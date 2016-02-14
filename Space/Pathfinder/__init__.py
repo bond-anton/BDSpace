@@ -1,6 +1,5 @@
 import numpy as np
-from Coordinates import Cartesian
-
+from Space.Coordinates import Cartesian
 from Space.Coordinates.transforms import unit_vector
 from Space.Curve.Parametric import Helix, Arc
 

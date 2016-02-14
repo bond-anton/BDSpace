@@ -1,7 +1,7 @@
 import numpy as np
 from mayavi import mlab
 
-from Space.Coordinates.coordinates import Cartesian
+from Space.Coordinates import Cartesian
 from Space.Curve.Parametric import Helix
 from Space.Pathfinder import helix_between_two_points, arc_between_two_points
 from Space.Visual import visual

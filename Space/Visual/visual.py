@@ -7,7 +7,7 @@ Created on Mar 24, 2014
 from __future__ import division
 
 import numpy as np
-from Coordinates import transforms as gt
+from Space.Coordinates import transforms as gt
 from mayavi import mlab
 from tvtk.api import tvtk
 
