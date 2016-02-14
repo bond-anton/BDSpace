@@ -1,9 +1,3 @@
-'''
-Created on Mar 24, 2014
-
-@author: Anton Bondarenko
-'''
-
 from __future__ import division
 
 import numpy as np
@@ -40,7 +34,7 @@ def draw_CS_box(fig, CS, scale=1.0, draw_axes=True):
                                                origin=np.array([scale/2, scale/2, scale/2]))
     cube = tvtk.StructuredGrid(dimensions=(2, 2, 2))
     cube.points = CS.to_global(cube_points)
-    euler_color = gt.euler_color(CS.euler_angles)        
+    euler_color = gt.euler_color(CS.euler_angles)
     cube_s = mlab.pipeline.surface(cube, color=euler_color)
     cube_s.actor.property.edge_visibility = 1
     cube_s.actor.property.edge_color = euler_color
