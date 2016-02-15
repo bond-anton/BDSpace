@@ -14,22 +14,14 @@ CS = Cartesian()  # if you don't pass arguments the basis coincide with 'Absolut
 # to visualise the coordinate system basis the module Visual is used
 
 fig = mlab.figure('CS demo', bgcolor=(0, 0, 0))  # Create the mayavi figure
-cs_box = Visual.draw_CS_box(fig, CS)
-CS.rotate_axis_angle(np.ones(3), np.deg2rad(45))  # this is inplace transform
-euler_color = gt.euler_color(CS.euler_angles)
-cs_box.actor.property.edge_visibility = 1
-cs_box.actor.property.color = euler_color
-cs_box.actor.property.edge_color = euler_color
 
 @mlab.animate(delay=100)
 def anim():
     #f = mlab.gcf()
+    cs_box, arrows, labels = Visual.draw_CS_box(fig, CS)
     while True:
         CS.rotate_axis_angle(np.ones(3), np.deg2rad(5))  # this is inplace transform
-        euler_color = gt.euler_color(CS.euler_angles)
-        cs_box.actor.property.edge_visibility = 1
-        cs_box.actor.property.color = euler_color
-        cs_box.actor.property.edge_color = euler_color
+        cs_box, arrows, labels = Visual.update_CS_box(CS, cs_box, arrows, labels)
         yield
 
 anim()

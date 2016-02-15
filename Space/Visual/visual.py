@@ -10,54 +10,6 @@ from Space.Figures import figures
 
 Scale = 100.0
 
-def draw_CS_axes(fig, CS, scale=1.0):
-    points = np.array([CS.origin, CS.origin, CS.origin])
-    mlab.figure(fig, bgcolor=fig.scene.background)
-    points_v = mlab.quiver3d(points[:,0], points[:,1], points[:,2],
-                          CS.basis[0,:]*scale, CS.basis[1,:]*scale, CS.basis[2,:]*scale,
-                          scalars=np.array([3,2,1]), mode='arrow')
-    points_v.glyph.color_mode = 'color_by_scalar'
-    points_v.glyph.glyph.scale_factor = scale
-    data = points_v.parent.parent
-    data.name = CS.name
-    glyph_scale = points_v.glyph.glyph.scale_factor * 1.1
-    label_col = [(1, 0, 0), (0, 1, 0), (0, 0, 1)]
-    for i in range(3):
-        mlab.text3d(points[i, 0] + glyph_scale * CS.basis[0, i],
-                    points[i, 1] + glyph_scale * CS.basis[1, i],
-                    points[i, 2] + glyph_scale * CS.basis[2, i],
-                    CS.labels[i], color=label_col[i], scale=0.1*scale)
-
-def draw_CS_box(fig, CS, scale=1.0, draw_axes=True):
-    mlab.figure(fig, bgcolor=fig.scene.background)
-    cube_points = figures.generate_cube_points(scale, scale, scale,
-                                               origin=np.array([scale/2, scale/2, scale/2]))
-    cube = tvtk.StructuredGrid(dimensions=(2, 2, 2))
-    cube.points = CS.to_global(cube_points)
-    euler_color = gt.euler_color(CS.euler_angles)
-    cube_s = mlab.pipeline.surface(cube, color=euler_color)
-    cube_s.actor.property.edge_visibility = 1
-    cube_s.actor.property.edge_color = euler_color
-    if not draw_axes:
-        return
-    points = [CS.origin]
-    for i in range(3):
-        points.append(scale/2 * CS.basis[:, i] + CS.origin)
-    points = np.array(points)
-    points_v = mlab.quiver3d(points[1:,0], points[1:,1], points[1:,2],
-                    CS.basis[0,:]*scale, CS.basis[1,:]*scale, CS.basis[2,:]*scale,
-                    scalars=np.array([3,2,1]), mode='arrow')
-    points_v.glyph.color_mode = 'color_by_scalar'
-    points_v.glyph.glyph.scale_factor = scale/2
-    glyph_scale = points_v.glyph.glyph.scale_factor * 1.1
-    label_col = [(1, 0, 0), (0, 1, 0), (0, 0, 1)]
-    for i in range(3):
-        mlab.text3d(points[i+1, 0] + glyph_scale * CS.basis[0, i],
-                    points[i+1, 1] + glyph_scale * CS.basis[1, i],
-                    points[i+1, 2] + glyph_scale * CS.basis[2, i],
-                    CS.labels[i], color=label_col[i], scale=0.1*scale)
-    return cube_s
-
 def draw_polepiece(fig, CS, angle=55, hole=0.1, R_min=0.2, height=1, draw_axes=False):
     CS_scaled = Cartesian(origin=np.copy(CS.origin)*Scale, basis=np.copy(CS.basis))
     #CS_scaled.origin *= Scale
