@@ -7,7 +7,7 @@ and machining tools, multiple robotic arms, manipulators, etc.
 **Space** provides following basic features:
 
 |Feature                               |Staus             |
-|:------------------------------------:|:----------------:|
+|--------------------------------------|------------------|
 |Cartesian coordinate systems          |done              |
 |Spherical coordinate systems          |almost done       |
 |Cylindrical coordinate systems        |work in progress  |
@@ -29,4 +29,4 @@ Please see the demo directory for the usage examples.
 
 ## License
 
-Space is a free open source software licensed under Apache license version 2.0
+Space is free open source software licensed under Apache license version 2.0

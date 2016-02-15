@@ -58,7 +58,14 @@ class Cartesian(object):
     
     def calc_eulers(self):
         self.euler_angles[0] = m.atan2(self.basis[0, 2], -self.basis[1, 2])
-        self.euler_angles[1] = m.acos(self.basis[2, 2])
+        try:
+            self.euler_angles[1] = m.acos(self.basis[2, 2])
+        except ValueError as ve:
+            if np.allclose(self.basis[2, 2], 1.0):
+                self.euler_angles[1] = m.acos(1.0)
+                pass
+            else:
+                raise ve
         self.euler_angles[2] = m.atan2(self.basis[2, 0], self.basis[2, 1])
         self.euler_angles = adjust_euler_angles(self.euler_angles)
     

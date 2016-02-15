@@ -56,6 +56,7 @@ def draw_CS_box(fig, CS, scale=1.0, draw_axes=True):
                     points[i+1, 1] + glyph_scale * CS.basis[1, i],
                     points[i+1, 2] + glyph_scale * CS.basis[2, i],
                     CS.labels[i], color=label_col[i], scale=0.1*scale)
+    return cube_s
 
 def draw_polepiece(fig, CS, angle=55, hole=0.1, R_min=0.2, height=1, draw_axes=False):
     CS_scaled = Cartesian(origin=np.copy(CS.origin)*Scale, basis=np.copy(CS.basis))
