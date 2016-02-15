@@ -9,9 +9,9 @@ and machining tools, multiple robotic arms, manipulators, etc.
 |Feature                               |Staus             |
 |--------------------------------------|------------------|
 |Cartesian coordinate systems          |done              |
-|Spherical coordinate systems          |almost done       |
-|Cylindrical coordinate systems        |work in progress  |
-|Conversion between coordinate systems |work in progress  |
+|Spherical coordinates                 |done              |
+|Cylindrical coordinates               |work in progress  |
+|Conversion between coordinate systems |done              |
 |Multiple nested coordinate systems    |done              |
 |Parametric curves                     |done              |
 |Trajectory builder (Pathfinder module)|work in progress  |
