@@ -31,9 +31,6 @@ def anim():
     cs_box_6, arrows_6, labels_6 = Visual.draw_CS_box(fig, CS_6)
     direction = 1
     while True:
-        print '--'
-        print CS_3.euler_angles
-        print CS_5.euler_angles
         CS_1.rotate_axis_angle(np.array([0, 1, 0]), np.deg2rad(step))  # this is inplace transform
         CS_2.rotate_axis_angle(np.array([1, 0, 0]), np.deg2rad(step))  # this is inplace transform
         CS_3.rotate_axis_angle(np.array([0, 0, 1]), np.deg2rad(step))  # this is inplace transform
@@ -41,7 +38,6 @@ def anim():
         CS_5.set_eulers(CS_5.euler_angles + direction * np.array([0, np.deg2rad(step), 0]))
         CS_6.set_eulers(CS_6.euler_angles - np.array([np.deg2rad(step), 0, 0]))
 
-        print abs(np.pi - CS_5.euler_angles[1]), np.deg2rad(step)
         if direction == 1 and abs(np.pi - CS_5.euler_angles[1]) < np.deg2rad(step):
             direction *= -1
         elif direction == -1 and abs(CS_5.euler_angles[1]) < np.deg2rad(step):
