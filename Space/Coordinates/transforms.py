@@ -31,10 +31,11 @@ def rotation_matrix_euler_angles(euler_angles):
                     [s[1]*s[2],                 c[2]*s[1],                 c[1]     ]])
 
 
-def adjust_rotation_angles(angles):
+def adjust_rotation_angles(angles, keep_sign=False):
     """
-    Adjusts rotation angles to be in the range [0; 2*pi]
+    Adjusts rotation angles to be in the range [-2*pi; 2*pi]
     :param angles: array of input angles
+    :param keep_sign: if False (default) adjust angle to be within [0; 2*pi]
     :return: adjusted array of angles
     """
     adjusted_angles = []
@@ -43,12 +44,14 @@ def adjust_rotation_angles(angles):
             angle -= 2*m.pi*(angle // (2*m.pi))
         elif angle < -2 * m.pi:
             angle += 2*m.pi*(abs(angle) // (2*m.pi))
+        if not keep_sign and angle < 0:
+            angle += 2*m.pi
         adjusted_angles.append(angle)
     return adjusted_angles
 
 
 def euler_color(euler_angles):
-    return (euler_angles[0] + np.pi) / (np.pi * 2), euler_angles[1] / np.pi, (euler_angles[2] + np.pi) / (np.pi * 2)
+    return euler_angles[0] / (np.pi * 2), euler_angles[1] / np.pi, euler_angles[2] / (np.pi * 2)
 
 
 def rotate_vector(vec, axis, theta):
