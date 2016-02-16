@@ -52,11 +52,6 @@ def draw_CS_box(fig, CS, offset=0.5, scale=1.0, draw_axes=True, draw_labels=True
     cube_surface = mlab.pipeline.surface(cube, color=euler_color)
     cube_surface.actor.property.edge_visibility = 1
     cube_surface.actor.property.edge_color = euler_color
-    #for prop in cube_surface.parent.parent.all_trait_names():
-    #    print prop
-    #cube_surface.parent.parent.data = cube
-    #print cube
-    #print cube_surface.mlab_source
     arrows, labels = None, None
     if draw_axes:
         arrows, labels = draw_CS_axes(fig, CS, offset=offset, scale=scale, draw_labels=draw_labels)

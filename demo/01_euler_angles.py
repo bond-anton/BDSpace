@@ -28,6 +28,6 @@ for phi1 in np.linspace(0, 360, M, endpoint=True):
             # Set CS orientation using Euler's angles
             CS.set_eulers(euler_angles)
             # CS_box visualize CS as a cube colored according to Euler's angles
-            Visual.draw_CS_box(fig, CS, scale, draw_axes=True)
+            Visual.draw_CS_box(fig, CS, scale=scale, draw_axes=True)
 # mlab.outline(extent=[0, 360, 0, 180, 0, 360])  # uncomment to draw white outline
 mlab.show()
