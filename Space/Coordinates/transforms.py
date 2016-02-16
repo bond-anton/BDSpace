@@ -23,7 +23,7 @@ def rotation_matrix(axis, theta):
 
 
 def rotation_matrix_euler_angles(euler_angles):
-    euler_angles = adjust_euler_angles(euler_angles)
+    euler_angles = adjust_rotation_angles(euler_angles)
     c = np.cos(euler_angles)
     s = np.sin(euler_angles)
     return np.array([[c[0]*c[2]-c[1]*s[0]*s[2], -c[0]*s[2]-c[1]*c[2]*s[0],  s[0]*s[1]],
@@ -31,25 +31,24 @@ def rotation_matrix_euler_angles(euler_angles):
                     [s[1]*s[2],                 c[2]*s[1],                 c[1]     ]])
 
 
-def adjust_euler_angles(euler_angles, positive=True):
+def adjust_rotation_angles(angles):
     """
-    Adjusts sign and range of Euler's angles
-    Euler's angles in Space module are used in the proper notation Z (phi1) - X' (Phi) - Z" (phi2)
-    phi1 and phi2 are defined to have modulo 2*pi radians [-pi; pi] or [0; 2*pi]
-    Phi is defined to have modulo pi radians [-pi/2; pi/2] or [0; pi]
-    :param euler_angles: array of 3 angles
-    :param positive: if True (default) positive ranges [0; 2*pi] and [0; pi] are used else centered ranges.
-    :return: adjusted array of 3 Euler's angles
+    Adjusts rotation angles to be in the range [0; 2*pi]
+    :param angles: array of input angles
+    :return: adjusted array of angles
     """
-    adjusted_euler_angles = []
-    for angle in euler_angles:
-        angle -= 2*m.pi*(angle // (2*m.pi))
-        adjusted_euler_angles.append(angle)
-    return adjusted_euler_angles
+    adjusted_angles = []
+    for angle in angles:
+        if angle > 2 * m.pi:
+            angle -= 2*m.pi*(angle // (2*m.pi))
+        elif angle < -2 * m.pi:
+            angle += 2*m.pi*(abs(angle) // (2*m.pi))
+        adjusted_angles.append(angle)
+    return adjusted_angles
 
 
 def euler_color(euler_angles):
-    return euler_angles[0] / (np.pi * 2), euler_angles[1] / (np.pi), euler_angles[2] / (np.pi * 2)
+    return (euler_angles[0] + np.pi) / (np.pi * 2), euler_angles[1] / np.pi, (euler_angles[2] + np.pi) / (np.pi * 2)
 
 
 def rotate_vector(vec, axis, theta):

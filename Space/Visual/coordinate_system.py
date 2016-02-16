@@ -9,7 +9,7 @@ from Space.Coordinates.coordinates import Cartesian
 from Space.Figures import figures
 
 
-def CS_arrows(CS, offset=0, scale=1.0):
+def CS_arrows(CS, offset=0.0, scale=1.0):
     points = []
     lengths = []
     for i in range(3):
@@ -20,7 +20,7 @@ def CS_arrows(CS, offset=0, scale=1.0):
     return points, lengths
 
 
-def draw_CS_axes(fig, CS, offset=0, scale=1.0, draw_labels=True):
+def draw_CS_axes(fig, CS, offset=0.0, scale=1.0, draw_labels=True):
     points, lengths = CS_arrows(CS, offset=offset, scale=scale)
     mlab.figure(fig, bgcolor=fig.scene.background)
     arrows = mlab.quiver3d(points[:, 0], points[:, 1], points[:, 2],
@@ -58,7 +58,7 @@ def draw_CS_box(fig, CS, offset=0.5, scale=1.0, draw_axes=True, draw_labels=True
     return cube_surface, arrows, labels
 
 
-def update_CS_axes(CS, arrows, labels, offset=0, scale=1.0):
+def update_CS_axes(CS, arrows, labels, offset=0.0, scale=1.0):
     points, lengths = CS_arrows(CS, offset=offset, scale=scale)
     data = arrows.parent.parent
     data.mlab_source.points = points

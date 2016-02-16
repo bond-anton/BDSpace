@@ -2,6 +2,7 @@ import numpy as np
 from matplotlib import pyplot as plt
 from Space.Coordinates import Cartesian
 
+
 def error(CS_1, CS_2):
     delta = CS_1.basis - CS_2.basis
     return np.sqrt(np.sum(delta**2))
@@ -14,7 +15,7 @@ CS_2 = Cartesian(origin=np.array([0, 0, 0]))
 
 turns = 10
 axis = np.array([1, 1, 1])
-steps = 1 # per turn
+steps = 1  # per turn
 max_steps_order = 4
 errors = []
 
@@ -29,6 +30,8 @@ for order in range(max_steps_order + 1):
             CS_2.rotate_axis_angle(axis, step)
         laps_errors.append(error(CS_1, CS_2))
     errors.append(np.mean(laps_errors))
+
 print errors
+
 plt.semilogy(np.arange(max_steps_order + 1), errors, 'r-o')
 plt.show()
