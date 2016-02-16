@@ -33,7 +33,16 @@ class Cartesian(object):
         else:
             self.labels = ['x', 'y', 'z']
         self.name = str(name)
-    
+
+    def __eq__(self, other):
+        result = isinstance(other, self.__class__)
+        result = result and np.allclose(self.basis, other.basis)
+        result = result and np.allclose(self.origin, other.origin)
+        return result
+
+    def __ne__(self, other):
+        return not self.__eq__(other)
+
     def set_origin(self, origin):
         self.origin = origin
     
@@ -57,7 +66,6 @@ class Cartesian(object):
             self.calc_eulers()
     
     def calc_eulers(self):
-        #print self.basis
         if np.allclose(self.basis[2, 2], 1.0):
             self.euler_angles[1] = m.acos(1.0)
             self.euler_angles[2] = 0.0
