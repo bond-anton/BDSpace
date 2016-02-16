@@ -31,7 +31,16 @@ def rotation_matrix_euler_angles(euler_angles):
                     [s[1]*s[2],                 c[2]*s[1],                 c[1]     ]])
 
 
-def adjust_euler_angles(euler_angles):
+def adjust_euler_angles(euler_angles, positive=True):
+    """
+    Adjusts sign and range of Euler's angles
+    Euler's angles in Space module are used in the proper notation Z (phi1) - X' (Phi) - Z" (phi2)
+    phi1 and phi2 are defined to have modulo 2*pi radians [-pi; pi] or [0; 2*pi]
+    Phi is defined to have modulo pi radians [-pi/2; pi/2] or [0; pi]
+    :param euler_angles: array of 3 angles
+    :param positive: if True (default) positive ranges [0; 2*pi] and [0; pi] are used else centered ranges.
+    :return: adjusted array of 3 Euler's angles
+    """
     adjusted_euler_angles = []
     for angle in euler_angles:
         angle -= 2*m.pi*(angle // (2*m.pi))

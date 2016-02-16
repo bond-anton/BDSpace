@@ -57,21 +57,25 @@ class Cartesian(object):
             self.calc_eulers()
     
     def calc_eulers(self):
-        self.euler_angles[0] = m.atan2(self.basis[0, 2], -self.basis[1, 2])
-        try:
+        #print self.basis
+        if np.allclose(self.basis[2, 2], 1.0):
+            self.euler_angles[1] = m.acos(1.0)
+            self.euler_angles[2] = 0.0
+            self.euler_angles[0] = m.atan2(self.basis[1, 0], self.basis[0, 0])
+        elif np.allclose(self.basis[2, 2], -1.0):
+            self.euler_angles[1] = m.acos(-1.0)
+            self.euler_angles[2] = 0.0
+            self.euler_angles[0] = m.atan2(self.basis[1, 0], self.basis[0, 0])
+        else:
             self.euler_angles[1] = m.acos(self.basis[2, 2])
-        except ValueError as ve:
-            if np.allclose(self.basis[2, 2], 1.0):
-                self.euler_angles[1] = m.acos(1.0)
-                pass
-            else:
-                raise ve
-        self.euler_angles[2] = m.atan2(self.basis[2, 0], self.basis[2, 1])
+            self.euler_angles[0] = m.atan2(self.basis[0, 2], -self.basis[1, 2])
+            self.euler_angles[2] = m.atan2(self.basis[2, 0], self.basis[2, 1])
         self.euler_angles = adjust_euler_angles(self.euler_angles)
     
     def set_eulers(self, euler_angles):
         self.euler_angles = adjust_euler_angles(euler_angles)
         self.basis = rotation_matrix_euler_angles(euler_angles)
+        self.calc_eulers()
         
     def rotate_axis_angle(self, axis, theta, rot_center=None):
         '''

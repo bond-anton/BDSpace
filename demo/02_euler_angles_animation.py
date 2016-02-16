@@ -9,19 +9,43 @@ from Space import Visual
 
 # Create cartesian coordinate system
 
-CS = Cartesian()  # if you don't pass arguments the basis coincide with 'Absolute' (mayavi) coordinate system
-
+# if you don't pass arguments the basis coincide with 'Absolute' (mayavi) coordinate system
+CS_1 = Cartesian(origin=np.array([0, 0, 0]))
+CS_2 = Cartesian(origin=np.array([3, 0, 0]))
+CS_3 = Cartesian(origin=np.array([6, 0, 0]))
+CS_4 = Cartesian(origin=np.array([0, 3, 0]))
+CS_5 = Cartesian(origin=np.array([3, 3, 0]))
+CS_6 = Cartesian(origin=np.array([6, 3, 0]))
+step = 1.0  # in degrees
 # to visualise the coordinate system basis the module Visual is used
 
 fig = mlab.figure('CS demo', bgcolor=(0, 0, 0))  # Create the mayavi figure
 
-@mlab.animate(delay=100)
+@mlab.animate(delay=1000)
 def anim():
-    #f = mlab.gcf()
-    cs_box, arrows, labels = Visual.draw_CS_box(fig, CS)
+    cs_box_1, arrows_1, labels_1 = Visual.draw_CS_box(fig, CS_1)
+    cs_box_2, arrows_2, labels_2 = Visual.draw_CS_box(fig, CS_2)
+    cs_box_3, arrows_3, labels_3 = Visual.draw_CS_box(fig, CS_3)
+    cs_box_4, arrows_4, labels_4 = Visual.draw_CS_box(fig, CS_4)
+    cs_box_5, arrows_5, labels_5 = Visual.draw_CS_box(fig, CS_5)
+    cs_box_6, arrows_6, labels_6 = Visual.draw_CS_box(fig, CS_6)
     while True:
-        CS.rotate_axis_angle(np.ones(3), np.deg2rad(5))  # this is inplace transform
-        cs_box, arrows, labels = Visual.update_CS_box(CS, cs_box, arrows, labels)
+        print '--'
+        print CS_3.euler_angles
+        print CS_5.euler_angles
+        CS_1.rotate_axis_angle(np.array([1, 0, 0]), np.deg2rad(step))  # this is inplace transform
+        CS_2.rotate_axis_angle(np.array([0, 1, 0]), np.deg2rad(step))  # this is inplace transform
+        CS_3.rotate_axis_angle(np.array([0, 0, 1]), np.deg2rad(step))  # this is inplace transform
+        CS_4.set_eulers(CS_4.euler_angles + np.array([0, 0, np.deg2rad(step)]))
+        CS_5.set_eulers(CS_5.euler_angles + np.array([0, np.deg2rad(step), 0]))
+        CS_6.set_eulers(CS_6.euler_angles - np.array([np.deg2rad(step), 0, 0]))
+
+        cs_box_1, arrows_1, labels_1 = Visual.update_CS_box(CS_1, cs_box_1, arrows_1, labels_1)
+        cs_box_2, arrows_2, labels_2 = Visual.update_CS_box(CS_2, cs_box_2, arrows_2, labels_2)
+        cs_box_3, arrows_3, labels_3 = Visual.update_CS_box(CS_3, cs_box_3, arrows_3, labels_3)
+        cs_box_4, arrows_4, labels_4 = Visual.update_CS_box(CS_4, cs_box_4, arrows_4, labels_4)
+        cs_box_5, arrows_5, labels_5 = Visual.update_CS_box(CS_5, cs_box_5, arrows_5, labels_5)
+        cs_box_6, arrows_6, labels_6 = Visual.update_CS_box(CS_6, cs_box_6, arrows_6, labels_6)
         yield
 
 anim()
