@@ -1,5 +1,9 @@
 import numpy as np
-from matplotlib import pyplot as plt
+try:
+    from matplotlib import pyplot as plt
+    use_mpl = True
+except ImportError:
+    use_mpl = True
 from Space.Coordinates import Cartesian
 
 
@@ -25,13 +29,17 @@ for order in range(max_steps_order + 1):
     step = 2 * np.pi / steps
     print "  Angle increment is %g rad (%g deg)" % (step, np.rad2deg(step))
     laps_errors = []
+    print "    Lap:",
     for i in range(turns):
+        print i+1,
         for k in range(steps):
             CS_2.rotate_axis_angle(axis, step)
         laps_errors.append(error(CS_1, CS_2))
+    print "done.\n"
     errors.append(np.mean(laps_errors))
 
 print errors
 
-plt.semilogy(np.arange(max_steps_order + 1), errors, 'r-o')
-plt.show()
+if use_mpl:
+    plt.semilogy(np.arange(max_steps_order + 1), errors, 'r-o')
+    plt.show()

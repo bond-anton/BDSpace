@@ -3,8 +3,9 @@ from distutils.core import setup
 setup(
     name='Space',
     version='0.0.1',
-    packages=['Space', 'Space.Curve', 'Space.Visual', 'Space.Figures',
-              'Space.Pathfinder', 'Space.Coordinates'],
+    packages=['Space', 'Space.Coordinates',
+              'Space.Curve', 'Space.Figures',
+              'Space.Pathfinder'],
     url='https://github.com/bond-anton/Space',
     license='Apache Software License',
     author='Anton Bondarenko',
