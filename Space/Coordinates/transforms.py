@@ -1,9 +1,3 @@
-'''
-Created on Mar 20, 2014
-
-@author: Anton Bondarenko
-'''
-
 from __future__ import division
 import numpy as np
 import math as m
@@ -27,8 +21,8 @@ def rotation_matrix_euler_angles(euler_angles):
     c = np.cos(euler_angles)
     s = np.sin(euler_angles)
     return np.array([[c[0]*c[2]-c[1]*s[0]*s[2], -c[0]*s[2]-c[1]*c[2]*s[0],  s[0]*s[1]],
-                    [c[2]*s[0]+c[0]*c[1]*s[2],  c[0]*c[1]*c[2]-s[0]*s[2], -c[0]*s[1]],
-                    [s[1]*s[2],                 c[2]*s[1],                 c[1]     ]])
+                    [c[2]*s[0]+c[0]*c[1]*s[2],   c[0]*c[1]*c[2]-s[0]*s[2], -c[0]*s[1]],
+                    [s[1]*s[2],                  c[2]*s[1],                 c[1]]])
 
 
 def adjust_rotation_angles(angles, keep_sign=False):
@@ -50,10 +44,5 @@ def adjust_rotation_angles(angles, keep_sign=False):
     return adjusted_angles
 
 
-def euler_color(euler_angles):
-    return euler_angles[0] / (np.pi * 2), euler_angles[1] / np.pi, euler_angles[2] / (np.pi * 2)
-
-
 def rotate_vector(vec, axis, theta):
-    return np.dot(rotation_matrix(axis,theta), vec)
-
+    return np.dot(rotation_matrix(axis, theta), vec)
