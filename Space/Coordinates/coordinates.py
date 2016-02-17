@@ -7,7 +7,7 @@ Created on Mar 25, 2014
 import numpy as np
 import math as m
 
-from transforms import unit_vector, adjust_rotation_angles, rotation_matrix, rotation_matrix_euler_angles
+from transforms import unit_vector, reduce_angle, rotation_matrix, rotation_matrix_euler_angles
 
 class Cartesian(object):
     '''
@@ -78,10 +78,10 @@ class Cartesian(object):
             self.euler_angles[1] = m.acos(self.basis[2, 2])
             self.euler_angles[0] = m.atan2(self.basis[0, 2], -self.basis[1, 2])
             self.euler_angles[2] = m.atan2(self.basis[2, 0], self.basis[2, 1])
-        self.euler_angles = adjust_rotation_angles(self.euler_angles)
+        self.euler_angles = reduce_angle(self.euler_angles)
     
     def set_eulers(self, euler_angles):
-        self.euler_angles = adjust_rotation_angles(euler_angles)
+        self.euler_angles = reduce_angle(euler_angles)
         self.basis = rotation_matrix_euler_angles(euler_angles)
         self.calc_eulers()
         

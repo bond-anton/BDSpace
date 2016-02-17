@@ -1,4 +1,5 @@
 from __future__ import division
+import numbers
 import numpy as np
 import math as m
 
@@ -17,7 +18,7 @@ def rotation_matrix(axis, theta):
 
 
 def rotation_matrix_euler_angles(euler_angles):
-    euler_angles = adjust_rotation_angles(euler_angles)
+    euler_angles = reduce_angle(euler_angles)
     c = np.cos(euler_angles)
     s = np.sin(euler_angles)
     return np.array([[c[0]*c[2]-c[1]*s[0]*s[2], -c[0]*s[2]-c[1]*c[2]*s[0],  s[0]*s[1]],
@@ -25,23 +26,33 @@ def rotation_matrix_euler_angles(euler_angles):
                     [s[1]*s[2],                  c[2]*s[1],                 c[1]]])
 
 
-def adjust_rotation_angles(angles, keep_sign=False):
+def reduce_angle(angle, keep_sign=False):
     """
-    Adjusts rotation angles to be in the range [-2*pi; 2*pi]
-    :param angles: array of input angles
+    Adjusts rotation angle to be in the range [-2*pi; 2*pi]
+    :param angle: angle or array-like of input angle
     :param keep_sign: if False (default) adjust angle to be within [0; 2*pi]
-    :return: adjusted array of angles
+    :return: reduced angle or array of reduced angles
     """
-    adjusted_angles = []
-    for angle in angles:
+    if isinstance(angle, numbers.Number):
         if angle > 2 * m.pi:
-            angle -= 2*m.pi*(angle // (2*m.pi))
+            reduced_angle = angle - 2 * m.pi * (angle // (2 * m.pi))
         elif angle < -2 * m.pi:
-            angle += 2*m.pi*(abs(angle) // (2*m.pi))
-        if not keep_sign and angle < 0:
-            angle += 2*m.pi
-        adjusted_angles.append(angle)
-    return adjusted_angles
+            reduced_angle = angle + 2 * m.pi * (abs(angle) // (2 * m.pi))
+        else:
+            reduced_angle = angle
+        if not keep_sign and reduced_angle < 0:
+            reduced_angle += 2 * m.pi
+    elif isinstance(angle, np.ndarray):
+        reduced_angle = np.copy(angle)
+        reduced_angle[np.where(reduced_angle > 2 * np.pi)] = angle - 2 * np.pi * (angle // (2 * np.pi))
+        reduced_angle[np.where(reduced_angle < -2 * np.pi)] = angle + 2 * np.pi * (abs(angle) // (2 * np.pi))
+        if not keep_sign:
+            reduced_angle[np.where(reduced_angle < 0)] += 2 * np.pi
+    elif isinstance(angle, (tuple, list)):
+        reduced_angle = reduce_angle(np.array(angle), keep_sign=keep_sign)
+    else:
+        raise ValueError('Input angle must be either number or iterable of numbers.')
+    return reduced_angle
 
 
 def rotate_vector(vec, axis, theta):
