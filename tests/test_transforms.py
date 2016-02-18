@@ -11,9 +11,15 @@ class TestTransforms(unittest.TestCase):
         angle = 0.1
         self.assertEqual(reduce_angle(angle, keep_sign=True), angle)
         self.assertEqual(reduce_angle(angle, keep_sign=False), angle)
+        angle = 1
+        self.assertEqual(reduce_angle(angle, keep_sign=True), angle)
+        self.assertEqual(reduce_angle(angle, keep_sign=False), angle)
 
     def test_reduce_angle_constant_negative(self):
         angle = -0.1
+        self.assertEqual(reduce_angle(angle, keep_sign=True), angle)
+        self.assertEqual(reduce_angle(angle, keep_sign=False), angle + 2 * np.pi)
+        angle = -1
         self.assertEqual(reduce_angle(angle, keep_sign=True), angle)
         self.assertEqual(reduce_angle(angle, keep_sign=False), angle + 2 * np.pi)
 
@@ -32,6 +38,9 @@ class TestTransforms(unittest.TestCase):
 
     def test_reduce_angle_array(self):
         angle = np.array([0.1, ])
+        np.testing.assert_allclose(reduce_angle(angle, keep_sign=True), angle)
+        np.testing.assert_allclose(reduce_angle(angle, keep_sign=False), angle)
+        angle = np.array([1, ])
         np.testing.assert_allclose(reduce_angle(angle, keep_sign=True), angle)
         np.testing.assert_allclose(reduce_angle(angle, keep_sign=False), angle)
         angle = np.array([0.1, -0.2])

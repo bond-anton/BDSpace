@@ -21,7 +21,7 @@ def reduce_angle(angle, keep_sign=False):
         if not keep_sign and reduced_angle < 0:
             reduced_angle += 2 * m.pi
     elif isinstance(angle, np.ndarray):
-        reduced_angle = np.copy(angle)
+        reduced_angle = np.copy(angle).astype(np.float)
         big_pos_idx = np.where(reduced_angle > 2 * np.pi)
         big_neg_idx = np.where(reduced_angle < -2 * np.pi)
         reduced_angle[big_pos_idx] = angle[big_pos_idx] - 2 * np.pi * (angle[big_pos_idx] // (2 * np.pi))
