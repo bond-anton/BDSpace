@@ -87,3 +87,60 @@ def rotate_vector(vec, axis, theta):
     :return: rotated vector
     """
     return np.dot(rotation_matrix(axis, theta), vec)
+
+
+def to_polar(xyz):
+    """
+    convert cartesian to polar coordinates
+    :param xyz: Cartesian coordinates (at least 3)
+    """
+    xyz = np.array(xyz)
+    r_theta_phi = np.zeros(xyz.shape)
+    if xyz.size == 3:
+        xy = xyz[0]**2 + xyz[1]**2
+        r_theta_phi[0] = np.sqrt(xy + xyz[2]**2)
+        r_theta_phi[1] = np.arctan2(np.sqrt(xy), xyz[2])
+        r_theta_phi[2] = reduce_angle(np.arctan2(xyz[1], xyz[0]), keep_sign=False)
+    elif xyz.size > 3:
+        if len(xyz.shape) == 2 and xyz.shape[1] == 3:
+            xy = xyz[:, 0]**2 + xyz[:, 1]**2
+            r_theta_phi[:, 0] = np.sqrt(xy + xyz[:, 2]**2)
+            r_theta_phi[:, 1] = np.arctan2(np.sqrt(xy), xyz[:, 2])
+            r_theta_phi[:, 2] = reduce_angle(np.arctan2(xyz[:, 1], xyz[:, 0]), keep_sign=False)
+        else:
+            raise ValueError('N-points array shape must be (N, 3)')
+    else:
+        raise ValueError('at least 3 coordinates are needed for conversion')
+    return r_theta_phi
+
+
+def to_cartesian(r_theta_phi):
+    """
+    convert polar to cartesian coordinates
+    :param r_theta_phi: polar coordinates (at least 3)
+    """
+    r_theta_phi = np.array(r_theta_phi)
+    xyz = np.zeros(r_theta_phi.shape)
+    if r_theta_phi.size == 3:
+        r_theta_phi[2] = reduce_angle(r_theta_phi[2], keep_sign=False)
+        if (r_theta_phi < 0).any() or r_theta_phi[1] > np.pi or r_theta_phi[2] > 2 * np.pi:
+            raise ValueError('r must be >= 0, theta must be within [0; pi], phi must be within [0; 2*pi]')
+        xy = r_theta_phi[0] * np.sin(r_theta_phi[1])
+        xyz[0] = xy * np.cos(r_theta_phi[2])
+        xyz[1] = xy * np.sin(r_theta_phi[2])
+        xyz[2] = r_theta_phi[0] * np.cos(r_theta_phi[1])
+    elif r_theta_phi.size > 3:
+        if len(r_theta_phi.shape) == 2 and r_theta_phi.shape[1] == 3:
+            r_theta_phi[:, 2] = reduce_angle(r_theta_phi[:, 2], keep_sign=False)
+            if (r_theta_phi < 0).any() or (r_theta_phi[:, 1] > np.pi).any() or (r_theta_phi[:, 2] > 2 * np.pi).any():
+                print r_theta_phi
+                raise ValueError('r must be >= 0, theta must be within [0; pi], phi must be within [0; 2*pi]')
+            xy = r_theta_phi[:, 0] * np.sin(r_theta_phi[:, 1])
+            xyz[:, 0] = xy * np.cos(r_theta_phi[:, 2])
+            xyz[:, 1] = xy * np.sin(r_theta_phi[:, 2])
+            xyz[:, 2] = r_theta_phi[:, 0] * np.cos(r_theta_phi[:, 1])
+        else:
+            raise ValueError('N-points array shape must be (N, 3)')
+    else:
+        raise ValueError('at least 3 coordinates are needed for conversion')
+    return xyz

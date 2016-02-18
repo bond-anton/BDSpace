@@ -2,6 +2,7 @@ import unittest
 import numpy as np
 from Space.Coordinates.transforms import reduce_angle, unit_vector
 from Space.Coordinates.transforms import rotation_matrix, rotation_matrix_euler_angles, rotate_vector
+from Space.Coordinates.transforms import to_polar, to_cartesian
 
 
 class TestTransforms(unittest.TestCase):
@@ -48,7 +49,6 @@ class TestTransforms(unittest.TestCase):
         angle = (0.1, 0.2)
         np.testing.assert_allclose(reduce_angle(angle, keep_sign=True), angle)
         np.testing.assert_allclose(reduce_angle(angle, keep_sign=False), angle)
-
 
     def test_reduce_angle_random_array_positive(self):
         size = 1000
@@ -137,7 +137,7 @@ class TestTransforms(unittest.TestCase):
     def test_rotate_vecor_null_vector(self):
         v = [0, 0, 0]
         axis = np.random.random(3) * 100
-        angle = np.random.random_sample() * 2* np.pi
+        angle = np.random.random_sample() * 2 * np.pi
         np.testing.assert_allclose(rotate_vector(v, axis, angle), v)
 
     def test_rotate_vecor_zero_angle(self):
@@ -163,3 +163,53 @@ class TestTransforms(unittest.TestCase):
         v = np.array([0, 1, 0])
         axis = np.array([0, 0, 1])
         np.testing.assert_allclose(rotate_vector(v, axis, angle), -v, atol=np.finfo(float).eps)
+
+    def test_to_polar_single_point(self):
+        xyz = [1, 0, 0]
+        np.testing.assert_allclose(to_polar(xyz), [1, np.pi / 2, 0], atol=np.finfo(float).eps)
+        xyz = [0, 1, 0]
+        np.testing.assert_allclose(to_polar(xyz), [1, np.pi / 2, np.pi / 2], atol=np.finfo(float).eps)
+        xyz = [0, 0, 0]
+        np.testing.assert_allclose(to_polar(xyz), [0, 0, 0], atol=np.finfo(float).eps)
+
+    def test_to_polar_wrong_arguments(self):
+        xyz = 0
+        self.assertRaises(ValueError, to_polar, xyz)
+        xyz = [0, 0]
+        self.assertRaises(ValueError, to_polar, xyz)
+        xyz = [0, 0, 0, 0]
+        self.assertRaises(ValueError, to_polar, xyz)
+        xyz = [0, 0, 0, 0, 0, 0]
+        self.assertRaises(ValueError, to_polar, xyz)
+
+    def test_to_polar_and_back_many_points(self):
+        points_num = 100
+        xyz = ((np.random.random(points_num * 3) - 0.5) * 200).reshape((points_num, 3))
+        rtp = to_polar(xyz)
+        np.testing.assert_allclose(to_cartesian(rtp), xyz)
+
+    def test_to_cartesian_single_point(self):
+        rtp = [0, 0, 0]
+        np.testing.assert_allclose(to_cartesian(rtp), [0, 0, 0], atol=np.finfo(float).eps)
+        rtp = [0, 1, 0]
+        np.testing.assert_allclose(to_cartesian(rtp), [0, 0, 0], atol=np.finfo(float).eps)
+        rtp = [1, 0, 0]
+        np.testing.assert_allclose(to_cartesian(rtp), [0, 0, 1], atol=np.finfo(float).eps)
+        rtp = [1, np.pi/2, 0]
+        np.testing.assert_allclose(to_cartesian(rtp), [1, 0, 0], atol=np.finfo(float).eps)
+        rtp = [1, np.pi, 0]
+        np.testing.assert_allclose(to_cartesian(rtp), [0, 0, -1], atol=np.finfo(float).eps)
+
+    def test_to_cartesian_wrong_arguments(self):
+        rtp = 0
+        self.assertRaises(ValueError, to_cartesian, rtp)
+        rtp = [0, 0]
+        self.assertRaises(ValueError, to_cartesian, rtp)
+        rtp = [0, 0, 0, 0]
+        self.assertRaises(ValueError, to_cartesian, rtp)
+        rtp = [0, 0, 0, 0, 0, 0]
+        self.assertRaises(ValueError, to_cartesian, rtp)
+        rtp = [-1, 0, 0]
+        self.assertRaises(ValueError, to_cartesian, rtp)
+        rtp = [1, 2*np.pi, 0]
+        self.assertRaises(ValueError, to_cartesian, rtp)
