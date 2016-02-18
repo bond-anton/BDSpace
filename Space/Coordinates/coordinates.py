@@ -20,10 +20,7 @@ class Cartesian(object):
             self.set_basis(np.identity(3, dtype=np.float))
         # Origin in parent CS
         self.origin = None
-        if origin is not None:
-            self.origin = origin
-        else:
-            self.origin = np.array([0, 0, 0], dtype=np.float)
+        self.set_origin(origin)
         self.labels = None
         if labels is not None:
             self.labels = labels
@@ -40,7 +37,12 @@ class Cartesian(object):
     def __ne__(self, other):
         return not self.__eq__(other)
 
-    def set_origin(self, origin):
+    def set_origin(self, origin=None):
+        if origin is None:
+            origin = [0, 0, 0]
+        origin = np.array(origin).astype(np.float).ravel()
+        if origin.size != 3:
+            raise ValueError('Origin must be 3 numeric coordinates')
         self.origin = origin
     
     def set_basis(self, basis):
@@ -60,9 +62,9 @@ class Cartesian(object):
                 self.basis = basis
             else:
                 raise ValueError('complete 3D basis is needed')
-            self.calc_eulers()
+            self.calc_euler_angles()
     
-    def calc_eulers(self):
+    def calc_euler_angles(self):
         if np.allclose(self.basis[2, 2], [1.0]):
             self.euler_angles[1] = m.acos(1.0)
             self.euler_angles[2] = 0.0
@@ -77,10 +79,10 @@ class Cartesian(object):
             self.euler_angles[2] = m.atan2(self.basis[2, 0], self.basis[2, 1])
         self.euler_angles = reduce_angle(self.euler_angles)
     
-    def set_eulers(self, euler_angles):
+    def set_euler_angles(self, euler_angles):
         self.euler_angles = reduce_angle(euler_angles)
         self.basis = rotation_matrix_euler_angles(euler_angles)
-        self.calc_eulers()
+        self.calc_euler_angles()
         
     def rotate_axis_angle(self, axis, theta, rot_center=None):
         """
@@ -95,9 +97,9 @@ class Cartesian(object):
         shift = self.origin - rot_center
         self.origin = rot_center + np.dot(R, shift)
         self.basis = np.dot(R, self.basis)
-        self.calc_eulers()
+        self.calc_euler_angles()
         
-    def rotate_eulers_angles(self, euler_angles, rot_center=None):
+    def rotate_euler_angles(self, euler_angles, rot_center=None):
         """
         rotate basis around axis in parent CS
         :param euler_angles:
@@ -109,7 +111,7 @@ class Cartesian(object):
         shift = self.origin - rot_center
         self.origin = rot_center + np.dot(R, shift)
         self.basis = np.dot(R, self.basis)
-        self.calc_eulers()
+        self.calc_euler_angles()
     
     def to_global(self, xyz):
         """
