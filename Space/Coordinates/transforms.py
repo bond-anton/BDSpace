@@ -44,8 +44,10 @@ def reduce_angle(angle, keep_sign=False):
             reduced_angle += 2 * m.pi
     elif isinstance(angle, np.ndarray):
         reduced_angle = np.copy(angle)
-        reduced_angle[np.where(reduced_angle > 2 * np.pi)] = angle - 2 * np.pi * (angle // (2 * np.pi))
-        reduced_angle[np.where(reduced_angle < -2 * np.pi)] = angle + 2 * np.pi * (abs(angle) // (2 * np.pi))
+        big_pos_idx = np.where(reduced_angle > 2 * np.pi)
+        big_neg_idx = np.where(reduced_angle < -2 * np.pi)
+        reduced_angle[big_pos_idx] = angle[big_pos_idx] - 2 * np.pi * (angle[big_pos_idx] // (2 * np.pi))
+        reduced_angle[big_neg_idx] = angle[big_neg_idx] + 2 * np.pi * (abs(angle[big_neg_idx]) // (2 * np.pi))
         if not keep_sign:
             reduced_angle[np.where(reduced_angle < 0)] += 2 * np.pi
     elif isinstance(angle, (tuple, list)):
