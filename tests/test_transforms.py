@@ -1,6 +1,7 @@
 import unittest
 import numpy as np
-from Space.Coordinates.transforms import reduce_angle
+from Space.Coordinates.transforms import reduce_angle, unit_vector
+from Space.Coordinates.transforms import rotation_matrix, rotation_matrix_euler_angles, rotate_vector
 
 
 class TestTransforms(unittest.TestCase):
@@ -72,3 +73,93 @@ class TestTransforms(unittest.TestCase):
         angle = (np.random.random(size) - 0.5) * 4 * np.pi
         np.testing.assert_allclose(reduce_angle(angle, keep_sign=True), angle)
 
+    def test_unit_vector_1d(self):
+        v = 0.1
+        self.assertEqual(unit_vector(v), 1.0)
+        v = -0.1
+        self.assertEqual(unit_vector(v), -1.0)
+        v = [0.1]
+        self.assertEqual(unit_vector(v), [1.0])
+        v = [-0.1]
+        self.assertEqual(unit_vector(v), [-1.0])
+        v = np.array([0.1])
+        self.assertEqual(unit_vector(v), [1.0])
+
+    def test_unit_vector_null_vector(self):
+        self.assertRaises(ValueError, unit_vector, 0.0)
+        max_dimensions = 100
+        for dim in range(max_dimensions):
+            v = np.zeros(dim)
+            self.assertRaises(ValueError, unit_vector, v)
+
+    def test_unit_vector_random_vector(self):
+        max_dimensions = 100
+        for dim in range(max_dimensions):
+            v = np.random.random(dim+1) * 100
+            np.testing.assert_allclose(unit_vector(v), v / np.sqrt(np.dot(v, v)))
+
+    def test_rotation_matrix_zero_angle(self):
+        axis = np.random.random(3) * 100
+        angle = 0
+        np.testing.assert_allclose(rotation_matrix(axis, angle), np.eye(3, 3))
+
+    def test_rotation_matrix_two_pi(self):
+        axis = np.random.random(3) * 100
+        angle = 2 * np.pi
+        np.testing.assert_allclose(rotation_matrix(axis, angle), np.eye(3, 3), atol=2*np.finfo(float).eps)
+
+    def test_rotation_matrix_half_pi(self):
+        rx = np.array([[1, 0, 0], [0, 0, -1], [0, 1, 0]])
+        ry = np.array([[0, 0, 1], [0, 1, 0], [-1, 0, 0]])
+        rz = np.array([[0, -1, 0], [1, 0, 0], [0, 0, 1]])
+        np.testing.assert_allclose(rotation_matrix([1, 0, 0], -np.pi/2), rx, atol=np.finfo(float).eps)
+        np.testing.assert_allclose(rotation_matrix([0, 1, 0], -np.pi/2), ry, atol=np.finfo(float).eps)
+        np.testing.assert_allclose(rotation_matrix([0, 0, 1], -np.pi/2), rz, atol=np.finfo(float).eps)
+
+    def test_rotation_matrix_null_vector(self):
+        axis = np.zeros(3)
+        angle = np.random.random_sample()
+        self.assertRaises(ValueError, rotation_matrix, axis, angle)
+
+    def test_rotattion_matrix_euler_angles_zero(self):
+        np.testing.assert_allclose(rotation_matrix_euler_angles([0, 0, 0]), np.eye(3, 3), atol=np.finfo(float).eps)
+
+    def test_rotattion_matrix_euler_angles_two_pi(self):
+        np.testing.assert_allclose(rotation_matrix_euler_angles(2 * np.pi * np.ones(3)),
+                                   np.eye(3, 3), atol=3*np.finfo(float).eps)
+
+    def test_rotattion_matrix_euler_angles_half_pi(self):
+        rx = np.array([[1, 0, 0], [0, 0, -1], [0, 1, 0]])
+        rz = np.array([[0, -1, 0], [1, 0, 0], [0, 0, 1]])
+        np.testing.assert_allclose(rotation_matrix_euler_angles([0, np.pi/2, 0]), rx, atol=np.finfo(float).eps)
+        np.testing.assert_allclose(rotation_matrix_euler_angles([np.pi/2, 0, 0]), rz, atol=np.finfo(float).eps)
+
+    def test_rotate_vecor_null_vector(self):
+        v = [0, 0, 0]
+        axis = np.random.random(3) * 100
+        angle = np.random.random_sample() * 2* np.pi
+        np.testing.assert_allclose(rotate_vector(v, axis, angle), v)
+
+    def test_rotate_vecor_zero_angle(self):
+        v = np.random.random(3) * 100
+        axis = np.random.random(3) * 100
+        angle = 0
+        np.testing.assert_allclose(rotate_vector(v, axis, angle), v)
+
+    def test_rotate_vecor_two_pi(self):
+        v = np.random.random(3) * 100
+        axis = np.random.random(3) * 100
+        angle = 2 * np.pi
+        np.testing.assert_allclose(rotate_vector(v, axis, angle), v)
+
+    def test_rotate_vector_pi(self):
+        angle = np.pi
+        v = np.array([1, 0, 0])
+        axis = np.array([0, 1, 0])
+        np.testing.assert_allclose(rotate_vector(v, axis, angle), -v, atol=np.finfo(float).eps)
+        v = np.array([1, 0, 0])
+        axis = np.array([0, 0, 1])
+        np.testing.assert_allclose(rotate_vector(v, axis, angle), -v, atol=np.finfo(float).eps)
+        v = np.array([0, 1, 0])
+        axis = np.array([0, 0, 1])
+        np.testing.assert_allclose(rotate_vector(v, axis, angle), -v, atol=np.finfo(float).eps)
