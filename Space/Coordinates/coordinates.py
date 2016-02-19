@@ -14,10 +14,7 @@ class Cartesian(object):
         self.euler_angles = np.array([0, 0, 0], dtype=np.float)
         # Basis in parent CS
         self.basis = None
-        if basis is not None:
-            self.set_basis(basis)
-        else:
-            self.set_basis(np.identity(3, dtype=np.float))
+        self.set_basis(basis)
         # Origin in parent CS
         self.origin = None
         self.set_origin(origin)
@@ -27,6 +24,7 @@ class Cartesian(object):
         else:
             self.labels = ['x', 'y', 'z']
         self.name = str(name)
+        self.calc_euler_angles()
 
     def __eq__(self, other):
         result = isinstance(other, self.__class__)
@@ -46,6 +44,8 @@ class Cartesian(object):
         self.origin = origin
     
     def set_basis(self, basis):
+        if basis is None:
+            basis = np.identity(3, dtype=np.float)
         if isinstance(basis, np.ndarray):
             try:
                 basis = basis.astype(np.float)
