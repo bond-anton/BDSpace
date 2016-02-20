@@ -24,7 +24,7 @@ class Cartesian(object):
         else:
             self.labels = ['x', 'y', 'z']
         self.name = str(name)
-        self.calc_euler_angles()
+        self.calculate_euler_angles()
 
     def __eq__(self, other):
         result = isinstance(other, self.__class__)
@@ -62,9 +62,13 @@ class Cartesian(object):
                 self.basis = basis
             else:
                 raise ValueError('complete 3D basis is needed')
-            self.calc_euler_angles()
+            self.calculate_euler_angles()
     
-    def calc_euler_angles(self):
+    def calculate_euler_angles(self):
+        """
+        method calculates Euler's angles for the coordinate system in Z-X'-Z" notation
+        The limits for the angles are [0; 2*pi] for Z and Z", and [0: pi] for X'
+        """
         if np.allclose(self.basis[2, 2], [1.0]):
             self.euler_angles[1] = m.acos(1.0)
             self.euler_angles[2] = 0.0
@@ -80,58 +84,63 @@ class Cartesian(object):
         self.euler_angles = reduce_angle(self.euler_angles)
     
     def set_euler_angles(self, euler_angles):
+        """
+        Sets coordinate system orientation using given 3 Euler's angles in Z-X'-Z" notation
+        The input angles could be of any value. After the rotation the correct Euler's angles will be calculated.
+        :param euler_angles: input Euler's angles
+        """
         self.euler_angles = reduce_angle(euler_angles)
         self.basis = rotation_matrix_euler_angles(euler_angles)
-        self.calc_euler_angles()
+        self.calculate_euler_angles()
         
     def rotate_axis_angle(self, axis, theta, rot_center=None):
         """
         rotate basis around axis in parent CS
-        :param axis:
-        :param theta:
-        :param rot_center:
+        :param axis: axis of rotation
+        :param theta: angle of rotation
+        :param rot_center: center of rotation, if None the origin of the CS is used
         """
         if rot_center is None:
             rot_center = self.origin
-        R = rotation_matrix(axis, theta)
+        rot_matrix = rotation_matrix(axis, theta)
         shift = self.origin - rot_center
-        self.origin = rot_center + np.dot(R, shift)
-        self.basis = np.dot(R, self.basis)
-        self.calc_euler_angles()
+        self.origin = rot_center + np.dot(rot_matrix, shift)
+        self.basis = np.dot(rot_matrix, self.basis)
+        self.calculate_euler_angles()
         
     def rotate_euler_angles(self, euler_angles, rot_center=None):
         """
-        rotate basis around axis in parent CS
-        :param euler_angles:
-        :param rot_center:
+        rotate basis in parent CS using three Euler's angles and selected center of rotation
+        :param euler_angles: Euler's angles
+        :param rot_center: rotation center, if None the origin of the CS is used
         """
         if rot_center is None:
             rot_center = self.origin
-        R = rotation_matrix_euler_angles(euler_angles)
+        rot_matrix = rotation_matrix_euler_angles(euler_angles)
         shift = self.origin - rot_center
-        self.origin = rot_center + np.dot(R, shift)
-        self.basis = np.dot(R, self.basis)
-        self.calc_euler_angles()
+        self.origin = rot_center + np.dot(rot_matrix, shift)
+        self.basis = np.dot(rot_matrix, self.basis)
+        self.calculate_euler_angles()
     
     def to_global(self, xyz):
         """
         calculate coordinate of points in parent CS
-        :param xyz:
+        :param xyz: local coordinates array
         """
         if xyz.size == 3:
             return np.dot(self.basis, xyz) + self.origin
         else:
-            coords = np.zeros_like(xyz)
+            coordinates = np.zeros_like(xyz)
             for i in range(xyz.shape[0]):
-                coords[i, :] = self.to_global(xyz[i, :])
-            return coords
+                coordinates[i, :] = self.to_global(xyz[i, :])
+            return coordinates
 
     def to_local(self, xyz, xyz_coordinate_system=None):
         """
-        calculates local coords for points in CS_xyz
+        calculates local coordinates for points in CS_xyz
         if CS_xyz is None global CS is assumed
-        :param xyz:
-        :param xyz_coordinate_system:
+        :param xyz: coordinates in external coordinate system if specified or in global coordinate system.
+        :param xyz_coordinate_system: external coordinate system, if None global coordinate system is assumed.
         """
         if xyz_coordinate_system is not None:
             coordinates = xyz_coordinate_system.to_global(xyz)

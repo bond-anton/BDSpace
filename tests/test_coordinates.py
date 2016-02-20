@@ -33,3 +33,20 @@ class TestCoordinates(unittest.TestCase):
         np.testing.assert_allclose(self.CS.basis,
                                    np.array([[1, 0, 0], [0, 1, 0], [0, 0, 1]]), atol=2*np.finfo(float).eps)
 
+    def test_euler_angles(self):
+        axis = [1, 0, 0]
+        self.CS.rotate_axis_angle(axis, np.pi)
+        np.testing.assert_allclose(self.CS.euler_angles,
+                                   np.array([0, np.pi, 0]), atol=np.finfo(float).eps)
+        self.CS.rotate_axis_angle(axis, np.pi)
+        np.testing.assert_allclose(self.CS.euler_angles,
+                                   np.array([0, 0, 0]), atol=np.finfo(float).eps)
+        self.CS.rotate_axis_angle(axis, np.pi * 0.5)
+        np.testing.assert_allclose(self.CS.euler_angles,
+                                   np.array([np.pi, np.pi * 0.5, np.pi]), atol=np.finfo(float).eps)
+        self.CS.rotate_axis_angle(axis, np.pi * 0.5)
+        np.testing.assert_allclose(self.CS.euler_angles,
+                                   np.array([0, np.pi, 0]), atol=np.finfo(float).eps)
+        self.CS.rotate_axis_angle(axis, np.pi * 0.5)
+        np.testing.assert_allclose(self.CS.euler_angles,
+                                   np.array([0, np.pi * 0.5, 0]), atol=np.finfo(float).eps)
