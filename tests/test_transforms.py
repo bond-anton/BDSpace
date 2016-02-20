@@ -118,9 +118,9 @@ class TestTransforms(unittest.TestCase):
         np.testing.assert_allclose(rotation_matrix(axis, angle), np.eye(3, 3), atol=2*np.finfo(float).eps)
 
     def test_rotation_matrix_half_pi(self):
-        rx = np.array([[1, 0, 0], [0, 0, -1], [0, 1, 0]])
-        ry = np.array([[0, 0, 1], [0, 1, 0], [-1, 0, 0]])
-        rz = np.array([[0, -1, 0], [1, 0, 0], [0, 0, 1]])
+        rx = np.array([[1, 0, 0], [0, 0, 1], [0, -1, 0]])
+        ry = np.array([[0, 0, -1], [0, 1, 0], [1, 0, 0]])
+        rz = np.array([[0, 1, 0], [-1, 0, 0], [0, 0, 1]])
         np.testing.assert_allclose(rotation_matrix([1, 0, 0], -np.pi/2), rx, atol=np.finfo(float).eps)
         np.testing.assert_allclose(rotation_matrix([0, 1, 0], -np.pi/2), ry, atol=np.finfo(float).eps)
         np.testing.assert_allclose(rotation_matrix([0, 0, 1], -np.pi/2), rz, atol=np.finfo(float).eps)
