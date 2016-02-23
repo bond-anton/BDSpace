@@ -138,9 +138,9 @@ class Cartesian(object):
     def to_local(self, xyz, xyz_coordinate_system=None):
         """
         calculates local coordinates for points in CS_xyz
-        if CS_xyz is None global CS is assumed
-        :param xyz: coordinates in external coordinate system if specified or in global coordinate system.
-        :param xyz_coordinate_system: external coordinate system, if None global coordinate system is assumed.
+        if CS_xyz is None parent CS is assumed
+        :param xyz: coordinates in external coordinate system if specified or in parent coordinate system.
+        :param xyz_coordinate_system: external coordinate system, if None parent coordinate system is assumed.
         """
         if xyz_coordinate_system is not None:
             coordinates = xyz_coordinate_system.to_global(xyz)
