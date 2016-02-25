@@ -1,18 +1,14 @@
-'''
-Created on Apr 1, 2014
-
-@author: Anton Bondarenko
-'''
-
 import numpy as np
+
 
 def generate_cube_points(a=1, b=1, c=1, origin=np.array([0, 0, 0])):
     cube = np.array([[0, 0, 0], [0, b, 0], [a, 0, 0], [a, b, 0],
                      [0, 0, c], [0, b, c], [a, 0, c], [a, b, c]])
     return cube[:] - origin
 
-def generate_polepiece(phi, z=np.array([0, 100.0]), theta=np.pi/4, hole=5, R_min=20):
-    z_min = R_min / np.tan(theta)
+
+def generate_cone(phi, z=np.array([0, 100.0]), theta=np.pi/4, hole=5, r_min=20):
+    z_min = r_min / np.tan(theta)
     points = np.empty([2 * len(phi) * len(z), 3])
     start = 0
     for z_plane in z:
@@ -27,9 +23,10 @@ def generate_polepiece(phi, z=np.array([0, 100.0]), theta=np.pi/4, hole=5, R_min
         start = end
     return points
 
-def generate_cylinder(phi, z, R, hole):
+
+def generate_cylinder(phi, z, r_outer, hole):
     points = np.empty([2 * len(phi) * len(z), 3])
-    r = np.array([hole, R])
+    r = np.array([hole, r_outer])
     start = 0
     for z_plane in z:
         x_plane = (np.cos(phi) * r[:, None]).ravel()
