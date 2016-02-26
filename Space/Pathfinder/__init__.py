@@ -8,7 +8,7 @@ def helix_between_two_points(CS, point1, point2, r=1, loops=1, right=True):
     distance = np.sqrt(np.dot(point2 - point1, point2 - point1))
     direction = unit_vector(point2 - point1)
     print direction
-    origin = CS.to_global(point1)
+    origin = CS.to_parent(point1)
     helix_CS = Cartesian(basis=np.copy(CS.basis), origin=np.copy(origin), name='Helix CS')
     R = np.sqrt(direction[0]**2 + direction[1]**2)
     theta = np.arcsin(R)
@@ -26,7 +26,7 @@ def helix_between_two_points(CS, point1, point2, r=1, loops=1, right=True):
 
 def arc_between_two_points(CS, point1, point2, r=1, right=True):
     direction = unit_vector(point2 - point1)
-    origin = CS.to_global(point1)
+    origin = CS.to_parent(point1)
     arc_CS = Cartesian(basis=np.copy(CS.basis), origin=np.copy(origin), name='Arc CS')
     R = np.sqrt(direction[0]**2 + direction[1]**2)
     theta = np.arcsin(R)
@@ -36,14 +36,14 @@ def arc_between_two_points(CS, point1, point2, r=1, right=True):
         phi = np.arccos(direction[0] / R)
     arc_CS.rotate_axis_angle(arc_CS.basis[:, 2], -phi)
     arc_CS.rotate_axis_angle(arc_CS.basis[:, 1], -theta)
-    local_point2 = arc_CS.to_local(CS.to_global(point2))
+    local_point2 = arc_CS.to_local(CS.to_parent(point2))
     origin2 = np.array([np.sqrt((2 * r)**2 - local_point2[2]**2), 0, 0])
     print 'Arc CS origin offset:', origin2
     distance = np.sqrt(np.dot(local_point2 - origin2, local_point2 - origin2))
     print distance
     direction = unit_vector(local_point2 - origin2)
     print direction
-    origin = arc_CS.to_global(origin2)
+    origin = arc_CS.to_parent(origin2)
     arc_CS = Cartesian(basis=np.copy(arc_CS.basis), origin=np.copy(origin), name='Arc CS')
     R = np.sqrt(direction[0]**2 + direction[1]**2)
     theta = np.arcsin(R)
@@ -54,8 +54,8 @@ def arc_between_two_points(CS, point1, point2, r=1, right=True):
     print R, np.rad2deg(theta), np.rad2deg(phi)
     arc_CS.rotate_axis_angle(arc_CS.basis[:, 2], -phi)
     arc_CS.rotate_axis_angle(arc_CS.basis[:, 1], -theta)
-    local_point1 = arc_CS.to_local(CS.to_global(point1)) - np.array([0, 0, r])
-    local_point2 = arc_CS.to_local(CS.to_global(point2)) - np.array([0, 0, r])
+    local_point1 = arc_CS.to_local(CS.to_parent(point1)) - np.array([0, 0, r])
+    local_point2 = arc_CS.to_local(CS.to_parent(point2)) - np.array([0, 0, r])
     print local_point1
     print local_point2
     start = np.pi - np.arccos(local_point1[2] / r)

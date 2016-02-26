@@ -1,13 +1,14 @@
+import numpy as np
 from Coordinates import Cartesian
 
 
 class Space(object):
 
-    def __init__(self, name, coordinates_system=None):
-        if coordinates_system is None:
-            self.coordinates_system = Cartesian()
-        elif isinstance(coordinates_system, Cartesian):
-            self.coordinates_system = coordinates_system
+    def __init__(self, name, coordinate_system=None):
+        if coordinate_system is None:
+            self.coordinate_system = Cartesian()
+        elif isinstance(coordinate_system, Cartesian):
+            self.coordinate_system = coordinate_system
         else:
             raise ValueError('coordinates system must be instance of Cartesian class')
         self.name = str(name)
@@ -17,6 +18,36 @@ class Space(object):
     def __str__(self):
         return 'Space: ' + self.name
 
+    def to_global_coordinate_system(self, xyz):
+        """
+        convert local points coordinates xyz to global coordinate system coordinates
+        :param xyz: array of points shaped Nx3
+        :return: array of points in global coordinates system
+        """
+        parent_xyz = self.coordinate_system.to_parent(xyz)
+        if self.parent is None:
+            return parent_xyz
+        else:
+            return self.parent.to_global_coordinate_system(parent_xyz)
+
+    def basis_in_global_coordinate_system(self):
+        """
+        returns local coordinate system basis in global coordinate system as Cartesian class object
+        :return: local Cartesian coordinate system in global coordinate system
+        """
+        origin = np.copy(self.coordinate_system.origin)
+        basis = np.copy(self.coordinate_system.basis)
+        if self.parent is not None:
+            parent_origin = np.copy(self.parent.coordinate_system.origin)
+            if self.parent.parent is not None:
+                parent_origin = self.parent.parent.to_global_coordinate_system(parent_origin)
+            origin = self.parent.to_global_coordinate_system(origin)
+            basis = (self.parent.to_global_coordinate_system(basis) - parent_origin)
+        name = self.coordinate_system.name
+        labels = self.coordinate_system.labels
+        coordinate_system = Cartesian(basis=basis, origin=origin, name=name, labels=labels)
+        return coordinate_system
+
     def add_element(self, element):
         if isinstance(element, Space):
             if element == self:
@@ -25,9 +56,9 @@ class Space(object):
                 if element.parent is None:
                     element_name = element.name
                     name_counter = 1
-                    format = ' %d'
+                    name_format = ' %d'
                     while element_name in self.elements.keys():
-                        element_name = element.name + format % name_counter
+                        element_name = element.name + name_format % name_counter
                         name_counter += 1
                     element.name = element_name
                     self.elements[element.name] = element

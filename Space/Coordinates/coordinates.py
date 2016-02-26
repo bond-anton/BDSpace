@@ -38,7 +38,7 @@ class Cartesian(object):
     def set_origin(self, origin=None):
         if origin is None:
             origin = [0, 0, 0]
-        origin = np.array(origin).astype(np.float).ravel()
+        origin = np.array(origin, dtype=np.float).ravel()
         if origin.size != 3:
             raise ValueError('Origin must be 3 numeric coordinates')
         self.origin = origin
@@ -122,32 +122,36 @@ class Cartesian(object):
         self.basis = np.dot(rot_matrix, self.basis)
         self.calculate_euler_angles()
     
-    def to_global(self, xyz):
+    def to_parent(self, xyz):
         """
-        calculate coordinate of points in parent CS
+        calculates coordinates of given points in parent (global) CS
         :param xyz: local coordinates array
         """
-        if xyz.size == 3:
-            return np.dot(self.basis, xyz) + self.origin
+        xyz = np.array(xyz, dtype=np.float)
+        if len(xyz.shape) == 2:
+            if xyz.shape[1] != 3 and xyz.shape[0] == 3:
+                xyz = xyz.T
+            elif 3 not in xyz.shape:
+                raise ValueError('Input must be a single point or an array of points coordinates with shape Nx3')
+        elif len(xyz.shape) == 1 and xyz.size == 3:
+            xyz = xyz.reshape(1, 3)
         else:
-            coordinates = np.zeros_like(xyz)
-            for i in range(xyz.shape[0]):
-                coordinates[i, :] = self.to_global(xyz[i, :])
-            return coordinates
+            raise ValueError('Input must be a single point or an array of points coordinates with shape Nx3')
+        return np.dot(xyz, self.basis) + self.origin
 
-    def to_local(self, xyz, xyz_coordinate_system=None):
+    def to_local(self, xyz):
         """
-        calculates local coordinates for points in CS_xyz
-        if CS_xyz is None parent CS is assumed
-        :param xyz: coordinates in external coordinate system if specified or in parent coordinate system.
-        :param xyz_coordinate_system: external coordinate system, if None parent coordinate system is assumed.
+        calculates local coordinates for points in parent CS/
+        :param xyz: coordinates in parent (global) coordinate system.
         """
-        if xyz_coordinate_system is not None:
-            coordinates = xyz_coordinate_system.to_global(xyz)
-        if xyz.size == 3:
-            return np.dot(xyz - self.origin, self.basis)
+        xyz = np.array(xyz, dtype=np.float)
+        if len(xyz.shape) == 2:
+            if xyz.shape[1] != 3 and xyz.shape[0] == 3:
+                xyz = xyz.T
+            elif 3 not in xyz.shape:
+                raise ValueError('Input must be a single point or an array of points coordinates with shape Nx3')
+        elif len(xyz.shape) == 1 and xyz.size == 3:
+            xyz = xyz.reshape(1, 3)
         else:
-            coordinates = np.zeros_like(xyz)
-            for i in range(xyz.shape[0]):
-                coordinates[i, :] = self.to_local(xyz[i, :])
-            return coordinates
+            raise ValueError('Input must be a single point or an array of points coordinates with shape Nx3')
+        return np.dot(xyz - self.origin, self.basis)
