@@ -44,6 +44,15 @@ class Cartesian(object):
         self.origin = origin
     
     def set_basis(self, basis):
+        """
+        Sets basis for the cartesian coordinate system. Basis will be converted to 3x3 array.
+        Each basis vector will be normed and placed in separate row like this:
+          x  y  z
+        1 x1 y1 z1
+        2 x2 y2 z2
+        3 x3 y3 z3
+        :param basis: 3x3 array.
+        """
         if basis is None:
             basis = np.identity(3, dtype=np.float)
         if isinstance(basis, np.ndarray):
@@ -54,13 +63,10 @@ class Cartesian(object):
             if basis.shape == (3, 3) or basis.size == 9:
                 basis = basis.reshape((3, 3))
                 for i in range(3):
-                    basis[:, i] = unit_vector(basis[:, i])
-                if not np.allclose(np.dot(basis[:, 0], basis[:, 1]), [0]):
-                    #print basis
-                    #pass
+                    basis[i] = unit_vector(basis[i])
+                if not np.allclose(np.dot(basis[0], basis[1]), [0]):
                     raise ValueError('only orthogonal vectors accepted')
-                if not np.allclose(np.cross(basis[:, 0], basis[:, 1]), basis[:, 2]):
-                        #pass
+                if not np.allclose(np.cross(basis[0], basis[1]), basis[2]):
                         raise ValueError('only right-hand basis accepted')
                 self.basis = basis
             else:
@@ -75,15 +81,15 @@ class Cartesian(object):
         if np.allclose(self.basis[2, 2], [1.0]):
             self.euler_angles[1] = m.acos(1.0)
             self.euler_angles[2] = 0.0
-            self.euler_angles[0] = m.atan2(self.basis[1, 0], self.basis[0, 0])
+            self.euler_angles[0] = m.atan2(self.basis[0, 1], self.basis[0, 0])
         elif np.allclose(self.basis[2, 2], [-1.0]):
             self.euler_angles[1] = m.acos(-1.0)
             self.euler_angles[2] = 0.0
-            self.euler_angles[0] = m.atan2(self.basis[1, 0], self.basis[0, 0])
+            self.euler_angles[0] = m.atan2(self.basis[0, 1], self.basis[0, 0])
         else:
             self.euler_angles[1] = m.acos(self.basis[2, 2])
-            self.euler_angles[0] = m.atan2(self.basis[0, 2], -self.basis[1, 2])
-            self.euler_angles[2] = m.atan2(self.basis[2, 0], self.basis[2, 1])
+            self.euler_angles[0] = m.atan2(self.basis[2, 0], -self.basis[2, 1])
+            self.euler_angles[2] = m.atan2(self.basis[0, 2], self.basis[1, 2])
         self.euler_angles = reduce_angle(self.euler_angles)
     
     def set_euler_angles(self, euler_angles):
@@ -140,8 +146,7 @@ class Cartesian(object):
             xyz = xyz.reshape(1, 3)
         else:
             raise ValueError('Input must be a single point or an array of points coordinates with shape Nx3')
-        return np.dot(xyz, self.basis.T) + self.origin
-        #return np.dot(self.basis, xyz.T) + self.origin
+        return np.dot(xyz, self.basis) + self.origin
 
     def to_local(self, xyz):
         """
@@ -158,4 +163,4 @@ class Cartesian(object):
             xyz = xyz.reshape(1, 3)
         else:
             raise ValueError('Input must be a single point or an array of points coordinates with shape Nx3')
-        return np.dot(xyz - self.origin, self.basis)
+        return np.dot(xyz - self.origin, self.basis.T)

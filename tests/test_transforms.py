@@ -108,19 +108,19 @@ class TestTransforms(unittest.TestCase):
             np.testing.assert_allclose(unit_vector(v), v / np.sqrt(np.dot(v, v)))
 
     def test_rotation_matrix_zero_angle(self):
-        axis = np.random.random(3) * 100
+        axis = (np.random.random(3) - 0.5) * 100
         angle = 0
         np.testing.assert_allclose(rotation_matrix(axis, angle), np.eye(3, 3))
 
     def test_rotation_matrix_two_pi(self):
-        axis = np.random.random(3) * 100
+        axis = (np.random.random(3) - 0.5) * 100
         angle = 2 * np.pi
         np.testing.assert_allclose(rotation_matrix(axis, angle), np.eye(3, 3), atol=2*np.finfo(float).eps)
 
     def test_rotation_matrix_half_pi(self):
-        rx = np.array([[1, 0, 0], [0, 0, 1], [0, -1, 0]])
-        ry = np.array([[0, 0, -1], [0, 1, 0], [1, 0, 0]])
-        rz = np.array([[0, 1, 0], [-1, 0, 0], [0, 0, 1]])
+        rx = np.array([[1, 0, 0], [0, 0, -1], [0, 1, 0]])
+        ry = np.array([[0, 0, 1], [0, 1, 0], [-1, 0, 0]])
+        rz = np.array([[0, -1, 0], [1, 0, 0], [0, 0, 1]])
         np.testing.assert_allclose(rotation_matrix([1, 0, 0], -np.pi/2), rx, atol=np.finfo(float).eps)
         np.testing.assert_allclose(rotation_matrix([0, 1, 0], -np.pi/2), ry, atol=np.finfo(float).eps)
         np.testing.assert_allclose(rotation_matrix([0, 0, 1], -np.pi/2), rz, atol=np.finfo(float).eps)
@@ -138,8 +138,8 @@ class TestTransforms(unittest.TestCase):
                                    np.eye(3, 3), atol=3*np.finfo(float).eps)
 
     def test_rotattion_matrix_euler_angles_half_pi(self):
-        rx = np.array([[1, 0, 0], [0, 0, -1], [0, 1, 0]])
-        rz = np.array([[0, -1, 0], [1, 0, 0], [0, 0, 1]])
+        rx = np.array([[1, 0, 0], [0, 0, 1], [0, -1, 0]])
+        rz = np.array([[0, 1, 0], [-1, 0, 0], [0, 0, 1]])
         np.testing.assert_allclose(rotation_matrix_euler_angles([0, np.pi/2, 0]), rx, atol=np.finfo(float).eps)
         np.testing.assert_allclose(rotation_matrix_euler_angles([np.pi/2, 0, 0]), rz, atol=np.finfo(float).eps)
 
