@@ -38,11 +38,13 @@ class Space(object):
         origin = np.copy(self.coordinate_system.origin)
         basis = np.copy(self.coordinate_system.basis)
         if self.parent is not None:
+            origin = self.parent.to_global_coordinate_system(origin)
             parent_origin = np.copy(self.parent.coordinate_system.origin)
             if self.parent.parent is not None:
                 parent_origin = self.parent.parent.to_global_coordinate_system(parent_origin)
-            origin = self.parent.to_global_coordinate_system(origin)
-            basis = (self.parent.to_global_coordinate_system(basis) - parent_origin)
+                basis = (self.parent.to_global_coordinate_system(basis).T - parent_origin)
+            else:
+                basis = (self.parent.to_global_coordinate_system(basis) - parent_origin)
         name = self.coordinate_system.name
         labels = self.coordinate_system.labels
         coordinate_system = Cartesian(basis=basis, origin=origin, name=name, labels=labels)

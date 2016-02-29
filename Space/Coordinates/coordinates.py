@@ -56,8 +56,11 @@ class Cartesian(object):
                 for i in range(3):
                     basis[:, i] = unit_vector(basis[:, i])
                 if not np.allclose(np.dot(basis[:, 0], basis[:, 1]), [0]):
+                    #print basis
+                    #pass
                     raise ValueError('only orthogonal vectors accepted')
                 if not np.allclose(np.cross(basis[:, 0], basis[:, 1]), basis[:, 2]):
+                        #pass
                         raise ValueError('only right-hand basis accepted')
                 self.basis = basis
             else:
@@ -137,7 +140,8 @@ class Cartesian(object):
             xyz = xyz.reshape(1, 3)
         else:
             raise ValueError('Input must be a single point or an array of points coordinates with shape Nx3')
-        return np.dot(xyz, self.basis) + self.origin
+        return np.dot(xyz, self.basis.T) + self.origin
+        #return np.dot(self.basis, xyz.T) + self.origin
 
     def to_local(self, xyz):
         """
