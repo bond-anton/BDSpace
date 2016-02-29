@@ -14,6 +14,7 @@ class Space(object):
         self.name = str(name)
         self.parent = None
         self.elements = {}
+        self.points = None
 
     def __str__(self):
         return 'Space: ' + self.name
