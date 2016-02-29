@@ -7,6 +7,20 @@ def generate_cuboid(a=1, b=1, c=1, origin=np.array([0, 0, 0])):
     return cube[:] - origin
 
 
+def generate_sphere(resolution=180, radius=1):
+    latitudes = np.linspace(0, np.pi, resolution * 0.5, endpoint=True)
+    t = np.linspace(0, 2*np.pi, resolution, endpoint=True)
+    points = np.ones((resolution * resolution * 0.5, 3), dtype=np.float)
+    start = 0
+    for latitude in latitudes:
+        end = start + len(t)
+        points[start:end, 2] *= radius * np.cos(latitude)
+        points[start:end, 1] *= radius * np.sin(t) * np.sin(latitude)
+        points[start:end, 0] *= radius * np.cos(t) * np.sin(latitude)
+        start = end
+    return points
+
+
 def generate_cone(phi, z=np.array([0, 100.0]), theta=np.pi/4, hole=5, r_min=20):
     z_min = r_min / np.tan(theta)
     points = np.empty([2 * len(phi) * len(z), 3])
