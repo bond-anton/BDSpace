@@ -4,20 +4,42 @@ import numpy as np
 def generate_cuboid(a=1, b=1, c=1, origin=np.array([0, 0, 0])):
     cube = np.array([[0, 0, 0], [0, b, 0], [a, 0, 0], [a, b, 0],
                      [0, 0, c], [0, b, c], [a, 0, c], [a, b, c]])
-    return cube[:] - origin
+    return cube[:] - origin, (2, 2, 2)
 
 
-def generate_sphere(resolution=180, radius=1):
-    latitudes = np.linspace(0, np.pi, resolution * 0.5, endpoint=True)
-    t = np.linspace(0, 2*np.pi, resolution, endpoint=True)
-    points = np.ones((resolution * resolution * 0.5, 3), dtype=np.float)
+def generate_sphere(r, theta, phi):
+    """
+    Generate points for structured grid for a spherical shell volume.
+    This method is useful for generating a unstructured cylindrical mesh for VTK.
+    :param r: radius grid
+    :param phi: azimuthal angle grid
+    :param theta: polar angle grid
+    """
+    # Find the x values and y values for each plane.
+    x_plane = (np.sin(theta) * np.cos(phi) * r[:, None]).ravel()
+    y_plane = (np.sin(theta) * np.cos(phi) * r[:, None]).ravel()
+    z = (np.cos(theta) * r[:, None])
+
+    # Allocate an array for all the points.  We'll have len(x_plane)
+    # points on each plane, and we have a plane for each z value, so
+    # we need len(x_plane)*len(z) points.
+    points = np.empty([len(x_plane) * len(z), 3])
+
+    # Loop through the points for each plane and fill them with the
+    # correct x,y,z values.
     start = 0
-    for latitude in latitudes:
-        end = start + len(t)
-        points[start:end, 2] *= radius * np.cos(latitude)
-        points[start:end, 1] *= radius * np.sin(t) * np.sin(latitude)
-        points[start:end, 0] *= radius * np.cos(t) * np.sin(latitude)
+    for z_plane in z:
+        end = start+len(x_plane)
+        # slice out a plane of the output points and fill it
+        # with the x,y, and z values for this plane.  The x,y
+        # values are the same for every plane.  The z value
+        # is set to the current z
+        plane_points = points[start:end]
+        plane_points[:, 0] = x_plane
+        plane_points[:, 1] = y_plane
+        plane_points[:, 2] = z_plane
         start = end
+
     return points
 
 
