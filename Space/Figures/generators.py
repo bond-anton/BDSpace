@@ -44,12 +44,14 @@ def generate_sphere(r, theta, phi):
     return points
 
 
-def generate_cone(phi, z=np.array([0, 50, 100.0]), theta=np.pi/4, hole=5, r_min=20):
+def generate_cone(phi, z=np.array([0, 100.0]), theta=np.pi/4, hole_radius=5, r_min=20):
+    if r_min < hole_radius:
+        r_min = hole_radius
     z_min = r_min / np.tan(theta)
     points = np.empty([2 * len(phi) * len(z), 3])
     start = 0
     for z_plane in z:
-        r = np.array([hole, (z_min + z_plane) * np.tan(theta)])
+        r = np.array([hole_radius, (z_min + z_plane) * np.tan(theta)])
         x_plane = (np.cos(phi) * r[:, None]).ravel()
         y_plane = (np.sin(phi) * r[:, None]).ravel()
         end = start + len(x_plane)
@@ -62,9 +64,12 @@ def generate_cone(phi, z=np.array([0, 50, 100.0]), theta=np.pi/4, hole=5, r_min=
     return points, dims
 
 
-def generate_cylinder(phi, z, r_outer, hole):
-    points = np.empty([2 * len(phi) * len(z), 3])
-    r = np.array([hole, r_outer])
+def generate_cylinder(phi, z, r_outer, hole=None):
+    if hole is not None:
+        r = np.array([hole, r_outer])
+    else:
+        r = np.array([r_outer])
+    points = np.empty([len(phi) * len(r) * len(z), 3])
     start = 0
     for z_plane in z:
         x_plane = (np.cos(phi) * r[:, None]).ravel()
@@ -75,4 +80,5 @@ def generate_cylinder(phi, z, r_outer, hole):
         plane_points[:, 1] = y_plane
         plane_points[:, 2] = z_plane
         start = end
-    return points
+    dims = (len(phi), len(r), len(z))
+    return points, dims
