@@ -11,19 +11,18 @@ def generate_cuboid(a=1, b=1, c=1, origin=np.array([0, 0, 0])):
 def generate_sphere(phi, theta, r):
     """
     Generate points for structured grid for a spherical shell volume.
-    This method is useful for generating a unstructured cylindrical mesh for VTK.
+    This method is useful for generating a structured cylindrical mesh for VTK.
     :param phi: azimuthal angle array
     :param theta: polar angle array
     :param r: radius of sphere
-    :param hole_r: array of radius values for filled sphere
     """
-    #z = r * np.cos(theta)
+    r = np.array(r, dtype=np.float)
     points = np.empty([len(phi) * len(r) * len(theta), 3])
     start = 0
     for th in theta:
         x_plane = (np.cos(phi) * r[:, None] * np.sin(th)).ravel()
         y_plane = (np.sin(phi) * r[:, None] * np.sin(th)).ravel()
-        z_plane = (r[:, None] * np.cos(th) * (np.cos(phi)**2 + np.sin(phi)**2)).ravel()
+        z_plane = (np.ones_like(phi) * r[:, None] * np.cos(th)).ravel()
         end = start + len(x_plane)
         plane_points = points[start:end]
         plane_points[:, 0] = x_plane
@@ -31,6 +30,30 @@ def generate_sphere(phi, theta, r):
         plane_points[:, 2] = z_plane
         start = end
     dims = (len(phi), len(r), len(theta))
+    return points, dims
+
+
+def generate_cylinder(phi, z, r):
+    """
+    Generate points for structured grid for a cylindrical shell volume.
+    This method is useful for generating a structured cylindrical mesh for VTK.
+    :param phi: azimuthal angle array
+    :param z: cylinder height array
+    :param r: radius of cylinder
+    """
+    r = np.array(r, dtype=np.float)
+    points = np.empty([len(phi) * len(r) * len(z), 3])
+    start = 0
+    for z_plane in z:
+        x_plane = (np.cos(phi) * r[:, None]).ravel()
+        y_plane = (np.sin(phi) * r[:, None]).ravel()
+        end = start + len(x_plane)
+        plane_points = points[start:end]
+        plane_points[:, 0] = x_plane
+        plane_points[:, 1] = y_plane
+        plane_points[:, 2] = z_plane
+        start = end
+    dims = (len(phi), len(r), len(z))
     return points, dims
 
 
@@ -54,21 +77,4 @@ def generate_cone(phi, z=np.array([0, 100.0]), theta=np.pi/4, hole_radius=5, r_m
     return points, dims
 
 
-def generate_cylinder(phi, z, r_outer, hole=None):
-    if hole is not None:
-        r = np.array([hole, r_outer])
-    else:
-        r = np.array([r_outer])
-    points = np.empty([len(phi) * len(r) * len(z), 3])
-    start = 0
-    for z_plane in z:
-        x_plane = (np.cos(phi) * r[:, None]).ravel()
-        y_plane = (np.sin(phi) * r[:, None]).ravel()
-        end = start + len(x_plane)
-        plane_points = points[start:end]
-        plane_points[:, 0] = x_plane
-        plane_points[:, 1] = y_plane
-        plane_points[:, 2] = z_plane
-        start = end
-    dims = (len(phi), len(r), len(z))
-    return points, dims
+
