@@ -4,7 +4,8 @@ import numpy as np
 def generate_cuboid(a=1, b=1, c=1, origin=np.array([0, 0, 0])):
     cube = np.array([[0, 0, 0], [0, b, 0], [a, 0, 0], [a, b, 0],
                      [0, 0, c], [0, b, c], [a, 0, c], [a, b, c]])
-    return cube[:] - origin, (2, 2, 2)
+    dims = (2, 2, 2)
+    return cube[:] - origin, dims
 
 
 def generate_sphere(r, theta, phi):
@@ -43,7 +44,7 @@ def generate_sphere(r, theta, phi):
     return points
 
 
-def generate_cone(phi, z=np.array([0, 100.0]), theta=np.pi/4, hole=5, r_min=20):
+def generate_cone(phi, z=np.array([0, 50, 100.0]), theta=np.pi/4, hole=5, r_min=20):
     z_min = r_min / np.tan(theta)
     points = np.empty([2 * len(phi) * len(z), 3])
     start = 0
@@ -57,7 +58,8 @@ def generate_cone(phi, z=np.array([0, 100.0]), theta=np.pi/4, hole=5, r_min=20):
         plane_points[:, 1] = y_plane
         plane_points[:, 2] = z_plane
         start = end
-    return points
+    dims = (len(phi), len(r), len(z))
+    return points, dims
 
 
 def generate_cylinder(phi, z, r_outer, hole):
