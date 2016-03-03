@@ -1,13 +1,10 @@
-from Space.Coordinates.coordinates import Cartesian
+from Space import Space
 
-class Curve(object):
 
-    def __init__(self, name='Unknown curve', CS=None):
-        self.name = str(name)
-        if CS is None:
-            self.CS = Cartesian()
-        else:
-            self.CS = CS
+class Curve(Space):
+
+    def __init__(self, name, coordinate_system=None):
+        super(Curve, self).__init__(name, coordinate_system=coordinate_system)
 
     def __str__(self):
         return 'Curve: ' + self.name
