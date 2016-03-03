@@ -37,18 +37,35 @@ class ParametricCurve(Curve):
 
     def tangent(self, t):
         xyz = self.generate_points(t)
-        return np.diff(xyz, axis=0)
+        return np.diff(xyz, axis=0) / np.diff(t).reshape(len(t) - 1, 1)
 
-    def length(self, a=None, b=None):
+    def length(self, a=None, b=None, precision=1e-6, return_details=False):
         if a is None:
             a = self.start
         if b is None:
             b = self.stop
-        t = np.linspace(a, b, num=500 * abs(b-a) / (2 * np.pi), endpoint=True, dtype=np.float)
-        xyz = self.tangent(t)
-        dl = np.sqrt(xyz[:, 0]**2 + xyz[:, 1]**2 + xyz[:, 2]**2)
-        length = np.trapz(dl, t[1:])
-        return length
+        num_points = int(100 * abs(b-a) / (2 * np.pi)) + 1
+        iteration = 0
+        length = length_polygonal = 0.0
+        error = 0
+        while True:
+            iteration += 1
+            t = np.linspace(a, b, num=num_points, endpoint=True, dtype=np.float)
+            xyz = self.tangent(t)
+            dl = np.sqrt(xyz[:, 0]**2 + xyz[:, 1]**2 + xyz[:, 2]**2)
+            length = np.trapz(dl, t[1:])
+            xyz = np.diff(self.generate_points(t), axis=0)
+            length_polygonal = np.sum(np.sqrt(xyz[:, 0]**2 + xyz[:, 1]**2 + xyz[:, 2]**2))
+            if length == length_polygonal == 0.0:
+                error = 0.0
+                break
+            error = abs(length - length_polygonal) / max(length, length_polygonal)
+            if error <= abs(precision):
+                break
+            num_points *= 2
+        if return_details:
+            return max(length, length_polygonal), error, iteration
+        return max(length, length_polygonal)
 
 
 class Helix(ParametricCurve):
@@ -59,7 +76,7 @@ class Helix(ParametricCurve):
         direction = 1 if right else -1
         super(Helix, self).__init__(name=name, coordinate_system=coordinate_system,
                                     x=lambda t: self.r * np.cos(t) - self.r,
-                                    y=lambda t: direction * self.r * np.sin(t),
+                                    y=lambda t: -direction * self.r * np.sin(t),
                                     z=lambda t: self.h / (2 * np.pi) * t,
                                     start=start, stop=stop)
 
