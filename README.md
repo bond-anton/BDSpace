@@ -10,10 +10,10 @@ and machining tools, multiple robotic arms, manipulators, etc.
 |--------------------------------------|------------------|
 |Cartesian coordinate systems          |done              |
 |Spherical coordinates                 |done              |
-|Cylindrical coordinates               |work in progress  |
+|Cylindrical coordinates               |done              |
 |Conversion between coordinate systems |done              |
 |Multiple nested coordinate systems    |done              |
-|Parametric curves                     |done              |
+|Parametric curves                     |work in progress  |
 |Trajectory builder (Pathfinder module)|work in progress  |
 |...                                   |discussion is open|
 

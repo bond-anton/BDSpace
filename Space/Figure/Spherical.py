@@ -1,7 +1,7 @@
 from __future__ import division
 import numpy as np
 
-from Space.Figures import Figure
+from Space.Figure import Figure
 
 
 class SphericalShape(Figure):

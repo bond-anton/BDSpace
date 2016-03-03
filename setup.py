@@ -4,7 +4,7 @@ setup(
     name='Space',
     version='0.0.1',
     packages=['Space', 'Space.Coordinates',
-              'Space.Curve', 'Space.Figures',
+              'Space.Curve', 'Space.Figure',
               'Space.Pathfinder'],
     url='https://github.com/bond-anton/Space',
     license='Apache Software License',
