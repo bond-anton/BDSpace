@@ -1,30 +1,26 @@
 from __future__ import division
 import numpy as np
 
-from Space.Coordinates import Cartesian
+from Space.Coordinates import Cartesian, transforms
 from Space.Coordinates.transforms import unit_vector
 from Space.Curve.Parametric import Helix, Arc
 
 
 def helix_between_two_points(coordinate_system, point1, point2, radius=1, loops=1, right=True):
-    distance = np.sqrt(np.dot(point2 - point1, point2 - point1))
-    direction = unit_vector(point2 - point1)
+    direction = point2 - point1
+    distance = np.sqrt(np.dot(direction, direction))
     print direction
     origin = coordinate_system.to_parent(point1)
     helix_coordinate_system = Cartesian(basis=np.copy(coordinate_system.basis), origin=np.copy(origin),
                                         name='Helix coordinate system')
-    R = np.sqrt(direction[0]**2 + direction[1]**2)
-    theta = np.arcsin(R)
-    if R == 0:
-        phi = 0
-    else:
-        phi = np.arccos(direction[0] / R)
-    print R, np.rad2deg(theta), np.rad2deg(phi)
-    helix_coordinate_system.rotate_axis_angle(helix_coordinate_system.basis[2, :], phi)
-    helix_coordinate_system.rotate_axis_angle(helix_coordinate_system.basis[1, :], theta)
-    h = distance / int(loops)
-    path = Helix(name='Right Helix', coordinate_system=helix_coordinate_system,
-                 radius=radius, pitch=h, start=0, stop=np.pi * 2 * int(loops), right=right)
+    r_theta_phi = transforms.cartesian_to_spherical(direction)
+    print r_theta_phi
+    helix_coordinate_system.rotate_axis_angle([0, 0, 1], r_theta_phi[2])
+    helix_coordinate_system.rotate_axis_angle([0, 1, 0], r_theta_phi[1])
+    pitch = distance / int(loops)
+    name = 'Right Helix' if right else 'Left Helix'
+    path = Helix(name=name, coordinate_system=helix_coordinate_system,
+                 radius=radius, pitch=pitch, start=0, stop=np.pi * 2 * int(loops), right=right)
     return path
 
 
