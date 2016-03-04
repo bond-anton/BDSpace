@@ -146,7 +146,10 @@ class Cartesian(object):
             xyz = xyz.reshape(1, 3)
         else:
             raise ValueError('Input must be a single point or an array of points coordinates with shape Nx3')
-        return np.dot(xyz, self.basis) + self.origin
+        if xyz.size > 3:
+            return np.dot(xyz, self.basis) + self.origin
+        else:
+            return (np.dot(xyz, self.basis) + self.origin)[0]
 
     def to_local(self, xyz):
         """
@@ -163,4 +166,7 @@ class Cartesian(object):
             xyz = xyz.reshape(1, 3)
         else:
             raise ValueError('Input must be a single point or an array of points coordinates with shape Nx3')
-        return np.dot(xyz - self.origin, self.basis.T)
+        if xyz.size > 3:
+            return np.dot(xyz - self.origin, self.basis.T)
+        else:
+            return np.dot(xyz - self.origin, self.basis.T)[0]

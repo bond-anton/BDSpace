@@ -83,13 +83,13 @@ class Helix(ParametricCurve):
 
 class Arc(ParametricCurve):
 
-    def __init__(self, name='Arc', coordinate_system=None, r=1, start=0, stop=np.pi * 2, right=True):
-        self.r = r
+    def __init__(self, name='Arc', coordinate_system=None, radius=1, start=0, stop=np.pi * 2, right=True):
+        self.radius = radius
         direction = 1 if right else -1
         super(Arc, self).__init__(name=name, coordinate_system=coordinate_system,
-                                  x=lambda t: direction * self.r * np.sin(t),
+                                  x=lambda t: direction * self.radius * np.sin(t),
                                   y=lambda t: np.zeros_like(t),
-                                  z=lambda t: -self.r * np.cos(t) + self.r,
+                                  z=lambda t: -self.radius * np.cos(t) + self.radius,
                                   start=start, stop=stop)
 
 
