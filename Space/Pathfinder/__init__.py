@@ -6,7 +6,7 @@ from Space.Coordinates.transforms import unit_vector
 from Space.Curve.Parametric import Helix, Arc
 
 
-def helix_between_two_points(coordinate_system, point1, point2, r=1, loops=1, right=True):
+def helix_between_two_points(coordinate_system, point1, point2, radius=1, loops=1, right=True):
     distance = np.sqrt(np.dot(point2 - point1, point2 - point1))
     direction = unit_vector(point2 - point1)
     print direction
@@ -20,11 +20,11 @@ def helix_between_two_points(coordinate_system, point1, point2, r=1, loops=1, ri
     else:
         phi = np.arccos(direction[0] / R)
     print R, np.rad2deg(theta), np.rad2deg(phi)
-    helix_coordinate_system.rotate_axis_angle(helix_coordinate_system.basis[:, 2], -phi)
-    helix_coordinate_system.rotate_axis_angle(helix_coordinate_system.basis[:, 1], -theta)
+    helix_coordinate_system.rotate_axis_angle(helix_coordinate_system.basis[2, :], phi)
+    helix_coordinate_system.rotate_axis_angle(helix_coordinate_system.basis[1, :], theta)
     h = distance / int(loops)
     path = Helix(name='Right Helix', coordinate_system=helix_coordinate_system,
-                 r=r, h=h, start=0, stop=np.pi * 2 * int(loops), right=right)
+                 radius=radius, pitch=h, start=0, stop=np.pi * 2 * int(loops), right=right)
     return path
 
 

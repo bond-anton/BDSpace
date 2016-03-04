@@ -70,14 +70,14 @@ class ParametricCurve(Curve):
 
 class Helix(ParametricCurve):
 
-    def __init__(self, name='Helix', coordinate_system=None, r=1, h=1, start=0, stop=10, right=True):
-        self.r = r
-        self.h = h
-        direction = 1 if right else -1
+    def __init__(self, name='Helix', coordinate_system=None, radius=1, pitch=1, start=0, stop=10, right=True):
+        self.radius = radius
+        self.pitch = pitch
+        direction = -1 if right else 1
         super(Helix, self).__init__(name=name, coordinate_system=coordinate_system,
-                                    x=lambda t: self.r * np.cos(t) - self.r,
-                                    y=lambda t: -direction * self.r * np.sin(t),
-                                    z=lambda t: self.h / (2 * np.pi) * t,
+                                    x=lambda t: self.radius - self.radius * np.cos(t),
+                                    y=lambda t: direction * self.radius * np.sin(t),
+                                    z=lambda t: self.pitch / (2 * np.pi) * t,
                                     start=start, stop=stop)
 
 
