@@ -68,6 +68,39 @@ class ParametricCurve(Curve):
         return max(length, length_polygonal)
 
 
+class Line(ParametricCurve):
+
+    def __init__(self, name='Line', coordinate_system=None, origin=(0, 0, 0), a=1, b=1, c=1, start=0, stop=1):
+        self.origin = np.array(origin, dtype=np.float)
+        self.a = a
+        self.b = b
+        self.c = c
+        super(Line, self).__init__(name=name, coordinate_system=coordinate_system,
+                                   x=lambda t: self.origin[0] + self.a * t,
+                                   y=lambda t: self.origin[1] + self.b * t,
+                                   z=lambda t: self.origin[2] + self.c * t,
+                                   start=start, stop=stop)
+
+
+class Arc(ParametricCurve):
+
+    def __init__(self, name='Arc', coordinate_system=None, a=1, b=1, start=0, stop=np.pi * 2, right=True):
+        self.a = max(a, b)
+        self.b = min(a, b)
+        direction = 1 if right else -1
+        super(Arc, self).__init__(name=name, coordinate_system=coordinate_system,
+                                  x=lambda t: self.a * np.cos(t),
+                                  y=lambda t: direction * self.b * np.sin(t),
+                                  z=lambda t: np.zeros_like(t),
+                                  start=start, stop=stop)
+
+    def get_eccentricity(self):
+        return np.sqrt((self.a**2 - self.b**2) / self.a**2)
+
+    def get_focus(self):
+        return self.a * self.get_eccentricity()
+
+
 class Helix(ParametricCurve):
 
     def __init__(self, name='Helix', coordinate_system=None, radius=1, pitch=1, start=0, stop=10, right=True):
@@ -79,18 +112,6 @@ class Helix(ParametricCurve):
                                     y=lambda t: direction * self.radius * np.sin(t),
                                     z=lambda t: self.pitch / (2 * np.pi) * t,
                                     start=start, stop=stop)
-
-
-class Arc(ParametricCurve):
-
-    def __init__(self, name='Arc', coordinate_system=None, radius=1, start=0, stop=np.pi * 2, right=True):
-        self.radius = radius
-        direction = 1 if right else -1
-        super(Arc, self).__init__(name=name, coordinate_system=coordinate_system,
-                                  x=lambda t: direction * self.radius * np.sin(t),
-                                  y=lambda t: np.zeros_like(t),
-                                  z=lambda t: -self.radius * np.cos(t) + self.radius,
-                                  start=start, stop=stop)
 
 
 def check_equations(equations):
