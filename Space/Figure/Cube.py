@@ -11,8 +11,20 @@ class Parallelepiped(Figure):
         self.vectors = vectors
         super(Parallelepiped, self).__init__(name, coordinate_system=coordinate_system)
 
-    def volume(self):
+    def inner_volume(self):
+        return 0.0
+
+    def external_volume(self):
         return np.dot(self.vectors[2], np.cross(self.vectors[0], self.vectors[1]))
+
+    def inner_surface_area(self):
+        return 0.0
+
+    def external_surface_area(self):
+        p1 = np.cross(self.vectors[0], self.vectors[1])
+        p2 = np.cross(self.vectors[0], self.vectors[2])
+        p3 = np.cross(self.vectors[1], self.vectors[2])
+        return 2 * (np.sqrt(np.dot(p1, p1)) + np.sqrt(np.dot(p2, p2)) + np.sqrt(np.dot(p3, p3)))
 
 
 class ParallelepipedTriclinic(Parallelepiped):
