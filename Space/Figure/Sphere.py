@@ -157,11 +157,11 @@ class SphericalSegmentWedge(SphericalShape):
                 s_cut -= h2_inner * self.r_inner * abs(np.sin(theta2_inner) - np.sin(theta1_inner))
         if self.phi == 2 * np.pi:
             s_cut = 0
-        s_base = np.pi * (self.r_outer * np.sin(theta1))**2
-        s_base += np.pi * (self.r_outer * np.sin(theta2))**2
+        s_base = self.phi / 2 * (self.r_outer * np.sin(theta1))**2
+        s_base += self.phi / 2 * (self.r_outer * np.sin(theta2))**2
         if h_inner > 0:
-            s_base -= np.pi * (self.r_inner * np.sin(theta1_inner))**2
-            s_base -= np.pi * (self.r_inner * np.sin(theta2_inner))**2
+            s_base -= self.phi / 2 * (self.r_inner * np.sin(theta1_inner))**2
+            s_base -= self.phi / 2 * (self.r_inner * np.sin(theta2_inner))**2
         if self.phi == 2 * np.pi and self.h1 <= - self.r_inner and self.h2 >= self.r_inner:
             return s_outer + s_base
         else:
