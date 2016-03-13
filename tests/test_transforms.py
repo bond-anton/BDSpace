@@ -1,6 +1,7 @@
+from __future__ import division
 import unittest
 import numpy as np
-from Space.Coordinates.transforms import reduce_angle, unit_vector
+from Space.Coordinates.transforms import reduce_angle, unit_vector, angles_between_vectors
 from Space.Coordinates.transforms import rotation_matrix, rotation_matrix_euler_angles, rotate_vector
 from Space.Coordinates.transforms import cartesian_to_spherical, spherical_to_cartesian
 from Space.Coordinates.transforms import cartesian_to_cylindrical, cylindrical_to_cartesian
@@ -108,6 +109,15 @@ class TestTransforms(unittest.TestCase):
         for dim in range(max_dimensions):
             v = np.random.random(dim+1) * 100
             np.testing.assert_allclose(unit_vector(v), v / np.sqrt(np.dot(v, v)))
+
+    def test_angle_between_vectors(self):
+        v1 = np.array([1, 0, 0], dtype=np.float)
+        v2 = np.array([0, 1, 0], dtype=np.float)
+        self.assertEqual(angles_between_vectors(v1, v2), np.pi/2)
+        self.assertEqual(angles_between_vectors(v1, v1), 0)
+        self.assertEqual(angles_between_vectors(v1, -v1), np.pi)
+        v2 = np.array([1, 1, 0], dtype=np.float)
+        np.testing.assert_allclose(angles_between_vectors(v1, v2), np.pi/4)
 
     def test_rotation_matrix_zero_angle(self):
         axis = (np.random.random(3) - 0.5) * 100
