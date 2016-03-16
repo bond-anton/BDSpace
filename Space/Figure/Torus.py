@@ -12,6 +12,7 @@ class ToricWedge(Figure):
                  r_torus=1.0, r_tube=np.array([0, 0.25])):
         self.r_torus = float(r_torus)
         self.r_tube = np.array(r_tube, dtype=np.float)
+        self.r_tube = self.r_tube.reshape(self.r_tube.size,)
         reduced_theta = reduce_angle(theta, keep_sign=True)
         theta_min = min(reduced_theta)
         theta_max = max(reduced_theta)
