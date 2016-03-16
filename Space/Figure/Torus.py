@@ -24,6 +24,13 @@ class ToricWedge(Figure):
 
         super(ToricWedge, self).__init__(name, coordinate_system=coordinate_system)
 
+    def inner_volume(self):
+        if np.allclose(self.theta[1] - self.theta[0], 2*np.pi) and np.allclose(self.phi, 2*np.pi):
+            return 2 * np.pi**2 * self.r_torus * self.r_tube**2
+        else:
+            return 0
+
+
 
 class ToricSector(ToricWedge):
 
