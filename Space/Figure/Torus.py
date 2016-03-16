@@ -22,3 +22,23 @@ class ToricWedge(Figure):
         self.phi = reduce_angle(phi)
 
         super(ToricWedge, self).__init__(name, coordinate_system=coordinate_system)
+
+
+class ToricSector(ToricWedge):
+
+    def __init__(self, name='Toric sector', coordinate_system=None,
+                 phi=np.pi/2,
+                 r_torus=1.0, r_tube=np.array([0, 0.25])):
+
+        super(ToricSector, self).__init__(name, coordinate_system=coordinate_system,
+                                          phi=phi, theta=np.array([0, 2*np.pi]),
+                                          r_torus=r_torus, r_tube=r_tube)
+
+
+class Torus(ToricSector):
+
+    def __init__(self, name='Torus', coordinate_system=None,
+                 r_torus=1.0, r_tube=np.array([0, 0.25])):
+
+        super(ToricSector, self).__init__(name, coordinate_system=coordinate_system,
+                                          phi=2*np.pi, r_torus=r_torus, r_tube=r_tube)
