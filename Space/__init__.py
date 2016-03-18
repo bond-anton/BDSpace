@@ -48,6 +48,15 @@ class Space(object):
         coordinate_system = Cartesian(basis=basis, origin=origin, name=name, labels=labels)
         return coordinate_system
 
+    def to_local_coordinate_system(self, xyz):
+        """
+        convert global points coordinates xyz to local coordinate system coordinates
+        :param xyz: array of points shaped Nx3
+        :return: array of points in local coordinates system
+        """
+        basis_global = self.basis_in_global_coordinate_system()
+        return basis_global.to_local(xyz)
+
     def add_element(self, element):
         if isinstance(element, Space):
             if element == self:

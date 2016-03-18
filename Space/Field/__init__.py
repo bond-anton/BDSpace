@@ -4,12 +4,9 @@ from Space import Space
 
 class Field(Space):
 
-    def __init__(self, name, parent, field_type):
-        if not isinstance(parent, Space):
-            raise ValueError('parent must be an instance of Space class')
+    def __init__(self, name, field_type):
         self.type = str(field_type)
         super(Field, self).__init__(name, coordinate_system=None)
-        parent.add_element(self)
 
     def __str__(self):
         return 'Field: %s (%s)' % (self.name, self.type)
@@ -33,7 +30,7 @@ class Field(Space):
             field = 0
         elif xyz.size > 3:
             if len(xyz.shape) == 2 and xyz.shape[1] == 3:
-                field = np.zeros_like(len(xyz))
+                field = np.zeros_like(xyz.shape[0])
             else:
                 raise ValueError('N-points array shape must be (N, 3)')
         else:
@@ -57,3 +54,63 @@ class Field(Space):
         else:
             raise ValueError('at least 3 coordinates are needed for point')
         return field
+
+
+class SuperposedField(Field):
+
+    def __init__(self, name, fields):
+        self.fields = None
+        self.type = None
+        self._set_fields(fields)
+        super(SuperposedField, self).__init__(name, self.type)
+
+    def _set_fields(self, fields):
+        for field in fields:
+            if not isinstance(field, Field):
+                raise ValueError('Fields must be iterable of Field class instances')
+            if self.type is None:
+                self.type = field.type
+            if self.type != field.type:
+                raise ValueError('All fields must be iterable of Field class instances')
+
+        self.fields = fields
+
+    def scalar_field(self, xyz):
+        """
+        Calculates superposed scalar field value at points xyz
+        :param xyz: array of one or more points in global coordinate system
+        :return: scalar values array
+        """
+        xyz = np.array(xyz, dtype=np.float)
+        if xyz.size == 3:
+            total_field = 0
+        elif xyz.size > 3:
+            if len(xyz.shape) == 2 and xyz.shape[1] == 3:
+                total_field = np.zeros_like(xyz.shape[0])
+            else:
+                raise ValueError('N-points array shape must be (N, 3)')
+        else:
+            raise ValueError('at least 3 coordinates are needed for point')
+        for field in self.fields:
+            total_field += field.scalar_field(field.to_local_coordinate_system(xyz))
+        return total_field
+
+    def vector_field(self, xyz):
+        """
+        Calculates superposed vector field value at points xyz
+        :param xyz: array of one or more points in global coordinate system
+        :return: vector values array
+        """
+        xyz = np.array(xyz, dtype=np.float)
+        if xyz.size == 3:
+            total_field = np.array([0, 0, 0])
+        elif xyz.size > 3:
+            if len(xyz.shape) == 2 and xyz.shape[1] == 3:
+                total_field = np.zeros_like(xyz)
+            else:
+                raise ValueError('N-points array shape must be (N, 3)')
+        else:
+            raise ValueError('at least 3 coordinates are needed for point')
+        for field in self.fields:
+            total_field += field.scalar_field(field.to_local_coordinate_system(xyz))
+        return total_field
