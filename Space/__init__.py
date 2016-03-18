@@ -1,5 +1,6 @@
 import numpy as np
 from Coordinates import Cartesian
+from _version import __version__
 
 
 class Space(object):

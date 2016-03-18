@@ -13,8 +13,9 @@ and machining tools, multiple robotic arms, manipulators, etc.
 |Cylindrical coordinates               |done              |
 |Conversion between coordinate systems |done              |
 |Multiple nested coordinate systems    |done              |
-|Parametric curves                     |work in progress  |
-|Trajectory builder (Pathfinder module)|work in progress  |
+|Parametric curves                     |done              |
+|Trajectory builder (Pathfinder module)|endless work      |
+|Planes and plane geometry             |work in progress  |
 |...                                   |discussion is open|
 
 ## Installation
