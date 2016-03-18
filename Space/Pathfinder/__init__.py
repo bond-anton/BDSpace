@@ -3,7 +3,19 @@ import numpy as np
 
 from Space.Coordinates import Cartesian, transforms
 from Space.Coordinates.transforms import unit_vector
-from Space.Curve.Parametric import Helix, Arc
+from Space.Curve.Parametric import Line, Helix, Arc
+
+
+def line_between_two_points(coordinate_system, point1, point2):
+    direction = point2 - point1
+    distance = np.sqrt(np.dot(direction, direction))
+    v = unit_vector(direction)
+    line_coordinate_system = Cartesian(basis=np.copy(coordinate_system.basis), origin=np.copy(coordinate_system.origin),
+                                       name='Line path coordinate system')
+    path = Line(name='Line Path', coordinate_system=line_coordinate_system,
+                origin=point1, a=v[0], b=v[1], c=v[2],
+                start=0, stop=distance)
+    return path
 
 
 def helix_between_two_points(coordinate_system, point1, point2, radius=1, loops=1, right=True):
@@ -26,30 +38,21 @@ def arc_between_two_points(coordinate_system, point1, point2, radius=1, right=Tr
     global_point1 = coordinate_system.to_parent(point1)
     global_point2 = coordinate_system.to_parent(point2)
     direction = point2 - point1
+    distance = np.sqrt(np.dot(direction, direction))
     arc_coordinate_system = Cartesian(basis=np.copy(coordinate_system.basis), origin=np.copy(global_point1),
                                       name='Arc coordinate_system')
+
     r_theta_phi = transforms.cartesian_to_spherical(direction)
     arc_coordinate_system.rotate_axis_angle([0, 0, 1], r_theta_phi[2])
-    arc_coordinate_system.rotate_axis_angle([0, 1, 0], r_theta_phi[1])
+    arc_coordinate_system.rotate_axis_angle([0, 1, 0], r_theta_phi[1] + np.pi/2)
+    x_offset = -distance / 2
+    y_offset = np.sqrt(radius**2 - x_offset**2)
+    if right:
+        y_offset *= -1
+    arc_coordinate_system.origin = arc_coordinate_system.to_parent([x_offset, y_offset, 0])
+    local_point1 = arc_coordinate_system.to_local(global_point1)
     local_point2 = arc_coordinate_system.to_local(global_point2)
-    print local_point2
-    origin = np.array([np.sqrt((2 * radius)**2 - local_point2[2]**2), 0, 0])
-    print origin
-    direction = local_point2 - origin
-    print direction
-    print 'Arc coordinate_system origin offset:', origin
-    distance = np.sqrt(np.dot(direction, direction))
-    print distance
-    origin = arc_coordinate_system.to_parent(origin)
-    arc_coordinate_system.origin = np.copy(origin)
-    r_theta_phi = transforms.cartesian_to_spherical(direction)
-    arc_coordinate_system.rotate_axis_angle([0, 0, 1], r_theta_phi[2])
-    arc_coordinate_system.rotate_axis_angle([0, 1, 0], r_theta_phi[2])
-    local_point1 = arc_coordinate_system.to_local(coordinate_system.to_parent(point1)) - np.array([0, 0, radius])
-    local_point2 = arc_coordinate_system.to_local(coordinate_system.to_parent(point2)) - np.array([0, 0, radius])
-    print local_point2
-    start = np.pi - np.arccos(local_point1[2] / radius)
-    stop = np.pi - np.arccos(local_point2[2] / radius)
-    print start, stop
-    path = Arc(coordinate_system=arc_coordinate_system, radius=radius, start=start, stop=stop, right=right)
+    start = transforms.cartesian_to_spherical(local_point1)[2]
+    stop = transforms.cartesian_to_spherical(local_point2)[2]
+    path = Arc(coordinate_system=arc_coordinate_system, a=radius, b=radius, start=start, stop=stop, right=right)
     return path
