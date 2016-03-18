@@ -54,5 +54,8 @@ def arc_between_two_points(coordinate_system, point1, point2, radius=1, right=Tr
     local_point2 = arc_coordinate_system.to_local(global_point2)
     start = transforms.cartesian_to_spherical(local_point1)[2]
     stop = transforms.cartesian_to_spherical(local_point2)[2]
+    if not right:
+        start = 2 * np.pi - start
+        stop = 2 * np.pi - stop
     path = Arc(coordinate_system=arc_coordinate_system, a=radius, b=radius, start=start, stop=stop, right=right)
     return path
