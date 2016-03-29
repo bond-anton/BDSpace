@@ -86,7 +86,7 @@ class SuperposedField(Field):
             total_field = 0
         elif xyz.size > 3:
             if len(xyz.shape) == 2 and xyz.shape[1] == 3:
-                total_field = np.zeros_like(xyz.shape[0])
+                total_field = np.zeros((xyz.shape[0],))
             else:
                 raise ValueError('N-points array shape must be (N, 3)')
         else:
