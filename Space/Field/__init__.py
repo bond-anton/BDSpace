@@ -112,5 +112,5 @@ class SuperposedField(Field):
         else:
             raise ValueError('at least 3 coordinates are needed for point')
         for field in self.fields:
-            total_field += field.scalar_field(field.to_local_coordinate_system(xyz))
+            total_field += field.vector_field(field.to_local_coordinate_system(xyz))
         return total_field
