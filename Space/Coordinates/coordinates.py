@@ -79,6 +79,11 @@ class Cartesian(object):
             if not match:
                 print('Convention: %s not found or not supported.' % euler_angles_convention)
                 print('Falling back to Bunge convention.')
+            elif 'bunge' in convention['variants']:
+                print('You asked to use %s' % convention['description'])
+                print('Unfortunately it is not supported for now.')
+                print('Falling back to Bunge convention.')
+                convention = conventions['Bunge']
         self.euler_angles_convention = convention
 
     def set_origin(self, origin=None):

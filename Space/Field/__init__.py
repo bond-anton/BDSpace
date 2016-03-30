@@ -1,3 +1,4 @@
+from __future__ import division, print_function
 import numpy as np
 from Space import Space
 
@@ -9,14 +10,20 @@ class Field(Space):
         super(Field, self).__init__(name, coordinate_system=None)
 
     def __str__(self):
-        return 'Field: %s (%s)' % (self.name, self.type)
+        description = 'Field: %s (%s)\n' % (self.name, self.type)
+        if self.parent is not None:
+            description += 'Parent entity:\n'
+            description += str(self.parent)
+        else:
+            description += str(self.coordinate_system)
+        return description
 
     def add_element(self, element):
-        print 'No element could be added to Field'
+        print('No element could be added to Field')
         pass
 
     def remove_element(self, element):
-        print 'No element could be added to or removed from Field'
+        print('No element could be added to or removed from Field')
         pass
 
     def scalar_field(self, xyz):

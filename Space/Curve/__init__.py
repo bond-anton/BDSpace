@@ -7,4 +7,6 @@ class Curve(Space):
         super(Curve, self).__init__(name, coordinate_system=coordinate_system)
 
     def __str__(self):
-        return 'Curve: ' + self.name
+        description = 'Curve: %s\n' % self.name
+        description += str(self.coordinate_system)
+        return description

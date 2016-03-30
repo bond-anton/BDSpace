@@ -7,7 +7,9 @@ class Figure(Space):
         super(Figure, self).__init__(name, coordinate_system=coordinate_system)
 
     def __str__(self):
-        return 'Figure: ' + self.name
+        description = 'Figure: %s\n' % self.name
+        description += str(self.coordinate_system)
+        return description
 
     def inner_volume(self):
         """

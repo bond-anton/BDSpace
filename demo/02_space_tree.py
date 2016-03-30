@@ -1,3 +1,4 @@
+from __future__ import division, print_function
 from Space import Space
 from Space.Coordinates import Cartesian
 
@@ -33,5 +34,4 @@ mars.add_element(phobos)
 solar_system.print_tree()
 
 mars.remove_element(lunohod)
-print phobos2.name
-
+print(phobos2.name)

@@ -1,3 +1,4 @@
+from __future__ import division, print_function
 import numpy as np
 from Coordinates import Cartesian
 from _version import __version__
@@ -18,7 +19,9 @@ class Space(object):
         self.points = None
 
     def __str__(self):
-        return 'Space: ' + self.name
+        description = 'Space: %s\n' % self.name
+        description += str(self.coordinate_system)
+        return description
 
     def to_global_coordinate_system(self, xyz):
         """
@@ -73,7 +76,7 @@ class Space(object):
                     self.elements[element.name] = element
                     element.parent = self
                 elif element.parent == self:
-                    print 'Space ' + element.name + 'is already a subspace of ' + self.name
+                    print('Space ' + element.name + 'is already a subspace of ' + self.name)
                 else:
                     raise ValueError(element.name + ' is subspace of another space: ' + element.parent.name +
                                      '. Please delete first.')
@@ -88,7 +91,7 @@ class Space(object):
                         del self.elements[key]
                 element.parent = None
             else:
-                print element.name + ' is not a subspace of ' + self.name
+                print(element.name + ' is not a subspace of ' + self.name)
         else:
             raise ValueError('Only another space could be detached')
 
@@ -97,6 +100,6 @@ class Space(object):
             self.parent.remove_element(self)
 
     def print_tree(self, level=0):
-        print '-' * level + ' ' * (level > 0) + self.name
+        print('-' * level + ' ' * (level > 0) + self.name)
         for key in self.elements.keys():
             self.elements[key].print_tree(level=level+1)
