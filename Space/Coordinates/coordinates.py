@@ -1,3 +1,4 @@
+from __future__ import division, print_function
 import numpy as np
 import math as m
 
@@ -9,8 +10,11 @@ class Cartesian(object):
     3D cartesian coordinate system
     """
 
-    def __init__(self, basis=None, origin=None, name='Cartesian CS', labels=None):
-        # Euler angles Z-X'-Z" notation
+    def __init__(self, basis=None, origin=None, name='Cartesian CS', labels=None,
+                 euler_angles_convention=None):
+        # Euler angles describe rotational orientation of the basis
+        self.euler_angles_convention = None
+        self.set_euler_angles_convention(euler_angles_convention)
         self.euler_angles = np.array([0, 0, 0], dtype=np.float)
         # Basis in parent CS
         self.basis = None
@@ -34,6 +38,48 @@ class Cartesian(object):
 
     def __ne__(self, other):
         return not self.__eq__(other)
+
+    def __str__(self):
+        information = 'Cartesian coordinate system: %s\n' % self.name
+        information += 'Origin: ' + str(self.origin) + '\n'
+        information += 'Basis:\n'
+        information += self.labels[0] + ': ' + str(self.basis[0]) + '\n'
+        information += self.labels[1] + ': ' + str(self.basis[1]) + '\n'
+        information += self.labels[2] + ': ' + str(self.basis[2]) + '\n'
+        information += 'Orientation: %s:\n' % self.euler_angles_convention['description']
+        information += str(self.euler_angles) + '\n'
+        return information
+
+    def set_euler_angles_convention(self, euler_angles_convention):
+        conventions = {
+            'Bunge': {'variants': ['bunge', 'zxz'],
+                      'labels': ['phi1', 'Phi', 'phi2'],
+                      'description': 'Bunge (phi1 Phi phi2) ZXZ convention'},
+            'Matthies': {'variants': ['matthies', 'zyz', 'nfft', 'abg'],
+                         'labels': ['alpha', 'beta', 'gamma'],
+                         'description': 'Matthies (alpha beta gamma) ZYZ convention'},
+            'Roe': {'variants': ['roe'],
+                    'labels': ['Psi', 'Theta', 'Phi'],
+                    'description': 'Roe (Psi, Theta, Phi) convention'},
+            'Kocks': {'variants': ['kocks'],
+                      'labels': ['Psi', 'Theta', 'phi'],
+                      'description': 'Kocks (Psi Theta phi) convention'},
+            'Canova': {'variants': ['canova'],
+                       'labels': ['omega', 'Theta', 'phi'],
+                       'description': 'Canova (omega, Theta, phi) convention'}
+        }
+        convention = conventions['Bunge']
+        if euler_angles_convention is not None:
+            match = False
+            for key in conventions.keys():
+                if euler_angles_convention.lower().strip() in conventions[key]['variants']:
+                    convention = conventions[key]
+                    match = True
+                    break
+            if not match:
+                print('Convention: %s not found or not supported.' % euler_angles_convention)
+                print('Falling back to Bunge convention.')
+        self.euler_angles_convention = convention
 
     def set_origin(self, origin=None):
         if origin is None:
@@ -75,7 +121,7 @@ class Cartesian(object):
     
     def calculate_euler_angles(self):
         """
-        method calculates Euler's angles for the coordinate system in Z-X'-Z" notation
+        method calculates Euler's angles for the coordinate system in Bunge Z-X'-Z" notation
         The limits for the angles are [0; 2*pi] for Z and Z", and [0: pi] for X'
         """
         if np.allclose(self.basis[2, 2], [1.0]):
@@ -94,7 +140,7 @@ class Cartesian(object):
     
     def set_euler_angles(self, euler_angles):
         """
-        Sets coordinate system orientation using given 3 Euler's angles in Z-X'-Z" notation
+        Sets coordinate system orientation using given 3 Euler's angles in Bunge Z-X'-Z" notation
         The input angles could be of any value. After the rotation the correct Euler's angles will be calculated.
         :param euler_angles: input Euler's angles
         """

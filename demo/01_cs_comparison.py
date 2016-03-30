@@ -1,3 +1,4 @@
+from __future__ import division, print_function
 import numpy as np
 try:
     from matplotlib import pyplot as plt
@@ -7,15 +8,17 @@ except ImportError:
 from Space.Coordinates import Cartesian
 
 
-def error(CS_1, CS_2):
-    delta = CS_1.basis - CS_2.basis
-    return np.sqrt(np.sum(delta**2))
+def error(cs_1, cs_2):
+    delta = cs_1.basis - cs_2.basis
+    return np.sqrt(np.sum(delta ** 2))
 
 # Create cartesian coordinate system
 
 # if you don't pass arguments the basis coincide with 'Absolute' (mayavi) coordinate system
-CS_1 = Cartesian(origin=np.array([0, 0, 0]))
-CS_2 = Cartesian(origin=np.array([0, 0, 0]))
+cs_1 = Cartesian(origin=np.array([0, 0, 0]))
+cs_2 = Cartesian(origin=np.array([0, 0, 0]))
+
+print(cs_1)
 
 turns = 10
 axis = np.array([1, 1, 1])
@@ -25,20 +28,20 @@ errors = []
 
 for order in range(max_steps_order + 1):
     steps = 10**order # per turn
-    print "Processing %g steps per turn" % steps
+    print("Processing %g steps per turn" % steps)
     step = 2 * np.pi / steps
-    print "  Angle increment is %g rad (%g deg)" % (step, np.rad2deg(step))
+    print("  Angle increment is %g rad (%g deg)" % (step, np.rad2deg(step)))
     laps_errors = []
-    print "    Lap:",
+    print("    Lap:",)
     for i in range(turns):
-        print i+1,
+        print(i+1,)
         for k in range(steps):
-            CS_2.rotate_axis_angle(axis, step)
-        laps_errors.append(error(CS_1, CS_2))
-    print "done.\n"
+            cs_2.rotate_axis_angle(axis, step)
+        laps_errors.append(error(cs_1, cs_2))
+    print("done.\n")
     errors.append(np.mean(laps_errors))
 
-print errors
+print(errors)
 
 if use_mpl:
     plt.semilogy(np.arange(max_steps_order + 1), errors, 'r-o')
