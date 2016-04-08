@@ -1,8 +1,8 @@
 from __future__ import division, print_function
 import numpy as np
-import math as m
 
-from transforms import unit_vector, reduce_angle, rotation_matrix, rotation_matrix_euler_angles
+from Quaternions import Rotation
+from transforms import unit_vector
 
 
 class Cartesian(object):
@@ -12,89 +12,37 @@ class Cartesian(object):
 
     def __init__(self, basis=None, origin=None, name='Cartesian CS', labels=None,
                  euler_angles_convention=None):
-        # Euler angles describe rotational orientation of the basis
-        self.euler_angles_convention = None
-        self.set_euler_angles_convention(euler_angles_convention)
-        self.euler_angles = np.array([0, 0, 0], dtype=np.float)
+        # The basis rotation is kept as Rotation quaternion
+        self._rotation = Rotation(euler_angles_convention=euler_angles_convention)
         # Basis in parent CS
-        self.basis = None
-        self.set_basis(basis)
+        self._set_basis(basis)
         # Origin in parent CS
-        self.origin = None
-        self.set_origin(origin)
+        self._origin = None
+        self._set_origin(origin)
         self.labels = None
         if labels is not None:
             self.labels = labels
         else:
             self.labels = ['x', 'y', 'z']
         self.name = str(name)
-        self.calculate_euler_angles()
 
-    def __eq__(self, other):
-        result = isinstance(other, self.__class__)
-        result = result and np.allclose(self.basis, other.basis)
-        result = result and np.allclose(self.origin, other.origin)
-        return result
+    def _set_euler_angles_convention(self, euler_angles_convention):
+        self._rotation.euler_angles_convention = euler_angles_convention
 
-    def __ne__(self, other):
-        return not self.__eq__(other)
+    def _get_euler_angles_convention(self):
+        return self._rotation.euler_angles_convention
 
-    def __str__(self):
-        information = 'Cartesian coordinate system: %s\n' % self.name
-        information += 'Origin: ' + str(self.origin) + '\n'
-        information += 'Basis:\n'
-        information += self.labels[0] + ': ' + str(self.basis[0]) + '\n'
-        information += self.labels[1] + ': ' + str(self.basis[1]) + '\n'
-        information += self.labels[2] + ': ' + str(self.basis[2]) + '\n'
-        information += 'Orientation: %s:\n' % self.euler_angles_convention['description']
-        information += str(self.euler_angles) + '\n'
-        return information
+    euler_angles_convention = property(_get_euler_angles_convention, _set_euler_angles_convention)
 
-    def set_euler_angles_convention(self, euler_angles_convention):
-        conventions = {
-            'Bunge': {'variants': ['bunge', 'zxz'],
-                      'labels': ['phi1', 'Phi', 'phi2'],
-                      'description': 'Bunge (phi1 Phi phi2) ZXZ convention'},
-            'Matthies': {'variants': ['matthies', 'zyz', 'nfft', 'abg'],
-                         'labels': ['alpha', 'beta', 'gamma'],
-                         'description': 'Matthies (alpha beta gamma) ZYZ convention'},
-            'Roe': {'variants': ['roe'],
-                    'labels': ['Psi', 'Theta', 'Phi'],
-                    'description': 'Roe (Psi, Theta, Phi) convention'},
-            'Kocks': {'variants': ['kocks'],
-                      'labels': ['Psi', 'Theta', 'phi'],
-                      'description': 'Kocks (Psi Theta phi) convention'},
-            'Canova': {'variants': ['canova'],
-                       'labels': ['omega', 'Theta', 'phi'],
-                       'description': 'Canova (omega, Theta, phi) convention'}
-        }
-        convention = conventions['Bunge']
-        if euler_angles_convention is not None:
-            match = False
-            for key in conventions.keys():
-                if euler_angles_convention.lower().strip() in conventions[key]['variants']:
-                    convention = conventions[key]
-                    match = True
-                    break
-            if not match:
-                print('Convention: %s not found or not supported.' % euler_angles_convention)
-                print('Falling back to Bunge convention.')
-            elif 'bunge' in convention['variants']:
-                print('You asked to use %s' % convention['description'])
-                print('Unfortunately it is not supported for now.')
-                print('Falling back to Bunge convention.')
-                convention = conventions['Bunge']
-        self.euler_angles_convention = convention
+    def _set_euler_angles(self, euler_angles):
+        self._rotation.euler_angles = euler_angles
 
-    def set_origin(self, origin=None):
-        if origin is None:
-            origin = [0, 0, 0]
-        origin = np.array(origin, dtype=np.float).ravel()
-        if origin.size != 3:
-            raise ValueError('Origin must be 3 numeric coordinates')
-        self.origin = origin
-    
-    def set_basis(self, basis):
+    def _get_euler_angles(self):
+        return self._rotation.euler_angles
+
+    euler_angles = property(_get_euler_angles, _set_euler_angles)
+
+    def _set_basis(self, basis):
         """
         Sets basis for the cartesian coordinate system. Basis will be converted to 3x3 array.
         Each basis vector will be normed and placed in separate row like this:
@@ -102,7 +50,7 @@ class Cartesian(object):
         1 x1 y1 z1
         2 x2 y2 z2
         3 x3 y3 z3
-        :param basis: 3x3 array.
+        :param basis: 3x3 numpy array.
         """
         if basis is None:
             basis = np.identity(3, dtype=np.float)
@@ -118,41 +66,46 @@ class Cartesian(object):
                 if not np.allclose(np.dot(basis[0], basis[1]), [0]):
                     raise ValueError('only orthogonal vectors accepted')
                 if not np.allclose(np.cross(basis[0], basis[1]), basis[2]):
-                        raise ValueError('only right-hand basis accepted')
-                self.basis = basis
+                    raise ValueError('only right-hand basis accepted')
+                self._rotation.rotation_matrix = basis.T
             else:
                 raise ValueError('complete 3D basis is needed')
-            self.calculate_euler_angles()
-    
-    def calculate_euler_angles(self):
-        """
-        method calculates Euler's angles for the coordinate system in Bunge Z-X'-Z" notation
-        The limits for the angles are [0; 2*pi] for Z and Z", and [0: pi] for X'
-        """
-        if np.allclose(self.basis[2, 2], [1.0]):
-            self.euler_angles[1] = m.acos(1.0)
-            self.euler_angles[2] = 0.0
-            self.euler_angles[0] = m.atan2(self.basis[0, 1], self.basis[0, 0])
-        elif np.allclose(self.basis[2, 2], [-1.0]):
-            self.euler_angles[1] = m.acos(-1.0)
-            self.euler_angles[2] = 0.0
-            self.euler_angles[0] = m.atan2(self.basis[0, 1], self.basis[0, 0])
-        else:
-            self.euler_angles[1] = m.acos(self.basis[2, 2])
-            self.euler_angles[0] = m.atan2(self.basis[2, 0], -self.basis[2, 1])
-            self.euler_angles[2] = m.atan2(self.basis[0, 2], self.basis[1, 2])
-        self.euler_angles = reduce_angle(self.euler_angles)
-    
-    def set_euler_angles(self, euler_angles):
-        """
-        Sets coordinate system orientation using given 3 Euler's angles in Bunge Z-X'-Z" notation
-        The input angles could be of any value. After the rotation the correct Euler's angles will be calculated.
-        :param euler_angles: input Euler's angles
-        """
-        self.euler_angles = reduce_angle(euler_angles)
-        self.basis = rotation_matrix_euler_angles(euler_angles)
-        self.calculate_euler_angles()
-        
+
+    def _get_basis(self):
+        return self._rotation.rotation_matrix.T
+
+    basis = property(_get_basis, _set_basis)
+
+    def _set_origin(self, origin):
+        if origin is None:
+            origin = [0, 0, 0]
+        origin = np.array(origin, dtype=np.float).ravel()
+        if origin.size != 3:
+            raise ValueError('Origin must be 3 numeric coordinates')
+        self._origin = origin
+
+    def _get_origin(self):
+        return self._origin
+
+    origin = property(_get_origin, _set_origin)
+
+    def __eq__(self, other):
+        result = isinstance(other, self.__class__)
+        result = result and np.allclose(self.basis, other.basis)
+        result = result and np.allclose(self.origin, other.origin)
+        return result
+
+    def __str__(self):
+        information = 'Cartesian coordinate system: %s\n' % self.name
+        information += 'Origin: ' + str(self.origin) + '\n'
+        information += 'Basis:\n'
+        information += self.labels[0] + ': ' + str(self.basis[0]) + '\n'
+        information += self.labels[1] + ': ' + str(self.basis[1]) + '\n'
+        information += self.labels[2] + ': ' + str(self.basis[2]) + '\n'
+        information += 'Orientation: %s:\n' % self.euler_angles_convention['description']
+        information += str(self.euler_angles) + '\n'
+        return information
+
     def rotate_axis_angle(self, axis, theta, rot_center=None):
         """
         rotate basis around axis in parent CS
@@ -162,11 +115,12 @@ class Cartesian(object):
         """
         if rot_center is None:
             rot_center = self.origin
-        rot_matrix = rotation_matrix(axis, theta)
+        rotation = Rotation(euler_angles_convention=self.euler_angles_convention)
+        rotation.axis_angle = (axis, theta)
+        rot_matrix = rotation.rotation_matrix
         shift = self.origin - rot_center
         self.origin = rot_center + np.dot(rot_matrix, shift)
         self.basis = np.dot(rot_matrix, self.basis)
-        self.calculate_euler_angles()
         
     def rotate_euler_angles(self, euler_angles, rot_center=None):
         """
@@ -176,11 +130,12 @@ class Cartesian(object):
         """
         if rot_center is None:
             rot_center = self.origin
-        rot_matrix = rotation_matrix_euler_angles(euler_angles)
+        rotation = Rotation(euler_angles_convention=self.euler_angles_convention)
+        rotation.euler_angles = euler_angles
+        rot_matrix = rotation.rotation_matrix
         shift = self.origin - rot_center
         self.origin = rot_center + np.dot(rot_matrix, shift)
         self.basis = np.dot(rot_matrix, self.basis)
-        self.calculate_euler_angles()
     
     def to_parent(self, xyz):
         """

@@ -1,7 +1,7 @@
 from __future__ import division, print_function
 import numpy as np
-from Coordinates import Cartesian
-from _version import __version__
+from Space.Coordinates import Cartesian
+from Space._version import __version__
 
 
 class Space(object):
