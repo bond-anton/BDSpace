@@ -1,11 +1,11 @@
 from __future__ import division
 import unittest
 import numpy as np
-from Space.Coordinates.transforms import reduce_angle, unit_vector, angles_between_vectors
-from Space.Coordinates.transforms import rotation_matrix, rotation_matrix_euler_angles, rotate_vector
-from Space.Coordinates.transforms import cartesian_to_spherical, spherical_to_cartesian
-from Space.Coordinates.transforms import cartesian_to_cylindrical, cylindrical_to_cartesian
-from Space.Coordinates.transforms import cylindrical_to_spherical, spherical_to_cylindrical
+from Space.Coordinates._transforms import reduce_angle, unit_vector, angles_between_vectors
+from Space.Coordinates._transforms import rotation_matrix, rotation_matrix_euler_angles, rotate_vector
+from Space.Coordinates._transforms import cartesian_to_spherical, spherical_to_cartesian
+from Space.Coordinates._transforms import cartesian_to_cylindrical, cylindrical_to_cartesian
+from Space.Coordinates._transforms import cylindrical_to_spherical, spherical_to_cylindrical
 
 
 class TestTransforms(unittest.TestCase):

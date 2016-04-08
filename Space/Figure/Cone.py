@@ -1,7 +1,7 @@
 from __future__ import division, print_function
 import numpy as np
 
-from Space.Coordinates.transforms import reduce_angle
+from Space.Coordinates._transforms import reduce_angle
 from Space.Figure import Figure
 
 
