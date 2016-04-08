@@ -47,6 +47,6 @@ setup(
     keywords='3D coordinate Space paths trajectory',
 
     packages=find_packages(exclude=['demo', 'tests', 'docs', 'contrib']),
-    install_requires=['numpy'],
+    install_requires=['numpy', 'Quaternions'],
     test_suite='nose.collector',
 )
