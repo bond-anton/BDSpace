@@ -2,7 +2,7 @@ from __future__ import division, print_function
 import numpy as np
 
 from Quaternions import Rotation
-from _transforms import unit_vector
+from _transforms import unit_vector, check_points_array
 
 
 class Cartesian(object):
@@ -23,7 +23,7 @@ class Cartesian(object):
         if labels is not None:
             self.labels = labels
         else:
-            self.labels = ['x', 'y', 'z']
+            self.labels = self._rotation.euler_angles_convention['axes_labels']
         self.name = str(name)
 
     def _set_euler_angles_convention(self, euler_angles_convention):
@@ -106,6 +106,20 @@ class Cartesian(object):
         information += str(self.euler_angles) + '\n'
         return information
 
+    def rotate(self, rotation, rot_center=None):
+        """
+        Apply rotation specified by Rotation quaternion instance
+        :param rotation: Rotation quaternion instance
+        :param rot_center: center of rotation, if None the origin of the CS is used
+        """
+        if isinstance(rotation, Rotation):
+            self._rotation *= rotation
+            if rot_center is not None:
+                origin_shift = self.origin - rot_center
+                self.origin = rot_center + rotation.rotate(origin_shift)
+        else:
+            raise ValueError('instance of Rotation class was expected, got' + str(type(rotation)))
+
     def rotate_axis_angle(self, axis, theta, rot_center=None):
         """
         rotate basis around axis in parent CS
@@ -113,14 +127,9 @@ class Cartesian(object):
         :param theta: angle of rotation
         :param rot_center: center of rotation, if None the origin of the CS is used
         """
-        if rot_center is None:
-            rot_center = self.origin
         rotation = Rotation(euler_angles_convention=self.euler_angles_convention)
         rotation.axis_angle = (axis, theta)
-        rot_matrix = rotation.rotation_matrix
-        shift = self.origin - rot_center
-        self.origin = rot_center + np.dot(rot_matrix, shift)
-        self.basis = np.dot(rot_matrix, self.basis)
+        self.rotate(rotation, rot_center=rot_center)
         
     def rotate_euler_angles(self, euler_angles, rot_center=None):
         """
@@ -128,51 +137,22 @@ class Cartesian(object):
         :param euler_angles: Euler's angles
         :param rot_center: rotation center, if None the origin of the CS is used
         """
-        if rot_center is None:
-            rot_center = self.origin
         rotation = Rotation(euler_angles_convention=self.euler_angles_convention)
         rotation.euler_angles = euler_angles
-        rot_matrix = rotation.rotation_matrix
-        shift = self.origin - rot_center
-        self.origin = rot_center + np.dot(rot_matrix, shift)
-        self.basis = np.dot(rot_matrix, self.basis)
+        self.rotate(rotation, rot_center=rot_center)
     
     def to_parent(self, xyz):
         """
         calculates coordinates of given points in parent (global) CS
         :param xyz: local coordinates array
         """
-        xyz = np.array(xyz, dtype=np.float)
-        if len(xyz.shape) == 2:
-            if xyz.shape[1] != 3 and xyz.shape[0] == 3:
-                xyz = xyz.T
-            elif 3 not in xyz.shape:
-                raise ValueError('Input must be a single point or an array of points coordinates with shape Nx3')
-        elif len(xyz.shape) == 1 and xyz.size == 3:
-            xyz = xyz.reshape(1, 3)
-        else:
-            raise ValueError('Input must be a single point or an array of points coordinates with shape Nx3')
-        if xyz.size > 3:
-            return np.dot(xyz, self.basis) + self.origin
-        else:
-            return (np.dot(xyz, self.basis) + self.origin)[0]
+        xyz = check_points_array(xyz)
+        return self._rotation.rotate(xyz) + self.origin
 
     def to_local(self, xyz):
         """
         calculates local coordinates for points in parent CS/
         :param xyz: coordinates in parent (global) coordinate system.
         """
-        xyz = np.array(xyz, dtype=np.float)
-        if len(xyz.shape) == 2:
-            if xyz.shape[1] != 3 and xyz.shape[0] == 3:
-                xyz = xyz.T
-            elif 3 not in xyz.shape:
-                raise ValueError('Input must be a single point or an array of points coordinates with shape Nx3')
-        elif len(xyz.shape) == 1 and xyz.size == 3:
-            xyz = xyz.reshape(1, 3)
-        else:
-            raise ValueError('Input must be a single point or an array of points coordinates with shape Nx3')
-        if xyz.size > 3:
-            return np.dot(xyz - self.origin, self.basis.T)
-        else:
-            return np.dot(xyz - self.origin, self.basis.T)[0]
+        xyz_offset = check_points_array(xyz) - self.origin
+        return self._rotation.reciprocal().rotate(xyz_offset)
