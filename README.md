@@ -20,7 +20,10 @@ and machining tools, multiple robotic arms, manipulators, etc.
 
 ## Installation
 
-In the root directory of Space distribution run
+Space depends on numpy and [Quaternions](https://github.com/bond-anton/Quaternions) packages only.
+It is compatible with Python 2 and Python 3.
+
+To install Space in the root directory of Space distribution run
 ```shell
 python setup.py install
 ```
