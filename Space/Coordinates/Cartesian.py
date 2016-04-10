@@ -127,7 +127,7 @@ class Cartesian(object):
         :param theta: angle of rotation
         :param rot_center: center of rotation, if None the origin of the CS is used
         """
-        rotation = Rotation(euler_angles_convention=self.euler_angles_convention)
+        rotation = Rotation(euler_angles_convention=self.euler_angles_convention['title'])
         rotation.axis_angle = (axis, theta)
         self.rotate(rotation, rot_center=rot_center)
         
@@ -137,7 +137,7 @@ class Cartesian(object):
         :param euler_angles: Euler's angles
         :param rot_center: rotation center, if None the origin of the CS is used
         """
-        rotation = Rotation(euler_angles_convention=self.euler_angles_convention)
+        rotation = Rotation(euler_angles_convention=self.euler_angles_convention['title'])
         rotation.euler_angles = euler_angles
         self.rotate(rotation, rot_center=rot_center)
     

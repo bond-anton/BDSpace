@@ -15,8 +15,8 @@ def error(cs_1, cs_2):
 # Create cartesian coordinate system
 
 # if you don't pass arguments the basis coincide with 'Absolute' (mayavi) coordinate system
-cs_1 = Cartesian(origin=np.array([0, 0, 0]))
-cs_2 = Cartesian(origin=np.array([0, 0, 0]))
+cs_1 = Cartesian(origin=np.array([0, 0, 0]), euler_angles_convention='Bunge')
+cs_2 = Cartesian(origin=np.array([0, 0, 0]), euler_angles_convention='Bunge')
 
 print(cs_1)
 
