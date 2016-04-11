@@ -2,7 +2,8 @@ from __future__ import division, print_function
 import numpy as np
 
 from Quaternions import Rotation
-from Space.Coordinates._transforms import unit_vector, check_points_array
+from Space.Coordinates.transforms import unit_vector
+from Space.Coordinates._utils import check_points_array
 
 
 class Cartesian(object):

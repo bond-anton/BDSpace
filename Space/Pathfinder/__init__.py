@@ -1,8 +1,8 @@
 from __future__ import division, print_function
 import numpy as np
 
-from Space.Coordinates import Cartesian, _transforms
-from Space.Coordinates._transforms import unit_vector
+from Space.Coordinates import Cartesian, transforms
+from Space.Coordinates.transforms import unit_vector
 from Space.Curve.Parametric import Line, Helix, Arc
 
 
@@ -24,7 +24,7 @@ def helix_between_two_points(coordinate_system, point1, point2, radius=1, loops=
     origin = coordinate_system.to_parent(point1)
     helix_coordinate_system = Cartesian(basis=np.copy(coordinate_system.basis), origin=np.copy(origin),
                                         name='Helix coordinate system')
-    r_theta_phi = _transforms.cartesian_to_spherical(direction)
+    r_theta_phi = transforms.cartesian_to_spherical(direction)
     helix_coordinate_system.rotate_axis_angle([0, 0, 1], r_theta_phi[2])
     helix_coordinate_system.rotate_axis_angle([0, 1, 0], r_theta_phi[1])
     pitch = distance / int(loops)
@@ -42,7 +42,7 @@ def arc_between_two_points(coordinate_system, point1, point2, radius=1, right=Tr
     arc_coordinate_system = Cartesian(basis=np.copy(coordinate_system.basis), origin=np.copy(global_point1),
                                       name='Arc coordinate_system')
 
-    r_theta_phi = _transforms.cartesian_to_spherical(direction)
+    r_theta_phi = transforms.cartesian_to_spherical(direction)
     arc_coordinate_system.rotate_axis_angle([0, 0, 1], r_theta_phi[2])
     arc_coordinate_system.rotate_axis_angle([0, 1, 0], r_theta_phi[1] + np.pi/2)
     x_offset = -distance / 2
@@ -52,8 +52,8 @@ def arc_between_two_points(coordinate_system, point1, point2, radius=1, right=Tr
     arc_coordinate_system.origin = arc_coordinate_system.to_parent([x_offset, y_offset, 0])
     local_point1 = arc_coordinate_system.to_local(global_point1)
     local_point2 = arc_coordinate_system.to_local(global_point2)
-    start = _transforms.cartesian_to_spherical(local_point1)[2]
-    stop = _transforms.cartesian_to_spherical(local_point2)[2]
+    start = transforms.cartesian_to_spherical(local_point1)[2]
+    stop = transforms.cartesian_to_spherical(local_point2)[2]
     if not right:
         start = 2 * np.pi - start
         stop = 2 * np.pi - stop
