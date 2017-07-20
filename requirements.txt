@@ -1,2 +1,2 @@
 numpy
-Quaternions
+git+https://github.com/bond-anton/Quaternions.git#egg=Quaternions
