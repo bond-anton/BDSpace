@@ -54,7 +54,7 @@ setup(
 
     packages=find_packages(exclude=['demo', 'tests', 'docs', 'contrib']),
     install_requires=['numpy',
-                      'git+https://github.com/bond-anton/Quaternions.git@master#egg=Quaternions'],
-    dependency_links=['git+https://github.com/bond-anton/Quaternions.git@master#egg=Quaternions'],
+                      'Quaternions'],
+    dependency_links=['git+https://github.com/bond-anton/Quaternions.git@master#egg=Quaternions-0.1'],
     test_suite='nose.collector',
 )
