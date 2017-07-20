@@ -5,7 +5,7 @@ try:
     use_mpl = True
 except ImportError:
     use_mpl = True
-from Space.Coordinates import Cartesian
+from BDSpace.Coordinates import Cartesian
 
 
 def error(cs_1, cs_2):

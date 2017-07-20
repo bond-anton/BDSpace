@@ -1,7 +1,7 @@
 from __future__ import division, print_function
 import numpy as np
 
-from Space.Curve import Curve
+from BDSpace.Curve import Curve
 
 
 class ParametricCurve(Curve):

@@ -1,11 +1,11 @@
 from __future__ import division, print_function
 import numpy as np
 
-from Space.Coordinates import Cartesian
-from Space import Space
-from Space.Figure import Figure
-from Space.Curve import Curve
-from Space.Field import Field
+from BDSpace.Coordinates import Cartesian
+from BDSpace import Space
+from BDSpace.Figure import Figure
+from BDSpace.Curve import Curve
+from BDSpace.Field import Field
 
 
 coordinate_system = Cartesian(origin=np.array([0, 0, 0]), euler_angles_convention='canova')

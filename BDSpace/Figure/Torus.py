@@ -1,8 +1,8 @@
 from __future__ import division, print_function
 import numpy as np
 
-from Space.Coordinates.transforms import reduce_angle
-from Space.Figure import Figure
+from BDSpace.Coordinates.transforms import reduce_angle
+from BDSpace.Figure import Figure
 
 
 class ToricWedge(Figure):

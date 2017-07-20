@@ -1,7 +1,7 @@
 from __future__ import division, print_function
 import numpy as np
 
-from Space.Figure import Figure
+from BDSpace.Figure import Figure
 
 
 class Parallelepiped(Figure):

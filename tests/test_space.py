@@ -1,5 +1,5 @@
 import unittest
-from Space import Space
+from BDSpace import Space
 
 class TestSpace(unittest.TestCase):
 
@@ -19,7 +19,7 @@ class TestSpace(unittest.TestCase):
 
     def test_add_remove_subspaces(self):
         self.assertRaises(ValueError, self.solar_system.add_element, self.solar_system)
-        self.assertRaises(ValueError, self.solar_system.add_element, 'Any object except Space')
+        self.assertRaises(ValueError, self.solar_system.add_element, 'Any object except BDSpace')
         earth = self.solar_system.elements['Earth']
         moon = Space('Moon')
         earth.add_element(moon)
@@ -31,7 +31,7 @@ class TestSpace(unittest.TestCase):
         mars.add_element(phobos)
         mars.add_element(deimos)
         self.assertRaises(ValueError, self.solar_system.add_element, lunohod)
-        self.assertRaises(ValueError, self.solar_system.remove_element, 'Any object, not Space')
+        self.assertRaises(ValueError, self.solar_system.remove_element, 'Any object, not BDSpace')
 
     def test_add_same_name_subspaces(self):
         mars = self.solar_system.elements['Mars']

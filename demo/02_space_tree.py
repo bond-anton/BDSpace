@@ -1,6 +1,6 @@
 from __future__ import division, print_function
-from Space import Space
-from Space.Coordinates import Cartesian
+from BDSpace import Space
+from BDSpace.Coordinates import Cartesian
 
 solar_system = Space('Solar System')
 mercury = Space('Mercury')

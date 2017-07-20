@@ -1,10 +1,10 @@
-# Space
+# BDSpace
 
-**Space** is a python package to simplify positioning, movement, and trajectory calculation for many
+**BDSpace** is a python package to simplify positioning, movement, and trajectory calculation for many
 different technical problems. It is mainly for multiple interacting bodies systems like coordinate stages
 and machining tools, multiple robotic arms, manipulators, etc.
 
-**Space** provides following basic features:
+**BDSpace** provides following basic features:
 
 |Feature                               |Staus             |
 |--------------------------------------|------------------|
@@ -20,10 +20,10 @@ and machining tools, multiple robotic arms, manipulators, etc.
 
 ## Installation
 
-Space depends on numpy and [Quaternions](https://github.com/bond-anton/Quaternions) packages only.
+Space depends on numpy and [BDQuaternions](https://github.com/bond-anton/BDQuaternions) packages only.
 It is compatible with Python 2 and Python 3.
 
-To install Space in the root directory of Space distribution run
+To install BDSpace run
 ```shell
 python setup.py install
 ```
@@ -33,4 +33,4 @@ Please see the demo directory for the usage examples.
 
 ## License
 
-Space is free open source software licensed under Apache license version 2.0
+BDSpace is free open source software licensed under Apache license version 2.0

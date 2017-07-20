@@ -1,9 +1,9 @@
 from __future__ import division, print_function
 import numpy as np
 
-from Space.Coordinates import Cartesian, transforms
-from Space.Coordinates.transforms import unit_vector
-from Space.Curve.Parametric import Line, Helix, Arc
+from BDSpace.Coordinates import Cartesian, transforms
+from BDSpace.Coordinates.transforms import unit_vector
+from BDSpace.Curve.Parametric import Line, Helix, Arc
 
 
 def line_between_two_points(coordinate_system, point1, point2):

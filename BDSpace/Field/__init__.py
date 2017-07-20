@@ -1,6 +1,6 @@
 from __future__ import division, print_function
 import numpy as np
-from Space import Space
+from BDSpace import Space
 
 
 class Field(Space):

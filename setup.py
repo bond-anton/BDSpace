@@ -6,7 +6,7 @@ import re
 
 
 here = path.abspath(path.dirname(__file__))
-package_name = 'Space'
+package_name = 'BDSpace'
 version_file = path.join(here, package_name, '_version.py')
 with open(version_file, 'rt') as f:
     version_file_line = f.read()
@@ -28,7 +28,7 @@ setup(
     description='3D space positioning and motion',
     long_description=long_description,
 
-    url='https://github.com/bond-anton/Space',
+    url='https://github.com/bond-anton/BDSpace',
 
     author='Anton Bondarenko',
     author_email='bond.anton@gmail.com',
@@ -54,7 +54,7 @@ setup(
 
     packages=find_packages(exclude=['demo', 'tests', 'docs', 'contrib']),
     install_requires=['numpy',
-                      'Quaternions'],
-    dependency_links=['git+https://github.com/bond-anton/Quaternions.git@master#egg=Quaternions'],
+                      'BDQuaternions'],
+    dependency_links=['git+https://github.com/bond-anton/BDQuaternions.git@master#egg=BDQuaternions'],
     test_suite='nose.collector',
 )

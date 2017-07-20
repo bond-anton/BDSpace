@@ -1,4 +1,4 @@
-from Space import Space
+from BDSpace import Space
 
 
 class Figure(Space):

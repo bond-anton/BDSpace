@@ -1,7 +1,7 @@
 from __future__ import division
 import unittest
 import numpy as np
-from Space.Coordinates import Cartesian
+from BDSpace.Coordinates import Cartesian
 
 
 class TestCoordinates(unittest.TestCase):

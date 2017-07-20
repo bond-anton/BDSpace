@@ -1,7 +1,7 @@
 from __future__ import division, print_function
 import numpy as np
-from Space.Coordinates import Cartesian
-from Space._version import __version__
+from BDSpace.Coordinates import Cartesian
+from BDSpace._version import __version__
 
 
 class Space(object):
@@ -19,7 +19,7 @@ class Space(object):
         self.points = None
 
     def __str__(self):
-        description = 'Space: %s\n' % self.name
+        description = 'BDSpace: %s\n' % self.name
         description += str(self.coordinate_system)
         return description
 
@@ -63,7 +63,7 @@ class Space(object):
     def add_element(self, element):
         if isinstance(element, Space):
             if element == self:
-                raise ValueError('Space can not be its own subspace')
+                raise ValueError('BDSpace can not be its own subspace')
             else:
                 if element.parent is None:
                     element_name = element.name
@@ -76,7 +76,7 @@ class Space(object):
                     self.elements[element.name] = element
                     element.parent = self
                 elif element.parent == self:
-                    print('Space ' + element.name + 'is already a subspace of ' + self.name)
+                    print('BDSpace ' + element.name + 'is already a subspace of ' + self.name)
                 else:
                     raise ValueError(element.name + ' is subspace of another space: ' + element.parent.name +
                                      '. Please delete first.')
