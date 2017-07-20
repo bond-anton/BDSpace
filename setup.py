@@ -54,7 +54,7 @@ setup(
 
     packages=find_packages(exclude=['demo', 'tests', 'docs', 'contrib']),
     install_requires=['numpy',
-                      'BDQuaternions'],
-    dependency_links=['http://github.com/bond-anton/BDQuaternions/tarball/master#egg=BDQuaternions'],
+                      'BDQuaternions==0.1.2'],
+    dependency_links=['https://github.com/bond-anton/BDQuaternions/tarball/master#egg=BDQuaternions-0.1.2'],
     test_suite='nose.collector',
 )
