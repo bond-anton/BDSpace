@@ -1,2 +1,2 @@
 numpy
-git+https://github.com/bond-anton/Quaternions.git#egg=Quaternions
+git+https://github.com/bond-anton/Quaternions.git@master#egg=Quaternions
