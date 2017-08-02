@@ -57,4 +57,5 @@ setup(
                       'BDQuaternions>=0.1.2'],
     dependency_links=['https://github.com/bond-anton/BDQuaternions/tarball/master#egg=BDQuaternions-0.1.2'],
     test_suite='nose.collector',
+    tests_require=['nose']
 )

@@ -4,9 +4,6 @@ import numpy as np
 import math as m
 
 
-
-
-
 def reduce_angle(angle, keep_sign=False):
     """
     Adjusts rotation angle to be in the range [-2*pi; 2*pi]

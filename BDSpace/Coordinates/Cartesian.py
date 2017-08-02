@@ -1,7 +1,7 @@
 from __future__ import division, print_function
 import numpy as np
 
-from Quaternions import Rotation
+from BDQuaternions import Rotation
 from BDSpace.Coordinates.transforms import unit_vector
 from BDSpace.Coordinates._utils import check_points_array
 
