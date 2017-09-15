@@ -5,7 +5,7 @@
 
 **BDSpace** is a python package to simplify positioning, movement, and trajectory calculation for many
 different technical problems. It is mainly for multiple interacting bodies systems like coordinate stages
-and machining tools, multiple robotic arms, manipulators, etc.
+and machining tools, robotic arms, manipulators, etc.
 
 **BDSpace** provides following basic features:
 
