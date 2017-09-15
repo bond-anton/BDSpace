@@ -1,2 +1,2 @@
 numpy
-git+https://github.com/bond-anton/BDQuaternions.git@master#egg=BDQuaternions
+BDQuaternions

@@ -2,34 +2,81 @@ from __future__ import division, print_function
 import numpy as np
 
 from BDSpace.Curve import Curve
-
+from ._helpers import check_equation
 
 class ParametricCurve(Curve):
 
     def __init__(self, name='Parametric curve', coordinate_system=None,
                  x=None, y=None, z=None, start=0.0, stop=0.0):
         super(ParametricCurve, self).__init__(name, coordinate_system=coordinate_system)
-        self.x = None
-        self.y = None
-        self.z = None
-        self.set_equations(x, y, z)
+        self.__x = None
+        self.__y = None
+        self.__z = None
+        self.x = x
+        self.y = y
+        self.z = z
+        self.__start = None
         self.start = start
+        self.__stop = None
         self.stop = stop
 
-    def set_equations(self, x, y, z):
-        if x is None or y is None or z is None:
-            self.x = lambda t: None
-            self.y = lambda t: None
-            self.z = lambda t: None
-        elif not check_equations([x, y, z]):
-            raise ValueError('Parametric equations must be single argument callable compatible with 1D numpy arrays')
+    @property
+    def x(self):
+        return self.__x
+
+    @x.setter
+    def x(self, x):
+        if x is None:
+            self.__x = lambda t: None
+        elif check_equation(x):
+            self.__x = x
         else:
-            self.x = x
-            self.y = y
-            self.z = z
+            raise ValueError('Parametric equation must be single argument callable compatible with 1D numpy arrays')
+
+    @property
+    def y(self):
+        return self.__y
+
+    @y.setter
+    def y(self, y):
+        if y is None:
+            self.__y = lambda t: None
+        elif check_equation(y):
+            self.__y = y
+        else:
+            raise ValueError('Parametric equation must be single argument callable compatible with 1D numpy arrays')
+
+    @property
+    def z(self):
+        return self.__z
+
+    @z.setter
+    def z(self, z):
+        if z is None:
+            self.__z = lambda t: None
+        elif check_equation(z):
+            self.__z = z
+        else:
+            raise ValueError('Parametric equation must be single argument callable compatible with 1D numpy arrays')
+
+    @property
+    def start(self):
+        return self.__start
+
+    @start.setter
+    def start(self, start):
+        self.__start = np.float64(start)
+
+    @property
+    def stop(self):
+        return self.__stop
+
+    @stop.setter
+    def stop(self, stop):
+        self.__stop = np.float64(stop)
 
     def generate_points(self, t):
-        xyz = np.zeros((len(t), 3), dtype=np.float)
+        xyz = np.zeros((len(t), 3), dtype=np.float64)
         xyz[:, 0] = self.x(t)
         xyz[:, 1] = self.y(t)
         xyz[:, 2] = self.z(t)
@@ -46,8 +93,6 @@ class ParametricCurve(Curve):
             b = self.stop
         num_points = int(100 * abs(b-a) / (2 * np.pi)) + 1
         iteration = 0
-        length = length_polygonal = 0.0
-        error = 0
         while True:
             iteration += 1
             t = np.linspace(a, b, num=num_points, endpoint=True, dtype=np.float)
@@ -72,6 +117,9 @@ class Line(ParametricCurve):
 
     def __init__(self, name='Line', coordinate_system=None, origin=(0, 0, 0), a=1, b=1, c=1, start=0, stop=1):
         self.origin = np.array(origin, dtype=np.float)
+        self.__a = None
+        self.__b = None
+        self.__c = None
         self.a = a
         self.b = b
         self.c = c
@@ -81,10 +129,36 @@ class Line(ParametricCurve):
                                    z=lambda t: self.origin[2] + self.c * t,
                                    start=start, stop=stop)
 
+    @property
+    def a(self):
+        return self.__a
+
+    @a.setter
+    def a(self, a):
+        self.__a = np.float64(a)
+
+    @property
+    def b(self):
+        return self.__b
+
+    @b.setter
+    def b(self, b):
+        self.__b = np.float64(b)
+
+    @property
+    def c(self):
+        return self.__c
+
+    @c.setter
+    def c(self, c):
+        self.__c = np.float64(c)
+
 
 class Arc(ParametricCurve):
 
     def __init__(self, name='Arc', coordinate_system=None, a=1, b=1, start=0, stop=np.pi * 2, right=True):
+        self.__a = None
+        self.__b = None
         self.a = max(a, b)
         self.b = min(a, b)
         direction = 1 if right else -1
@@ -93,6 +167,22 @@ class Arc(ParametricCurve):
                                   y=lambda t: direction * self.b * np.sin(t),
                                   z=lambda t: np.zeros_like(t),
                                   start=start, stop=stop)
+
+    @property
+    def a(self):
+        return self.__a
+
+    @a.setter
+    def a(self, a):
+        self.__a = np.float64(a)
+
+    @property
+    def b(self):
+        return self.__b
+
+    @b.setter
+    def b(self, b):
+        self.__b = np.float64(b)
 
     def get_eccentricity(self):
         return np.sqrt((self.a**2 - self.b**2) / self.a**2)
@@ -104,6 +194,8 @@ class Arc(ParametricCurve):
 class Helix(ParametricCurve):
 
     def __init__(self, name='Helix', coordinate_system=None, radius=1, pitch=1, start=0, stop=10, right=True):
+        self.__radius = None
+        self.__pitch = None
         self.radius = radius
         self.pitch = pitch
         direction = -1 if right else 1
@@ -113,21 +205,18 @@ class Helix(ParametricCurve):
                                     z=lambda t: self.pitch / (2 * np.pi) * t,
                                     start=start, stop=stop)
 
+    @property
+    def radius(self):
+        return self.__radius
 
-def check_equations(equations):
-        result = []
-        for eq in equations:
-            if hasattr(eq, '__call__'):
-                parameter = np.arange(5, dtype=np.float)
-                answer = eq(parameter)
-                if isinstance(answer, np.ndarray):
-                    if answer is None:
-                        result.append(True)
-                        continue
-                    if answer.size == parameter.size and answer.shape == parameter.shape:
-                        result.append(True)
-                        continue
-                result.append(False)
-            else:
-                result.append(False)
-        return np.array(result).all()
+    @radius.setter
+    def radius(self, radius):
+        self.__radius = np.float64(radius)
+
+    @property
+    def pitch(self):
+        return self.__pitch
+
+    @pitch.setter
+    def pitch(self, pitch):
+        self.__pitch = np.float64(pitch)

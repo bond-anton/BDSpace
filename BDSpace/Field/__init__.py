@@ -1,13 +1,23 @@
 from __future__ import division, print_function
 import numpy as np
+
 from BDSpace import Space
 
 
 class Field(Space):
 
     def __init__(self, name, field_type):
-        self.type = str(field_type)
+        self.__type = None
+        self.type = field_type
         super(Field, self).__init__(name, coordinate_system=None)
+
+    @property
+    def type(self):
+        return self.__type
+
+    @type.setter
+    def type(self, field_type):
+        self.__type = str(field_type)
 
     def __str__(self):
         description = 'Field: %s (%s)\n' % (self.name, self.type)
@@ -66,12 +76,17 @@ class Field(Space):
 class SuperposedField(Field):
 
     def __init__(self, name, fields):
-        self.fields = None
+        self.__fields = None
         self.type = None
-        self._set_fields(fields)
+        self.fields = fields
         super(SuperposedField, self).__init__(name, self.type)
 
-    def _set_fields(self, fields):
+    @property
+    def fields(self):
+        return self.__fields
+
+    @fields.setter
+    def fields(self, fields):
         for field in fields:
             if not isinstance(field, Field):
                 raise ValueError('Fields must be iterable of Field class instances')
@@ -80,7 +95,7 @@ class SuperposedField(Field):
             if self.type != field.type:
                 raise ValueError('All fields must be iterable of Field class instances')
 
-        self.fields = fields
+        self.__fields = fields
 
     def scalar_field(self, xyz):
         """

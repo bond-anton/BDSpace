@@ -1,22 +1,61 @@
 from __future__ import division, print_function
 import numpy as np
+
 from BDSpace.Coordinates import Cartesian
-from BDSpace._version import __version__
+from ._version import __version__
 
 
 class Space(object):
 
     def __init__(self, name, coordinate_system=None):
+        self.__name = None
+        self.name = name
+        self.__coordinate_system = None
+        self.coordinate_system = coordinate_system
+
+        self.__parent = None
+        self.__elements = {}
+        self.__points = None
+
+    @property
+    def name(self):
+        return self.__name
+
+    @name.setter
+    def name(self, name):
+        self.__name = str(name)
+
+    @property
+    def coordinate_system(self):
+        return self.__coordinate_system
+
+    @coordinate_system.setter
+    def coordinate_system(self, coordinate_system):
         if coordinate_system is None:
-            self.coordinate_system = Cartesian()
+            self.__coordinate_system = Cartesian()
         elif isinstance(coordinate_system, Cartesian):
-            self.coordinate_system = coordinate_system
+            self.__coordinate_system = coordinate_system
         else:
             raise ValueError('coordinates system must be instance of Cartesian class')
-        self.name = str(name)
-        self.parent = None
-        self.elements = {}
-        self.points = None
+
+    @property
+    def parent(self):
+        return self.__parent
+
+    @parent.setter
+    def parent(self, parent):
+        if isinstance(parent, Space) or parent is None:
+            self.__parent = parent
+        else:
+            raise ValueError('Space maybe a member of other space only')
+
+    @property
+    def elements(self):
+        return self.__elements
+
+    @property
+    def points(self):
+        return self.__points
 
     def __str__(self):
         description = 'BDSpace: %s\n' % self.name

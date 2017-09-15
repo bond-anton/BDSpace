@@ -1,6 +1,7 @@
 import unittest
 from BDSpace import Space
 
+
 class TestSpace(unittest.TestCase):
 
     def setUp(self):

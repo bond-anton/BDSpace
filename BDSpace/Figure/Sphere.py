@@ -8,27 +8,63 @@ from BDSpace.Figure import Figure
 class SphericalShape(Figure):
 
     def __init__(self, name='Spherical shape', coordinate_system=None,
-                 r_inner=0, r_outer=1.0, phi=np.pi/2):
+                 r_inner=0.0, r_outer=1.0, phi=np.pi/2):
+        self.__r_inner = None
         self.r_inner = max(min(r_inner, r_outer), 0.0)
+        self.__r_outer = None
         self.r_outer = max(max(r_inner, r_outer), 0.0)
-        self.phi = reduce_angle(float(phi))
+        self.__phi = None
+        self.phi = phi
         super(SphericalShape, self).__init__(name, coordinate_system=coordinate_system)
+
+    @property
+    def r_inner(self):
+        return self.__r_inner
+
+    @r_inner.setter
+    def r_inner(self, r_inner):
+        self.__r_inner = np.float64(r_inner)
+
+    @property
+    def r_outer(self):
+        return self.__r_outer
+
+    @r_outer.setter
+    def r_outer(self, r_outer):
+        self.__r_outer = np.float64(r_outer)
+
+    @property
+    def phi(self):
+        return self.__phi
+
+    @phi.setter
+    def phi(self, phi):
+        self.__phi = reduce_angle(np.float64(phi))
 
 
 class SphericalWedge(SphericalShape):
 
     def __init__(self, name='Spherical wedge', coordinate_system=None,
-                 r_inner=0, r_outer=1.0, phi=np.pi/2, theta=np.array([0, np.pi/2])):
-        max_theta = reduce_angle(max(theta))
-        if max_theta > np.pi:
-            max_theta = 2*np.pi - max_theta
-        min_theta = reduce_angle(min(theta))
-        if min_theta > np.pi:
-            min_theta = 2*np.pi - min_theta
-        theta_range = [min_theta, max_theta]
-        self.theta = np.array(theta_range, dtype=np.float)
+                 r_inner=0.0, r_outer=1.0, phi=np.pi/2, theta=np.array([0.0, np.pi/2])):
+        self.__theta = None
+        self.theta = theta
         super(SphericalWedge, self).__init__(name, coordinate_system=coordinate_system,
                                              r_inner=r_inner, r_outer=r_outer, phi=phi)
+
+    @property
+    def theta(self):
+        return self.__theta
+
+    @theta.setter
+    def theta(self, theta):
+        max_theta = reduce_angle(max(theta))
+        if max_theta > np.pi:
+            max_theta = 2 * np.pi - max_theta
+        min_theta = reduce_angle(min(theta))
+        if min_theta > np.pi:
+            min_theta = 2 * np.pi - min_theta
+        theta_range = [min_theta, max_theta]
+        self.__theta = np.array(theta_range, dtype=np.float64)
 
     def inner_volume(self):
         if self.phi == 2 * np.pi and (self.theta[1] - self.theta[0]) == np.pi:
@@ -68,28 +104,44 @@ class SphericalWedge(SphericalShape):
 class SphericalCone(SphericalWedge):
 
     def __init__(self, name='Spherical cone', coordinate_system=None,
-                 r_inner=0, r_outer=1.0, theta=np.pi/4):
+                 r_inner=0.0, r_outer=1.0, theta=np.pi/4):
         super(SphericalCone, self).__init__(name, coordinate_system=coordinate_system,
                                             r_inner=r_inner, r_outer=r_outer, phi=2*np.pi, theta=np.array([0, theta]))
 
 
 class Sphere(SphericalCone):
 
-    def __init__(self, name='Sphere', coordinate_system=None, r_inner=0, r_outer=1.0):
+    def __init__(self, name='Sphere', coordinate_system=None, r_inner=0.0, r_outer=1.0):
         super(Sphere, self).__init__(name, coordinate_system=coordinate_system,
                                      r_inner=r_inner, r_outer=r_outer, theta=np.pi)
 
 
 class SphericalSegmentWedge(SphericalShape):
 
-    def __init__(self, name='Spherical section', coordinate_system=None, r_inner=0, r_outer=1.0,
-                 h1=0, h2=1.0, phi=np.pi/2):
-        self.r_inner = max(min(r_inner, r_outer), 0.0)
-        self.r_outer = max(max(r_inner, r_outer), 0.0)
-        self.h1 = max(min(h1, h2), -self.r_outer)
-        self.h2 = min(max(h1, h2), self.r_outer)
+    def __init__(self, name='Spherical section', coordinate_system=None, r_inner=0.0, r_outer=1.0,
+                 h1=0.0, h2=1.0, phi=np.pi/2):
         super(SphericalSegmentWedge, self).__init__(name, coordinate_system=coordinate_system,
                                                     r_inner=r_inner, r_outer=r_outer, phi=phi)
+        self.__h1 = None
+        self.h1 = max(min(h1, h2), -self.r_outer)
+        self.__h2 = None
+        self.h2 = min(max(h1, h2), self.r_outer)
+
+    @property
+    def h1(self):
+        return self.__h1
+
+    @h1.setter
+    def h1(self, h1):
+        self.__h1 = np.float64(h1)
+
+    @property
+    def h2(self):
+        return self.__h2
+
+    @h2.setter
+    def h2(self, h2):
+        self.__h2 = np.float64(h2)
 
     def inner_volume(self):
         if self.phi == 2 * np.pi and self.h1 <= - self.r_inner and self.h2 >= self.r_inner:

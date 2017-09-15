@@ -9,25 +9,69 @@ class ConicalWedge(Figure):
 
     def __init__(self, name='Conical wedge', coordinate_system=None,
                  phi=np.pi/2, theta=np.pi/6, z=np.array([0.0, 1.0]), z_offset=0.0, r_min=0.0):
-        reduced_angle = reduce_angle(float(theta))
-        if reduced_angle > np.pi/2:
+        self.__theta = None
+        self.theta = theta
+        self.__phi = None
+        self.phi = phi
+        self.__r_min = None
+        self.r_min = r_min
+        self.__z_offset = None
+        self.z_offset = z_offset
+        self.__z = None
+        self.z = z
+        super(ConicalWedge, self).__init__(name, coordinate_system=coordinate_system)
+
+    @property
+    def theta(self):
+        return self.__theta
+
+    @theta.setter
+    def theta(self, theta):
+        reduced_angle = reduce_angle(np.float64(theta))
+        if reduced_angle > np.pi / 2:
             raise ValueError('Cone half angle should be between 0 and 2*pi radians')
-        self.theta = reduced_angle
-        self.phi = reduce_angle(float(phi))
-        self.r_min = abs(float(r_min))
+        self.__theta = reduced_angle
+
+    @property
+    def phi(self):
+        return self.__phi
+
+    @phi.setter
+    def phi(self, phi):
+        self.__phi = reduce_angle(np.float64(phi))
+
+    @property
+    def r_min(self):
+        return self.__r_min
+
+    @r_min.setter
+    def r_min(self, r_min):
+        self.__r_min = abs(np.float64(r_min))
+
+    @property
+    def z_offset(self):
+        return self.__z_offset
+
+    @z_offset.setter
+    def z_offset(self, z_offset):
+        self.__z_offset = abs(np.float64(z_offset))
+
+    @property
+    def z(self):
+        return self.__z
+
+    @z.setter
+    def z(self, z):
         z_min = self.r_min / np.tan(self.theta)
-        self.z_offset = abs(float(z_offset))
-        z_points = np.array(z, dtype=float)
+        z_points = np.array(z, dtype=np.float64)
         if np.sign(min(z_points) * max(z_points)) <= 0:
             z_points = np.union1d(z_points, np.array([0.0]))
-        if z_offset - z_min > 0:
+        if self.z_offset - z_min > 0:
             if max(z_points) > self.z_offset - z_min > min(z_points):
                 z_points = np.union1d(z_points, np.array([self.z_offset - z_min]))
             if min(z_points) < -self.z_offset + z_min < max(z_points):
                 z_points = np.union1d(z_points, np.array([-self.z_offset + z_min]))
-        self.z = z_points
-
-        super(ConicalWedge, self).__init__(name, coordinate_system=coordinate_system)
+        self.__z = z_points
 
     def inner_volume(self):
         return 0.0
