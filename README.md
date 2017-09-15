@@ -1,5 +1,8 @@
 # BDSpace
 
+[![Build Status](https://travis-ci.org/bond-anton/BDSpace.svg)](https://travis-ci.org/bond-anton/BDSpace)
+[![codecov](https://codecov.io/gh/bond-anton/BDSpace/branch/master/graph/badge.svg)](https://codecov.io/gh/bond-anton/BDSpace)
+
 **BDSpace** is a python package to simplify positioning, movement, and trajectory calculation for many
 different technical problems. It is mainly for multiple interacting bodies systems like coordinate stages
 and machining tools, multiple robotic arms, manipulators, etc.
