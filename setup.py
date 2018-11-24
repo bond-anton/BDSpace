@@ -1,7 +1,10 @@
 from setuptools import setup, find_packages
+from setuptools.extension import Extension
+from Cython.Build import cythonize
 
 from codecs import open
 from os import path
+import sys
 import re
 
 
@@ -21,12 +24,21 @@ readme_file = path.join(here, 'README.md')
 with open(readme_file, encoding='utf-8') as f:
     long_description = f.read()
 
+extensions = [
+    Extension(
+        'BDSpace.Coordinates.Cartesian',
+        ['BDSpace/Coordinates/Cartesian.pyx'],
+        depends=['BDSpace/Coordinates/Cartesian.pxd'],
+    ),
+]
+
 setup(
     name=package_name,
     version=version_string,
 
     description='3D space positioning and motion',
     long_description=long_description,
+    long_description_content_type='text/markdown',
 
     url='https://github.com/bond-anton/BDSpace',
 
@@ -52,10 +64,14 @@ setup(
 
     keywords='3D coordinate Space paths trajectory',
 
-    packages=find_packages(exclude=['demo', 'tests', 'docs', 'contrib']),
-    install_requires=['numpy',
+    packages=find_packages(exclude=['demo', 'tests', 'docs', 'contrib', 'venv']),
+    ext_modules=cythonize(extensions, compiler_directives={'language_level': sys.version_info[0]}),
+    package_data={
+        'Coordinates.Cartesian': ['Cartesian.pxd'],
+        # 'Schottky.Metal': ['Schottky/Metal/__init__.pxd'],
+    },
+    install_requires=['numpy', 'Cython',
                       'BDQuaternions>=0.1.2'],
-    dependency_links=['https://github.com/bond-anton/BDQuaternions/tarball/master#egg=BDQuaternions-0.1.2'],
     test_suite='nose.collector',
     tests_require=['nose']
 )

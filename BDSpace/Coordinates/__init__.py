@@ -1,1 +1,1 @@
-from BDSpace.Coordinates.Cartesian import Cartesian
+from .Cartesian import Cartesian

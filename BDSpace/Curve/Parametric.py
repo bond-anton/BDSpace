@@ -4,6 +4,7 @@ import numpy as np
 from BDSpace.Curve import Curve
 from ._helpers import check_equation
 
+
 class ParametricCurve(Curve):
 
     def __init__(self, name='Parametric curve', coordinate_system=None,
