@@ -1,12 +1,15 @@
 from __future__ import division
 import unittest
 import numpy as np
+import timeit
 
-from BDSpace.Coordinates.transforms import reduce_angle, unit_vector, angles_between_vectors
+from BDSpace.Coordinates.transforms import reduce_angle as reduce_angle_py
+from BDSpace.Coordinates.transforms import unit_vector, angles_between_vectors
 from BDSpace.Coordinates.transforms import cartesian_to_spherical, spherical_to_cartesian
 from BDSpace.Coordinates.transforms import cartesian_to_cylindrical, cylindrical_to_cartesian
 from BDSpace.Coordinates.transforms import cylindrical_to_spherical, spherical_to_cylindrical
 
+from BDSpace.Coordinates.transforms_c import reduce_angle
 
 class TestTransforms(unittest.TestCase):
 
@@ -84,6 +87,18 @@ class TestTransforms(unittest.TestCase):
         size = 1000
         angle = (np.random.random(size) - 0.5) * 4 * np.pi
         np.testing.assert_allclose(reduce_angle(angle, keep_sign=True), angle)
+
+    def test_reduce_angle_random_array_speed(self):
+        print()
+        s = timeit.timeit('reduce_angle((np.random.random(1000) - 0.5) * 4 * np.pi)',
+                          setup='import numpy as np\nfrom BDSpace.Coordinates.transforms import reduce_angle',
+                          number=100000)
+        print('RA Py:', s)
+        s = timeit.timeit('reduce_angle((np.random.random(1000) - 0.5) * 4 * np.pi)',
+                          setup='import numpy as np\nfrom BDSpace.Coordinates.transforms_c import reduce_angle',
+                          number=100000)
+        print('RA Cy:', s)
+        print()
 
     def test_unit_vector_1d(self):
         v = 0.1

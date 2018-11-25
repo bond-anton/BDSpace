@@ -15,7 +15,8 @@ class Cartesian(object):
     def __init__(self, basis=None, origin=None, name='Cartesian CS', labels=None,
                  euler_angles_convention=None):
         # The basis rotation is kept as Rotation quaternion
-        self.__rotation = Rotation(euler_angles_convention=euler_angles_convention)
+        self.__rotation = Rotation()
+        self.__rotation.euler_angles_convention = euler_angles_convention
         self.__name = None
         self.name = str(name)
         self.__labels = None
@@ -41,7 +42,7 @@ class Cartesian(object):
     @labels.setter
     def labels(self, labels):
         if labels is None:
-            self.__labels = self.__rotation.euler_angles_convention['axes_labels']
+            self.__labels = self.__rotation.euler_angles_convention.axes_labels
         elif isinstance(labels, (list, tuple, np.ndarray)):
             if len(labels) == 3:
                 self.__labels = [str(labels[i]) for i in range(3)]
@@ -126,7 +127,7 @@ class Cartesian(object):
         information += self.labels[0] + ': ' + str(self.basis[0]) + '\n'
         information += self.labels[1] + ': ' + str(self.basis[1]) + '\n'
         information += self.labels[2] + ': ' + str(self.basis[2]) + '\n'
-        information += 'Orientation: %s:\n' % self.euler_angles_convention['description']
+        information += 'Orientation: %s:\n' % self.euler_angles_convention.description
         information += str(self.euler_angles) + '\n'
         return information
 
@@ -151,7 +152,8 @@ class Cartesian(object):
         :param theta: angle of rotation
         :param rot_center: center of rotation, if None the origin of the CS is used
         """
-        rotation = Rotation(euler_angles_convention=self.euler_angles_convention['title'])
+        rotation = Rotation()
+        rotation.euler_angles_convention = self.euler_angles_convention.label
         rotation.axis_angle = (axis, theta)
         self.rotate(rotation, rot_center=rot_center)
         
@@ -161,7 +163,8 @@ class Cartesian(object):
         :param euler_angles: Euler's angles
         :param rot_center: rotation center, if None the origin of the CS is used
         """
-        rotation = Rotation(euler_angles_convention=self.euler_angles_convention['title'])
+        rotation = Rotation()
+        rotation.euler_angles_convention = self.euler_angles_convention.label
         rotation.euler_angles = euler_angles
         self.rotate(rotation, rot_center=rot_center)
     

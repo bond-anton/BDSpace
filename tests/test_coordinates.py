@@ -2,6 +2,7 @@ from __future__ import division
 import unittest
 import numpy as np
 from BDSpace.Coordinates import Cartesian
+from BDQuaternions import Conventions
 
 
 class TestCoordinates(unittest.TestCase):
@@ -35,7 +36,8 @@ class TestCoordinates(unittest.TestCase):
                                    np.array([[1, 0, 0], [0, 1, 0], [0, 0, 1]]), atol=2*np.finfo(float).eps)
 
     def test_euler_angles(self):
-        self.coordinate_system.euler_angles_convention = 'Bunge'
+        conventions = Conventions()
+        self.coordinate_system.euler_angles_convention = conventions.get_convention('Bunge')
         axis = [1, 0, 0]
         self.coordinate_system.rotate_axis_angle(axis, np.pi)
         np.testing.assert_allclose(self.coordinate_system.euler_angles.euler_angles,
