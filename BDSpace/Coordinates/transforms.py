@@ -43,7 +43,7 @@ def unit_vector(v):
     """
     length = np.sqrt(np.dot(v, v))
     if length == 0:
-        raise ValueError('Can not calculate unit vector for null-vector')
+        return v
     else:
         return v / length
 

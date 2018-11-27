@@ -3,13 +3,12 @@ import unittest
 import numpy as np
 import timeit
 
-from BDSpace.Coordinates.transforms import reduce_angle as reduce_angle_py
-from BDSpace.Coordinates.transforms import unit_vector, angles_between_vectors
+from BDSpace.Coordinates.transforms import angles_between_vectors
 from BDSpace.Coordinates.transforms import cartesian_to_spherical, spherical_to_cartesian
 from BDSpace.Coordinates.transforms import cartesian_to_cylindrical, cylindrical_to_cartesian
 from BDSpace.Coordinates.transforms import cylindrical_to_spherical, spherical_to_cylindrical
 
-from BDSpace.Coordinates.transforms_c import reduce_angle
+from BDSpace.Coordinates.transforms_c import reduce_angle, unit_vector
 
 class TestTransforms(unittest.TestCase):
 
@@ -102,28 +101,42 @@ class TestTransforms(unittest.TestCase):
 
     def test_unit_vector_1d(self):
         v = 0.1
-        self.assertEqual(unit_vector(v), 1.0)
-        v = -0.1
-        self.assertEqual(unit_vector(v), -1.0)
+        with self.assertRaises(TypeError):
+            unit_vector(v)
         v = [0.1]
-        self.assertEqual(unit_vector(v), [1.0])
-        v = [-0.1]
-        self.assertEqual(unit_vector(v), [-1.0])
+        with self.assertRaises(TypeError):
+            unit_vector(v)
         v = np.array([0.1])
-        self.assertEqual(unit_vector(v), [1.0])
+        np.testing.assert_allclose(unit_vector(v), np.array([1.0]))
 
     def test_unit_vector_null_vector(self):
-        self.assertRaises(ValueError, unit_vector, 0.0)
+        with self.assertRaises(TypeError):
+            unit_vector(0.0)
         max_dimensions = 100
         for dim in range(max_dimensions):
             v = np.zeros(dim)
-            self.assertRaises(ValueError, unit_vector, v)
+            np.testing.assert_allclose(unit_vector(v), v)
 
     def test_unit_vector_random_vector(self):
         max_dimensions = 100
         for dim in range(max_dimensions):
             v = np.random.random(dim+1) * 100
-            np.testing.assert_allclose(unit_vector(v), v / np.sqrt(np.dot(v, v)))
+            if np.linalg.norm(v) > 0:
+                np.testing.assert_allclose(unit_vector(v), v / np.sqrt(np.dot(v, v)))
+            else:
+                np.testing.assert_allclose(unit_vector(v), v)
+
+    def test_unit_vector_random_vector_speed(self):
+        print()
+        s = timeit.timeit('unit_vector(np.random.random(1000) * 100)',
+                          setup='import numpy as np\nfrom BDSpace.Coordinates.transforms import unit_vector',
+                          number=100000)
+        print('UV Py:', s)
+        s = timeit.timeit('unit_vector(np.random.random(1000) * 100)',
+                          setup='import numpy as np\nfrom BDSpace.Coordinates.transforms_c import unit_vector',
+                          number=100000)
+        print('UV Cy:', s)
+        print()
 
     def test_angle_between_vectors(self):
         v1 = np.array([1, 0, 0], dtype=np.float)

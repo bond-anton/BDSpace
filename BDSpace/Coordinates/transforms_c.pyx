@@ -59,17 +59,34 @@ def reduce_angle(angle, keep_sign=False):
         raise ValueError('Input angle must be either number or iterable of numbers.')
 
 
-def unit_vector(v):
+@boundscheck(False)
+@wraparound(False)
+cpdef double vector_norm(double[:] v):
+    cdef:
+        int i
+        double result = 0.0
+    for i in range(v.size):
+        result += v[i] * v[i]
+    return sqrt(result)
+
+
+@boundscheck(False)
+@wraparound(False)
+cpdef double[:] unit_vector(double[:] v):
     """
     returns unit vector for given vector v
     :param v: input vector
     :return: unit vector u parallel v of length 1
     """
-    length = np.sqrt(np.dot(v, v))
-    if length == 0:
-        raise ValueError('Can not calculate unit vector for null-vector')
-    else:
-        return v / length
+    cdef:
+        int i
+        Py_ssize_t s = v.size
+        double length = vector_norm(v)
+        double [:] result = np.zeros(s, dtype=np.double)
+    if length > 0:
+        for i in range(s):
+            result[i] = v[i] / length
+    return result
 
 
 def angles_between_vectors(v1, v2):
