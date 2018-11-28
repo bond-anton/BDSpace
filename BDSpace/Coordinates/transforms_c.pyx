@@ -4,6 +4,8 @@ import numpy as np
 
 from cython import boundscheck, wraparound
 
+from cpython.array cimport array, clone
+from libc.stdlib cimport malloc, free
 from libc.math cimport sin, cos, atan2, sqrt, M_PI
 
 
@@ -82,10 +84,15 @@ cpdef double[:] unit_vector(double[:] v):
         int i
         Py_ssize_t s = v.size
         double length = vector_norm(v)
-        double [:] result = np.zeros(s, dtype=np.double)
+        array[double] result, template = array('d')
+    result = clone(template, s, False)
+
     if length > 0:
         for i in range(s):
             result[i] = v[i] / length
+    else:
+        for i in range(s):
+            result[i] = 0.0
     return result
 
 
