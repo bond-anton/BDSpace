@@ -5,7 +5,6 @@ import numpy as np
 from cython import boundscheck, wraparound
 
 from cpython.array cimport array, clone
-from libc.stdlib cimport malloc, free
 from libc.math cimport sin, cos, atan2, acos, sqrt, M_PI
 
 
@@ -85,7 +84,7 @@ cpdef double[:] unit_vector(double[:] v):
         Py_ssize_t s = v.size
         double length = vector_norm(v)
         array[double] result, template = array('d')
-    result = clone(template, s, False)
+    result = clone(template, s, zero=False)
 
     if length > 0:
         for i in range(s):
@@ -96,23 +95,71 @@ cpdef double[:] unit_vector(double[:] v):
     return result
 
 
+@boundscheck(False)
+@wraparound(False)
+cdef double[:] __extend_vector_dimensions(double[:] v, Py_ssize_t s):
+    cdef:
+        Py_ssize_t s1 = v.size
+        array[double] result, template = array('d')
+        int i
+    result = clone(template, s, False)
+    for i in range(s):
+        if i < s1:
+            result[i] = v[i]
+        else:
+            result[i] = 0.0
+    return result
+
+
+@boundscheck(False)
+@wraparound(False)
 cpdef double angles_between_vectors(double[:] v1, double[:] v2):
     cdef:
         Py_ssize_t s1 = v1.size, s2 = v2.size
         Py_ssize_t s = s1
         double [:] v1_u = unit_vector(v1)
         double [:] v2_u = unit_vector(v2)
-        double angle
-    if
-    angle = acos(np.dot(v1_u, v2_u))
-    for i in range(v.size):
-        result += v[i] * v[i]
-    if np.isnan(angle):
-        if np.allclose(v1_u, v2_u):
-            return 0.0
-        else:
-            return M_PI
-    return angle
+        double cos_angle
+    if s1 > s2:
+        v2_u = __extend_vector_dimensions(v2_u, s)
+    elif s1 < s2:
+        s = s2
+        v1_u = __extend_vector_dimensions(v1_u, s)
+    for i in range(s):
+        cos_angle += v1_u[i] * v2_u[i]
+    return acos(cos_angle)
+
+
+@boundscheck(False)
+@wraparound(False)
+cdef double[:] __cartesian_to_spherical_point(double[:] xyz):
+    cdef:
+        Py_ssize_t s = xyz.size
+        array[double] r_theta_phi, template = array('d')
+        double xy
+    if s < 3:
+        xyz = __extend_vector_dimensions(xyz, 3)
+    r_theta_phi = clone(template, 3, False)
+    xy = xyz[0]*xyz[0] + xyz[1]*xyz[1]
+    r_theta_phi[0] = sqrt(xy + xyz[2]*xyz[2])
+    r_theta_phi[1] = atan2(sqrt(xy), xyz[2])
+    r_theta_phi[2] = __reduce_angle(atan2(xyz[1], xyz[0]), center=False, positive=True)
+    return r_theta_phi
+
+
+@boundscheck(False)
+@wraparound(False)
+cdef array[double]* __cartesian_to_spherical_points(double[:, :] xyz):
+    cdef:
+        array[double]* r_theta_phi[1000]# = np.empty((1000, 3), dtype=np.double)
+        int i
+    #print(xyz.size)
+    #print(xyz.shape)
+    #print(r_theta_phi.size)
+    #print(r_theta_phi.shape)
+    for i in range(1000):
+        r_theta_phi[i] = __cartesian_to_spherical_point(xyz[i])
+    return r_theta_phi
 
 
 def cartesian_to_spherical(xyz):
@@ -121,24 +168,13 @@ def cartesian_to_spherical(xyz):
     :param xyz: Cartesian coordinates (at least 3)
     :return: spherical coordinates r, theta, phi
     """
-    xyz = np.array(xyz)
-    r_theta_phi = np.zeros(xyz.shape)
-    if xyz.size == 3:
-        xy = xyz[0]**2 + xyz[1]**2
-        r_theta_phi[0] = np.sqrt(xy + xyz[2]**2)
-        r_theta_phi[1] = np.arctan2(np.sqrt(xy), xyz[2])
-        r_theta_phi[2] = reduce_angle(np.arctan2(xyz[1], xyz[0]), keep_sign=False)
-    elif xyz.size > 3:
+    if xyz.size <= 3:
+        return np.asarray(__cartesian_to_spherical_point(xyz))
+    else:
         if len(xyz.shape) == 2 and xyz.shape[1] == 3:
-            xy = xyz[:, 0]**2 + xyz[:, 1]**2
-            r_theta_phi[:, 0] = np.sqrt(xy + xyz[:, 2]**2)
-            r_theta_phi[:, 1] = np.arctan2(np.sqrt(xy), xyz[:, 2])
-            r_theta_phi[:, 2] = reduce_angle(np.arctan2(xyz[:, 1], xyz[:, 0]), keep_sign=False)
+            return np.asarray(__cartesian_to_spherical_points(xyz))
         else:
             raise ValueError('N-points array shape must be (N, 3)')
-    else:
-        raise ValueError('at least 3 coordinates are needed for conversion')
-    return r_theta_phi
 
 
 def spherical_to_cartesian(r_theta_phi):

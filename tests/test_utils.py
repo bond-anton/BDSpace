@@ -36,9 +36,9 @@ class TestCoordinatesUtils(unittest.TestCase):
         s = timeit.timeit('check_points(np.arange(36, dtype=np.double).reshape(12, 3).T)',
                           setup='import numpy as np\nfrom BDSpace.Coordinates._utils import check_points_array as check_points',
                           number=100000)
-        print('Py:', s)
+        print('CP Py:', s)
         s = timeit.timeit('check_points(np.arange(36, dtype=np.double).reshape(12, 3).T)',
                           setup='import numpy as np\nfrom BDSpace.Coordinates.Cartesian_c import check_points_array as check_points',
                           number=100000)
-        print('Cy:', s)
+        print('CP Cy:', s)
         print()

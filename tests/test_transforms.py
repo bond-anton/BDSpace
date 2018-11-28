@@ -3,12 +3,12 @@ import unittest
 import numpy as np
 import timeit
 
-from BDSpace.Coordinates.transforms import angles_between_vectors
-from BDSpace.Coordinates.transforms import cartesian_to_spherical, spherical_to_cartesian
+from BDSpace.Coordinates.transforms import spherical_to_cartesian
 from BDSpace.Coordinates.transforms import cartesian_to_cylindrical, cylindrical_to_cartesian
 from BDSpace.Coordinates.transforms import cylindrical_to_spherical, spherical_to_cylindrical
 
-from BDSpace.Coordinates.transforms_c import reduce_angle, unit_vector
+from BDSpace.Coordinates.transforms_c import reduce_angle, unit_vector, angles_between_vectors
+from BDSpace.Coordinates.transforms import cartesian_to_spherical#, spherical_to_cartesian
 
 class TestTransforms(unittest.TestCase):
 
@@ -91,11 +91,15 @@ class TestTransforms(unittest.TestCase):
         print()
         s = timeit.timeit('reduce_angle((np.random.random(1000) - 0.5) * 4 * np.pi)',
                           setup='import numpy as np\nfrom BDSpace.Coordinates.transforms import reduce_angle',
-                          number=100000)
+                          #number=100000,
+                          number=10
+                          )
         print('RA Py:', s)
         s = timeit.timeit('reduce_angle((np.random.random(1000) - 0.5) * 4 * np.pi)',
                           setup='import numpy as np\nfrom BDSpace.Coordinates.transforms_c import reduce_angle',
-                          number=100000)
+                          #number=100000
+                          number=10
+                          )
         print('RA Cy:', s)
         print()
 
@@ -130,11 +134,15 @@ class TestTransforms(unittest.TestCase):
         print()
         s = timeit.timeit('unit_vector(np.random.random(1000) * 100)',
                           setup='import numpy as np\nfrom BDSpace.Coordinates.transforms import unit_vector',
-                          number=100000)
+                          #number=100000
+                          number=10
+                          )
         print('UV Py:', s)
         s = timeit.timeit('unit_vector(np.random.random(1000) * 100)',
                           setup='import numpy as np\nfrom BDSpace.Coordinates.transforms_c import unit_vector',
-                          number=100000)
+                          #number=100000
+                          number=10
+                          )
         print('UV Cy:', s)
         print()
 
@@ -146,6 +154,25 @@ class TestTransforms(unittest.TestCase):
         self.assertEqual(angles_between_vectors(v1, -v1), np.pi)
         v2 = np.array([1, 1, 0], dtype=np.float)
         np.testing.assert_allclose(angles_between_vectors(v1, v2), np.pi/4)
+        v2 = np.array([1, 1], dtype=np.float)
+        np.testing.assert_allclose(angles_between_vectors(v1, v2), np.pi / 4)
+        np.testing.assert_allclose(angles_between_vectors(v2, v1), np.pi / 4)
+
+    def test_angle_between_vectors_speed(self):
+        print()
+        s = timeit.timeit('angles_between_vectors(np.random.random(1000) * 100, np.random.random(1000) * 100)',
+                          setup='import numpy as np\nfrom BDSpace.Coordinates.transforms import angles_between_vectors',
+                          #number=100000
+                          number=10
+                          )
+        print('VA Py:', s)
+        s = timeit.timeit('angles_between_vectors(np.random.random(1000) * 100, np.random.random(1000) * 100)',
+                          setup='import numpy as np\nfrom BDSpace.Coordinates.transforms_c import angles_between_vectors',
+                          #number=100000
+                          number=10
+                          )
+        print('VA Cy:', s)
+        print()
 
     def test_to_spherical_single_point(self):
         xyz = [1, 0, 0]
@@ -164,6 +191,36 @@ class TestTransforms(unittest.TestCase):
         self.assertRaises(ValueError, cartesian_to_spherical, xyz)
         xyz = [0, 0, 0, 0, 0, 0]
         self.assertRaises(ValueError, cartesian_to_spherical, xyz)
+
+    def test_to_spherical_speed(self):
+        print()
+        s = timeit.timeit('cartesian_to_spherical(np.random.random(3) * 100)',
+                          setup='import numpy as np\nfrom BDSpace.Coordinates.transforms import cartesian_to_spherical',
+                          # number=100000
+                          number=10000
+                          )
+        print('CS1 Py:', s)
+        s = timeit.timeit('cartesian_to_spherical(np.random.random(3) * 100)',
+                          setup='import numpy as np\nfrom BDSpace.Coordinates.transforms_c import cartesian_to_spherical',
+                          # number=100000
+                          number=10000
+                          )
+        print('CS1 Cy:', s)
+        print()
+        print()
+        s = timeit.timeit('cartesian_to_spherical(np.random.random(3*1000).reshape(1000, 3) * 100)',
+                          setup='import numpy as np\nfrom BDSpace.Coordinates.transforms import cartesian_to_spherical',
+                          #number=100000
+                          number=10
+                          )
+        print('CSM Py:', s)
+        s = timeit.timeit('cartesian_to_spherical(np.random.random(3*1000).reshape(1000, 3) * 100)',
+                          setup='import numpy as np\nfrom BDSpace.Coordinates.transforms_c import cartesian_to_spherical',
+                          #number=100000
+                          number=10
+                          )
+        print('CSM Cy:', s)
+        print()
 
     def test_to_spherical_and_back_many_points(self):
         points_num = 100
