@@ -12,6 +12,6 @@ script:
   nosetests -v --with-coverage --cover-package=BDQuaternions
 # codecov support
 before_install:
-- pip install codecov
+- pip install Cython codecov
 after_success:
 - codecov
