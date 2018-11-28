@@ -6,7 +6,7 @@ from cython import boundscheck, wraparound
 
 from cpython.array cimport array, clone
 from libc.stdlib cimport malloc, free
-from libc.math cimport sin, cos, atan2, sqrt, M_PI
+from libc.math cimport sin, cos, atan2, acos, sqrt, M_PI
 
 
 cdef double __reduce_angle(double angle, bint center=True, bint positive=False):
@@ -96,15 +96,22 @@ cpdef double[:] unit_vector(double[:] v):
     return result
 
 
-def angles_between_vectors(v1, v2):
-    v1_u = unit_vector(v1)
-    v2_u = unit_vector(v2)
-    angle = np.arccos(np.dot(v1_u, v2_u))
+cpdef double angles_between_vectors(double[:] v1, double[:] v2):
+    cdef:
+        Py_ssize_t s1 = v1.size, s2 = v2.size
+        Py_ssize_t s = s1
+        double [:] v1_u = unit_vector(v1)
+        double [:] v2_u = unit_vector(v2)
+        double angle
+    if
+    angle = acos(np.dot(v1_u, v2_u))
+    for i in range(v.size):
+        result += v[i] * v[i]
     if np.isnan(angle):
         if np.allclose(v1_u, v2_u):
             return 0.0
         else:
-            return np.pi
+            return M_PI
     return angle
 
 
