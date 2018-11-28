@@ -89,16 +89,16 @@ class TestTransforms(unittest.TestCase):
 
     def test_reduce_angle_random_array_speed(self):
         print()
-        s = timeit.timeit('reduce_angle((np.random.random(1000) - 0.5) * 4 * np.pi)',
+        s = timeit.timeit('np.random.seed(1); reduce_angle((np.random.random(1000) - 0.5) * 4 * np.pi)',
                           setup='import numpy as np\nfrom BDSpace.Coordinates.transforms import reduce_angle',
-                          #number=100000,
-                          number=10
+                          number=10000,
+                          #number=10
                           )
         print('RA Py:', s)
-        s = timeit.timeit('reduce_angle((np.random.random(1000) - 0.5) * 4 * np.pi)',
+        s = timeit.timeit('np.random.seed(1); reduce_angle((np.random.random(1000) - 0.5) * 4 * np.pi)',
                           setup='import numpy as np\nfrom BDSpace.Coordinates.transforms_c import reduce_angle',
-                          #number=100000
-                          number=10
+                          number=10000
+                          #number=10
                           )
         print('RA Cy:', s)
         print()
@@ -132,16 +132,16 @@ class TestTransforms(unittest.TestCase):
 
     def test_unit_vector_random_vector_speed(self):
         print()
-        s = timeit.timeit('unit_vector(np.random.random(1000) * 100)',
+        s = timeit.timeit('np.random.seed(1); unit_vector(np.random.random(1000) * 100)',
                           setup='import numpy as np\nfrom BDSpace.Coordinates.transforms import unit_vector',
-                          #number=100000
-                          number=10
+                          number=10000
+                          #number=10
                           )
         print('UV Py:', s)
-        s = timeit.timeit('unit_vector(np.random.random(1000) * 100)',
+        s = timeit.timeit('np.random.seed(1); unit_vector(np.random.random(1000) * 100)',
                           setup='import numpy as np\nfrom BDSpace.Coordinates.transforms_c import unit_vector',
-                          #number=100000
-                          number=10
+                          number=10000
+                          #number=10
                           )
         print('UV Cy:', s)
         print()
@@ -160,16 +160,16 @@ class TestTransforms(unittest.TestCase):
 
     def test_angle_between_vectors_speed(self):
         print()
-        s = timeit.timeit('angles_between_vectors(np.random.random(1000) * 100, np.random.random(1000) * 100)',
+        s = timeit.timeit('np.random.seed(1); angles_between_vectors(np.random.random(1000) * 100, np.random.random(1000) * 100)',
                           setup='import numpy as np\nfrom BDSpace.Coordinates.transforms import angles_between_vectors',
-                          #number=100000
-                          number=10
+                          number=10000
+                          #number=10
                           )
         print('VA Py:', s)
-        s = timeit.timeit('angles_between_vectors(np.random.random(1000) * 100, np.random.random(1000) * 100)',
+        s = timeit.timeit('np.random.seed(1); angles_between_vectors(np.random.random(1000) * 100, np.random.random(1000) * 100)',
                           setup='import numpy as np\nfrom BDSpace.Coordinates.transforms_c import angles_between_vectors',
-                          #number=100000
-                          number=10
+                          number=10000
+                          #number=10
                           )
         print('VA Cy:', s)
         print()
@@ -194,30 +194,30 @@ class TestTransforms(unittest.TestCase):
 
     def test_to_spherical_speed(self):
         print()
-        s = timeit.timeit('cartesian_to_spherical(np.random.random(3) * 100)',
+        s = timeit.timeit('np.random.seed(1); cartesian_to_spherical(np.random.random(3) * 100)',
                           setup='import numpy as np\nfrom BDSpace.Coordinates.transforms import cartesian_to_spherical',
-                          # number=100000
                           number=10000
+                          #number=10000
                           )
         print('CS1 Py:', s)
-        s = timeit.timeit('cartesian_to_spherical(np.random.random(3) * 100)',
+        s = timeit.timeit('np.random.seed(1); cartesian_to_spherical(np.random.random(3) * 100)',
                           setup='import numpy as np\nfrom BDSpace.Coordinates.transforms_c import cartesian_to_spherical',
-                          # number=100000
                           number=10000
+                          #number=10000
                           )
         print('CS1 Cy:', s)
         print()
         print()
-        s = timeit.timeit('cartesian_to_spherical(np.random.random(3*1000).reshape(1000, 3) * 100)',
+        s = timeit.timeit('np.random.seed(1); cartesian_to_spherical(np.random.random(3*1000).reshape(1000, 3) * 100)',
                           setup='import numpy as np\nfrom BDSpace.Coordinates.transforms import cartesian_to_spherical',
-                          #number=100000
-                          number=10
+                          number=10000
+                          #number=10
                           )
         print('CSM Py:', s)
-        s = timeit.timeit('cartesian_to_spherical(np.random.random(3*1000).reshape(1000, 3) * 100)',
+        s = timeit.timeit('np.random.seed(1); cartesian_to_spherical(np.random.random(3*1000).reshape(1000, 3) * 100)',
                           setup='import numpy as np\nfrom BDSpace.Coordinates.transforms_c import cartesian_to_spherical',
-                          #number=100000
-                          number=10
+                          number=10000
+                          #number=10
                           )
         print('CSM Cy:', s)
         print()

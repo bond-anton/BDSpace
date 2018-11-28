@@ -149,16 +149,18 @@ cdef double[:] __cartesian_to_spherical_point(double[:] xyz):
 
 @boundscheck(False)
 @wraparound(False)
-cdef array[double]* __cartesian_to_spherical_points(double[:, :] xyz):
+cdef double[:] __cartesian_to_spherical_points(double[:] xyz):
     cdef:
-        array[double]* r_theta_phi[1000]# = np.empty((1000, 3), dtype=np.double)
+        Py_ssize_t s = xyz.size
+        array[double] r_theta_phi, template = array('d')
         int i
-    #print(xyz.size)
-    #print(xyz.shape)
-    #print(r_theta_phi.size)
-    #print(r_theta_phi.shape)
-    for i in range(1000):
-        r_theta_phi[i] = __cartesian_to_spherical_point(xyz[i])
+        double xy
+    r_theta_phi = clone(template, s, False)
+    for i in range(0, s, 3):
+        xy = xyz[i]*xyz[i] + xyz[i + 1]*xyz[i + 1]
+        r_theta_phi[i] = sqrt(xy + xyz[i + 2]*xyz[i + 2])
+        r_theta_phi[i + 1] = atan2(sqrt(xy), xyz[i + 2])
+        r_theta_phi[i + 2] = __reduce_angle(atan2(xyz[i + 1], xyz[i]), center=False, positive=True)
     return r_theta_phi
 
 
@@ -172,7 +174,9 @@ def cartesian_to_spherical(xyz):
         return np.asarray(__cartesian_to_spherical_point(xyz))
     else:
         if len(xyz.shape) == 2 and xyz.shape[1] == 3:
-            return np.asarray(__cartesian_to_spherical_points(xyz))
+            #angles = np.array(angle, dtype=np.double)
+            #return np.asarray(__reduce_angles(angles.ravel(), center=False, positive=not keep_sign)).reshape(angles.shape)
+            return np.asarray(__cartesian_to_spherical_points(xyz.ravel())).reshape(xyz.shape)
         else:
             raise ValueError('N-points array shape must be (N, 3)')
 
