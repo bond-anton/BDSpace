@@ -3,12 +3,11 @@ import unittest
 import numpy as np
 import timeit
 
-from BDSpace.Coordinates.transforms import spherical_to_cartesian
 from BDSpace.Coordinates.transforms import cartesian_to_cylindrical, cylindrical_to_cartesian
 from BDSpace.Coordinates.transforms import cylindrical_to_spherical, spherical_to_cylindrical
 
 from BDSpace.Coordinates.transforms_c import reduce_angle, unit_vector, angles_between_vectors
-from BDSpace.Coordinates.transforms import cartesian_to_spherical#, spherical_to_cartesian
+from BDSpace.Coordinates.transforms import cartesian_to_spherical, spherical_to_cartesian
 
 
 class TestTransforms(unittest.TestCase):
@@ -254,6 +253,36 @@ class TestTransforms(unittest.TestCase):
         self.assertRaises(ValueError, spherical_to_cartesian, rtp)
         rtp = [1, 2*np.pi, 0]
         self.assertRaises(ValueError, spherical_to_cartesian, rtp)
+
+    def test_to_cartesian_speed(self):
+        print()
+        s = timeit.timeit('np.random.seed(1); spherical_to_cartesian(np.random.uniform(low=0, high=np.pi, size=3))',
+                          setup='import numpy as np\nfrom BDSpace.Coordinates.transforms import spherical_to_cartesian',
+                          number=10000
+                          #number=10000
+                          )
+        print('SC1 Py:', s)
+        s = timeit.timeit('np.random.seed(1); spherical_to_cartesian(np.random.uniform(low=0, high=np.pi, size=3))',
+                          setup='import numpy as np\nfrom BDSpace.Coordinates.transforms_c import spherical_to_cartesian',
+                          number=10000
+                          #number=10000
+                          )
+        print('SC1 Cy:', s)
+        print()
+        print()
+        s = timeit.timeit('np.random.seed(1); spherical_to_cartesian(np.random.uniform(low=0, high=np.pi, size=(1000, 3)))',
+                          setup='import numpy as np\nfrom BDSpace.Coordinates.transforms import spherical_to_cartesian',
+                          number=10000
+                          #number=10
+                          )
+        print('SCM Py:', s)
+        s = timeit.timeit('np.random.seed(1); spherical_to_cartesian(np.random.uniform(low=0, high=np.pi, size=(1000, 3)))',
+                          setup='import numpy as np\nfrom BDSpace.Coordinates.transforms_c import spherical_to_cartesian',
+                          number=10000
+                          #number=10
+                          )
+        print('SCM Cy:', s)
+        print()
 
     def test_to_cylindrical_single_point(self):
         xyz = [1, 0, 0]

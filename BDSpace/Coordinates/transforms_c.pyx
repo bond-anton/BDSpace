@@ -174,11 +174,45 @@ def cartesian_to_spherical(xyz):
         return np.asarray(__cartesian_to_spherical_point(xyz))
     else:
         if len(xyz.shape) == 2 and xyz.shape[1] == 3:
-            #angles = np.array(angle, dtype=np.double)
-            #return np.asarray(__reduce_angles(angles.ravel(), center=False, positive=not keep_sign)).reshape(angles.shape)
             return np.asarray(__cartesian_to_spherical_points(xyz.ravel())).reshape(xyz.shape)
         else:
             raise ValueError('N-points array shape must be (N, 3)')
+
+
+@boundscheck(False)
+@wraparound(False)
+cdef double[:] __spherical_to_cartesian_point(double[:] r_theta_phi):
+    cdef:
+        Py_ssize_t s = r_theta_phi.size
+        array[double] xyz, template = array('d')
+        double xy
+    if s < 3:
+        r_theta_phi = __extend_vector_dimensions(r_theta_phi, 3)
+    xyz = clone(template, 3, False)
+    r_theta_phi[2] = __reduce_angle(r_theta_phi[2], center=False, positive=True)
+    xy = r_theta_phi[0] * sin(r_theta_phi[1])
+    xyz[0] = xy * cos(r_theta_phi[2])
+    xyz[1] = xy * sin(r_theta_phi[2])
+    xyz[2] = r_theta_phi[0] * cos(r_theta_phi[1])
+    return xyz
+
+
+@boundscheck(False)
+@wraparound(False)
+cdef double[:] __spherical_to_cartesian_points(double[:] r_theta_phi):
+    cdef:
+        Py_ssize_t s = r_theta_phi.size
+        array[double] xyz, template = array('d')
+        int i
+        double xy
+    xyz = clone(template, s, False)
+    for i in range(0, s, 3):
+        r_theta_phi[i + 2] = __reduce_angle(r_theta_phi[i + 2], center=False, positive=True)
+        xy = r_theta_phi[i] * sin(r_theta_phi[i + 1])
+        xyz[i] = xy * cos(r_theta_phi[i + 2])
+        xyz[i + 1] = xy * sin(r_theta_phi[i + 2])
+        xyz[i + 2] = r_theta_phi[i] * cos(r_theta_phi[i + 1])
+    return xyz
 
 
 def spherical_to_cartesian(r_theta_phi):
@@ -187,30 +221,13 @@ def spherical_to_cartesian(r_theta_phi):
     :param r_theta_phi: spherical coordinates (at least 3)
     :return: cartesian coordinates x, y, z
     """
-    r_theta_phi = np.array(r_theta_phi)
-    xyz = np.zeros(r_theta_phi.shape)
-    if r_theta_phi.size == 3:
-        r_theta_phi[2] = reduce_angle(r_theta_phi[2], keep_sign=False)
-        if (r_theta_phi < 0).any() or r_theta_phi[1] > np.pi or r_theta_phi[2] > 2 * np.pi:
-            raise ValueError('r must be >= 0, theta must be within [0; pi], phi must be within [0; 2*pi]')
-        xy = r_theta_phi[0] * np.sin(r_theta_phi[1])
-        xyz[0] = xy * np.cos(r_theta_phi[2])
-        xyz[1] = xy * np.sin(r_theta_phi[2])
-        xyz[2] = r_theta_phi[0] * np.cos(r_theta_phi[1])
-    elif r_theta_phi.size > 3:
+    if r_theta_phi.size <= 3:
+        return np.asarray(__spherical_to_cartesian_point(r_theta_phi))
+    else:
         if len(r_theta_phi.shape) == 2 and r_theta_phi.shape[1] == 3:
-            r_theta_phi[:, 2] = reduce_angle(r_theta_phi[:, 2], keep_sign=False)
-            if (r_theta_phi < 0).any() or (r_theta_phi[:, 1] > np.pi).any() or (r_theta_phi[:, 2] > 2 * np.pi).any():
-                raise ValueError('r must be >= 0, theta must be within [0; pi], phi must be within [0; 2*pi]')
-            xy = r_theta_phi[:, 0] * np.sin(r_theta_phi[:, 1])
-            xyz[:, 0] = xy * np.cos(r_theta_phi[:, 2])
-            xyz[:, 1] = xy * np.sin(r_theta_phi[:, 2])
-            xyz[:, 2] = r_theta_phi[:, 0] * np.cos(r_theta_phi[:, 1])
+            return np.asarray(__spherical_to_cartesian_points(r_theta_phi.ravel())).reshape(r_theta_phi.shape)
         else:
             raise ValueError('N-points array shape must be (N, 3)')
-    else:
-        raise ValueError('at least 3 coordinates are needed for conversion')
-    return xyz
 
 
 def cartesian_to_cylindrical(xyz):
