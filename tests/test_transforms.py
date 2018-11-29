@@ -10,6 +10,7 @@ from BDSpace.Coordinates.transforms import cylindrical_to_spherical, spherical_t
 from BDSpace.Coordinates.transforms_c import reduce_angle, unit_vector, angles_between_vectors
 from BDSpace.Coordinates.transforms import cartesian_to_spherical#, spherical_to_cartesian
 
+
 class TestTransforms(unittest.TestCase):
 
     def test_reduce_angle_constant_positive(self):

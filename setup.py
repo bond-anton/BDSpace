@@ -34,7 +34,7 @@ extensions = [
     Extension(
         'BDSpace.Coordinates.transforms_c',
         ['BDSpace/Coordinates/transforms_c.pyx'],
-        depends=['BDSpace/Coordinates/transforms.pxd'],
+        depends=['BDSpace/Coordinates/transforms_c.pxd'],
     ),
 ]
 
