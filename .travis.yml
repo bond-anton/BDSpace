@@ -9,7 +9,7 @@ install:
 # command to run tests
 script:
 - python setup.py build_ext --inplace &&
-  nosetests -v --with-coverage --cover-package=BDQuaternions
+  nosetests -v --with-coverage --cover-package=BDSpace
 # codecov support
 before_install:
 - pip install Cython codecov
