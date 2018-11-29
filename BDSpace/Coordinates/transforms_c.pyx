@@ -119,7 +119,7 @@ cpdef double angles_between_vectors(double[:] v1, double[:] v2):
         Py_ssize_t s = s1
         double [:] v1_u = unit_vector(v1)
         double [:] v2_u = unit_vector(v2)
-        double cos_angle
+        double cos_angle = 0
     if s1 > s2:
         v2_u = __extend_vector_dimensions(v2_u, s)
     elif s1 < s2:
