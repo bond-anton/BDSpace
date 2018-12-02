@@ -3,11 +3,10 @@ import unittest
 import numpy as np
 import timeit
 
-from BDSpace.Coordinates.transforms import cartesian_to_cylindrical, cylindrical_to_cartesian
-from BDSpace.Coordinates.transforms import cylindrical_to_spherical, spherical_to_cylindrical
-
 from BDSpace.Coordinates.transforms_c import reduce_angle, unit_vector, angles_between_vectors
-from BDSpace.Coordinates.transforms import cartesian_to_spherical, spherical_to_cartesian
+from BDSpace.Coordinates.transforms_c import cartesian_to_spherical, spherical_to_cartesian
+from BDSpace.Coordinates.transforms_c import cartesian_to_cylindrical, cylindrical_to_cartesian
+from BDSpace.Coordinates.transforms_c import cylindrical_to_spherical, spherical_to_cylindrical
 
 
 class TestTransforms(unittest.TestCase):
@@ -89,18 +88,19 @@ class TestTransforms(unittest.TestCase):
 
     def test_reduce_angle_random_array_speed(self):
         print()
-        s = timeit.timeit('np.random.seed(1); reduce_angle((np.random.random(1000) - 0.5) * 4 * np.pi)',
-                          setup='import numpy as np\nfrom BDSpace.Coordinates.transforms import reduce_angle',
-                          number=10000,
-                          #number=10
-                          )
-        print('RA Py:', s)
-        s = timeit.timeit('np.random.seed(1); reduce_angle((np.random.random(1000) - 0.5) * 4 * np.pi)',
-                          setup='import numpy as np\nfrom BDSpace.Coordinates.transforms_c import reduce_angle',
-                          number=10000
-                          #number=10
-                          )
-        print('RA Cy:', s)
+        s1 = timeit.timeit('np.random.seed(1); reduce_angle((np.random.random(1000) - 0.5) * 4 * np.pi)',
+                           setup='import numpy as np\nfrom BDSpace.Coordinates.transforms import reduce_angle',
+                           number=10000,
+                           #number=10
+                           )
+        print('Reduce angle Py:', s1)
+        s2 = timeit.timeit('np.random.seed(1); reduce_angle((np.random.random(1000) - 0.5) * 4 * np.pi)',
+                           setup='import numpy as np\nfrom BDSpace.Coordinates.transforms_c import reduce_angle',
+                           number=10000
+                           #number=10
+                           )
+        print('Reduce angle Cy:', s2)
+        print('Reduce angle Cy speedup: %2.2f%%' % ((s1 - s2) / s1 * 100))
         print()
 
     def test_unit_vector_1d(self):
@@ -132,19 +132,19 @@ class TestTransforms(unittest.TestCase):
 
     def test_unit_vector_random_vector_speed(self):
         print()
-        s = timeit.timeit('np.random.seed(1); unit_vector(np.random.random(1000) * 100)',
-                          setup='import numpy as np\nfrom BDSpace.Coordinates.transforms import unit_vector',
-                          number=10000
-                          #number=10
-                          )
-        print('UV Py:', s)
-        s = timeit.timeit('np.random.seed(1); unit_vector(np.random.random(1000) * 100)',
-                          setup='import numpy as np\nfrom BDSpace.Coordinates.transforms_c import unit_vector',
-                          number=10000
-                          #number=10
-                          )
-        print('UV Cy:', s)
-        print()
+        s1 = timeit.timeit('np.random.seed(1); unit_vector(np.random.random(1000) * 100)',
+                           setup='import numpy as np\nfrom BDSpace.Coordinates.transforms import unit_vector',
+                           number=10000
+                           #number=10
+                           )
+        print('Unit vector Py:', s1)
+        s2 = timeit.timeit('np.random.seed(1); unit_vector(np.random.random(1000) * 100)',
+                           setup='import numpy as np\nfrom BDSpace.Coordinates.transforms_c import unit_vector',
+                           number=10000
+                           #number=10
+                           )
+        print('Unit vector Cy:', s2)
+        print('Unit vector Cy speedup: %2.2f%%' % ((s1 - s2) / s1 * 100))
 
     def test_angle_between_vectors(self):
         v1 = np.array([1, 0, 0], dtype=np.float)
@@ -160,67 +160,95 @@ class TestTransforms(unittest.TestCase):
 
     def test_angle_between_vectors_speed(self):
         print()
-        s = timeit.timeit('np.random.seed(1); angles_between_vectors(np.random.random(1000) * 100, np.random.random(1000) * 100)',
-                          setup='import numpy as np\nfrom BDSpace.Coordinates.transforms import angles_between_vectors',
-                          number=10000
-                          #number=10
-                          )
-        print('VA Py:', s)
-        s = timeit.timeit('np.random.seed(1); angles_between_vectors(np.random.random(1000) * 100, np.random.random(1000) * 100)',
-                          setup='import numpy as np\nfrom BDSpace.Coordinates.transforms_c import angles_between_vectors',
-                          number=10000
-                          #number=10
-                          )
-        print('VA Cy:', s)
-        print()
+        s1 = timeit.timeit('np.random.seed(1); angles_between_vectors(np.random.random(1000) * 100, np.random.random(1000) * 100)',
+                           setup='import numpy as np\nfrom BDSpace.Coordinates.transforms import angles_between_vectors',
+                           number=10000
+                           #number=10
+                           )
+        print('Angle between vectors Py:', s1)
+        s2 = timeit.timeit('np.random.seed(1); angles_between_vectors(np.random.random(1000) * 100, np.random.random(1000) * 100)',
+                           setup='import numpy as np\nfrom BDSpace.Coordinates.transforms_c import angles_between_vectors',
+                           number=10000
+                           #number=10
+                           )
+        print('Angle between vectors Cy:', s2)
+        print('Angle between vectors Cy speedup: %2.2f%%' % ((s1 - s2) / s1 * 100))
 
     def test_to_spherical_single_point(self):
-        xyz = [1, 0, 0]
+        xyz = np.array([1, 0, 0], dtype=np.double)
         np.testing.assert_allclose(cartesian_to_spherical(xyz), [1, np.pi / 2, 0], atol=np.finfo(float).eps)
-        xyz = [0, 1, 0]
+        xyz = np.array([0, 1, 0], dtype=np.double)
         np.testing.assert_allclose(cartesian_to_spherical(xyz), [1, np.pi / 2, np.pi / 2], atol=np.finfo(float).eps)
-        xyz = [0, 0, 0]
+        xyz = np.array([0, 0, 0], dtype=np.double)
         np.testing.assert_allclose(cartesian_to_spherical(xyz), [0, 0, 0], atol=np.finfo(float).eps)
 
     def test_to_spherical_wrong_arguments(self):
         xyz = 0
-        self.assertRaises(ValueError, cartesian_to_spherical, xyz)
+        self.assertRaises(AttributeError, cartesian_to_spherical, xyz)
         xyz = [0, 0]
-        self.assertRaises(ValueError, cartesian_to_spherical, xyz)
-        xyz = [0, 0, 0, 0]
+        self.assertRaises(AttributeError, cartesian_to_spherical, xyz)
+        xyz = np.array([0, 0, 0, 0], dtype=np.double)
         self.assertRaises(ValueError, cartesian_to_spherical, xyz)
         xyz = [0, 0, 0, 0, 0, 0]
-        self.assertRaises(ValueError, cartesian_to_spherical, xyz)
+        self.assertRaises(AttributeError, cartesian_to_spherical, xyz)
 
     def test_to_spherical_speed(self):
         print()
-        s = timeit.timeit('np.random.seed(1); cartesian_to_spherical(np.random.random(3) * 100)',
-                          setup='import numpy as np\nfrom BDSpace.Coordinates.transforms import cartesian_to_spherical',
-                          number=10000
-                          #number=10000
-                          )
-        print('CS1 Py:', s)
-        s = timeit.timeit('np.random.seed(1); cartesian_to_spherical(np.random.random(3) * 100)',
-                          setup='import numpy as np\nfrom BDSpace.Coordinates.transforms_c import cartesian_to_spherical',
-                          number=10000
-                          #number=10000
-                          )
-        print('CS1 Cy:', s)
+        s1 = timeit.timeit('np.random.seed(1); cartesian_to_spherical(np.random.random(3) * 100)',
+                           setup='import numpy as np\nfrom BDSpace.Coordinates.transforms import cartesian_to_spherical',
+                           number=10000
+                           #number=10000
+                           )
+        print('Cart. to Spherical 1 Py:', s1)
+        s2 = timeit.timeit('np.random.seed(1); cartesian_to_spherical(np.random.random(3) * 100)',
+                           setup='import numpy as np\nfrom BDSpace.Coordinates.transforms_c import cartesian_to_spherical',
+                           number=10000
+                           #number=10000
+                           )
+        print('Cart. to Spherical 1 Cy:', s2)
+        print('Cart. to Spherical 1 Cy speedup: %2.2f%%' % ((s1 - s2) / s1 * 100))
         print()
+        s1 = timeit.timeit('np.random.seed(1); cartesian_to_spherical(np.random.random(3*1000).reshape(1000, 3) * 100)',
+                           setup='import numpy as np\nfrom BDSpace.Coordinates.transforms import cartesian_to_spherical',
+                           number=10000
+                           #number=10
+                           )
+        print('Cart. to Spherical Py:', s1)
+        s2 = timeit.timeit('np.random.seed(1); cartesian_to_spherical(np.random.random(3*1000).reshape(1000, 3) * 100)',
+                           setup='import numpy as np\nfrom BDSpace.Coordinates.transforms_c import cartesian_to_spherical',
+                           number=10000
+                           #number=10
+                           )
+        print('Cart. to Spherical Cy:', s2)
+        print('Cart. to Spherical Cy speedup: %2.2f%%' % ((s1 - s2) / s1 * 100))
         print()
-        s = timeit.timeit('np.random.seed(1); cartesian_to_spherical(np.random.random(3*1000).reshape(1000, 3) * 100)',
-                          setup='import numpy as np\nfrom BDSpace.Coordinates.transforms import cartesian_to_spherical',
-                          number=10000
-                          #number=10
-                          )
-        print('CSM Py:', s)
-        s = timeit.timeit('np.random.seed(1); cartesian_to_spherical(np.random.random(3*1000).reshape(1000, 3) * 100)',
-                          setup='import numpy as np\nfrom BDSpace.Coordinates.transforms_c import cartesian_to_spherical',
-                          number=10000
-                          #number=10
-                          )
-        print('CSM Cy:', s)
+        s1 = timeit.timeit('np.random.seed(1); cylindrical_to_spherical(np.random.random(3) * 100)',
+                           setup='import numpy as np\nfrom BDSpace.Coordinates.transforms import cylindrical_to_spherical',
+                           number=10000
+                           # number=10000
+                           )
+        print('Cyl. to Spherical 1 Py:', s1)
+        s2 = timeit.timeit('np.random.seed(1); cylindrical_to_spherical(np.random.random(3) * 100)',
+                           setup='import numpy as np\nfrom BDSpace.Coordinates.transforms_c import cylindrical_to_spherical',
+                           number=10000
+                           # number=10000
+                           )
+        print('Cyl. to Spherical 1 Cy:', s2)
+        print('Cyl. to Spherical 1 Cy speedup: %2.2f%%' % ((s1 - s2) / s1 * 100))
         print()
+        s1 = timeit.timeit('np.random.seed(1); cylindrical_to_spherical(np.random.random(3*1000).reshape(1000, 3) * 100)',
+                           setup='import numpy as np\nfrom BDSpace.Coordinates.transforms import cylindrical_to_spherical',
+                           number=10000
+                           # number=10
+                           )
+        print('Cyl. to Spherical Py:', s1)
+        s2 = timeit.timeit('np.random.seed(1); cylindrical_to_spherical(np.random.random(3*1000).reshape(1000, 3) * 100)',
+                           setup='import numpy as np\nfrom BDSpace.Coordinates.transforms_c import cylindrical_to_spherical',
+                           number=10000
+                           # number=10
+                           )
+        print('Cyl. to Spherical Cy:', s2)
+        print('Cyl. to Spherical Cy speedup: %2.2f%%' % ((s1 - s2) / s1 * 100))
 
     def test_to_spherical_and_back_many_points(self):
         points_num = 100
@@ -229,71 +257,157 @@ class TestTransforms(unittest.TestCase):
         np.testing.assert_allclose(spherical_to_cartesian(rtp), xyz)
 
     def test_to_cartesian_single_point(self):
-        rtp = [0, 0, 0]
+        rtp = np.zeros(3, dtype=np.double)
         np.testing.assert_allclose(spherical_to_cartesian(rtp), [0, 0, 0], atol=np.finfo(float).eps)
-        rtp = [0, 1, 0]
+        rtp = np.array([0, 1, 0], dtype=np.double)
         np.testing.assert_allclose(spherical_to_cartesian(rtp), [0, 0, 0], atol=np.finfo(float).eps)
-        rtp = [1, 0, 0]
+        rtp = np.array([1, 0, 0], dtype=np.double)
         np.testing.assert_allclose(spherical_to_cartesian(rtp), [0, 0, 1], atol=np.finfo(float).eps)
-        rtp = [1, np.pi/2, 0]
+        rtp = np.array([1, np.pi/2, 0], dtype=np.double)
         np.testing.assert_allclose(spherical_to_cartesian(rtp), [1, 0, 0], atol=np.finfo(float).eps)
-        rtp = [1, np.pi, 0]
+        rtp = np.array([1, np.pi, 0], dtype=np.double)
         np.testing.assert_allclose(spherical_to_cartesian(rtp), [0, 0, -1], atol=np.finfo(float).eps)
 
     def test_to_cartesian_wrong_arguments(self):
         rtp = 0
-        self.assertRaises(ValueError, spherical_to_cartesian, rtp)
+        self.assertRaises(AttributeError, spherical_to_cartesian, rtp)
         rtp = [0, 0]
-        self.assertRaises(ValueError, spherical_to_cartesian, rtp)
-        rtp = [0, 0, 0, 0]
+        self.assertRaises(AttributeError, spherical_to_cartesian, rtp)
+        rtp = np.array([0, 0, 0, 0], dtype=np.double)
         self.assertRaises(ValueError, spherical_to_cartesian, rtp)
         rtp = [0, 0, 0, 0, 0, 0]
-        self.assertRaises(ValueError, spherical_to_cartesian, rtp)
-        rtp = [-1, 0, 0]
-        self.assertRaises(ValueError, spherical_to_cartesian, rtp)
-        rtp = [1, 2*np.pi, 0]
-        self.assertRaises(ValueError, spherical_to_cartesian, rtp)
+        self.assertRaises(AttributeError, spherical_to_cartesian, rtp)
 
     def test_to_cartesian_speed(self):
         print()
-        s = timeit.timeit('np.random.seed(1); spherical_to_cartesian(np.random.uniform(low=0, high=np.pi, size=3))',
-                          setup='import numpy as np\nfrom BDSpace.Coordinates.transforms import spherical_to_cartesian',
-                          number=10000
-                          #number=10000
-                          )
-        print('SC1 Py:', s)
-        s = timeit.timeit('np.random.seed(1); spherical_to_cartesian(np.random.uniform(low=0, high=np.pi, size=3))',
-                          setup='import numpy as np\nfrom BDSpace.Coordinates.transforms_c import spherical_to_cartesian',
-                          number=10000
-                          #number=10000
-                          )
-        print('SC1 Cy:', s)
+        s1 = timeit.timeit('np.random.seed(1); spherical_to_cartesian(np.random.uniform(low=0, high=np.pi, size=3))',
+                           setup='import numpy as np\nfrom BDSpace.Coordinates.transforms import spherical_to_cartesian',
+                           number=10000
+                           #number=10000
+                           )
+        print('Spherical to Cart. 1 Py:', s1)
+        s2 = timeit.timeit('np.random.seed(1); spherical_to_cartesian(np.random.uniform(low=0, high=np.pi, size=3))',
+                           setup='import numpy as np\nfrom BDSpace.Coordinates.transforms_c import spherical_to_cartesian',
+                           number=10000
+                           #number=10000
+                           )
+        print('Spherical to Cart. 1 Cy:', s2)
+        print('Spherical to Cart. 1 Cy speedup: %2.2f%%' % ((s1 - s2) / s1 * 100))
         print()
+        s1 = timeit.timeit('np.random.seed(1); spherical_to_cartesian(np.random.uniform(low=0, high=np.pi, size=(1000, 3)))',
+                           setup='import numpy as np\nfrom BDSpace.Coordinates.transforms import spherical_to_cartesian',
+                           number=10000
+                           #number=10
+                           )
+        print('Spherical to Cart. Py:', s1)
+        s2 = timeit.timeit('np.random.seed(1); spherical_to_cartesian(np.random.uniform(low=0, high=np.pi, size=(1000, 3)))',
+                           setup='import numpy as np\nfrom BDSpace.Coordinates.transforms_c import spherical_to_cartesian',
+                           number=10000
+                           #number=10
+                           )
+        print('Spherical to Cart. Cy:', s2)
+        print('Spherical to Cart. Cy speedup: %2.2f%%' % ((s1 - s2) / s1 * 100))
         print()
-        s = timeit.timeit('np.random.seed(1); spherical_to_cartesian(np.random.uniform(low=0, high=np.pi, size=(1000, 3)))',
-                          setup='import numpy as np\nfrom BDSpace.Coordinates.transforms import spherical_to_cartesian',
-                          number=10000
-                          #number=10
-                          )
-        print('SCM Py:', s)
-        s = timeit.timeit('np.random.seed(1); spherical_to_cartesian(np.random.uniform(low=0, high=np.pi, size=(1000, 3)))',
-                          setup='import numpy as np\nfrom BDSpace.Coordinates.transforms_c import spherical_to_cartesian',
-                          number=10000
-                          #number=10
-                          )
-        print('SCM Cy:', s)
+        s1 = timeit.timeit('np.random.seed(1); cylindrical_to_cartesian(np.random.uniform(low=0, high=np.pi, size=3))',
+                           setup='import numpy as np\nfrom BDSpace.Coordinates.transforms import cylindrical_to_cartesian',
+                           number=10000
+                           # number=10000
+                           )
+        print('Cyl. to Cart. 1 Py:', s1)
+        s2 = timeit.timeit('np.random.seed(1); cylindrical_to_cartesian(np.random.uniform(low=0, high=np.pi, size=3))',
+                           setup='import numpy as np\nfrom BDSpace.Coordinates.transforms_c import cylindrical_to_cartesian',
+                           number=10000
+                           # number=10000
+                           )
+        print('Cyl. to Cart. 1 Cy:', s2)
+        print('Cyl. to Cart. 1 Cy speedup: %2.2f%%' % ((s1 - s2) / s1 * 100))
         print()
+        s1 = timeit.timeit(
+            'np.random.seed(1); cylindrical_to_cartesian(np.random.uniform(low=0, high=np.pi, size=(1000, 3)))',
+            setup='import numpy as np\nfrom BDSpace.Coordinates.transforms import cylindrical_to_cartesian',
+            number=10000
+            # number=10
+            )
+        print('Cyl. to Cart. Py:', s1)
+        s2 = timeit.timeit(
+            'np.random.seed(1); cylindrical_to_cartesian(np.random.uniform(low=0, high=np.pi, size=(1000, 3)))',
+            setup='import numpy as np\nfrom BDSpace.Coordinates.transforms_c import cylindrical_to_cartesian',
+            number=10000
+            # number=10
+            )
+        print('Cyl. to Cart. Cy:', s2)
+        print('Cyl. to Cart. Cy speedup: %2.2f%%' % ((s1 - s2) / s1 * 100))
+
+    def test_to_cylindrical_speed(self):
+        print()
+        s1 = timeit.timeit('np.random.seed(1); spherical_to_cylindrical(np.random.uniform(low=0, high=np.pi, size=3))',
+                           setup='import numpy as np\nfrom BDSpace.Coordinates.transforms import spherical_to_cylindrical',
+                           number=10000
+                           #number=10000
+                           )
+        print('Spherical to Cyl. 1 Py:', s1)
+        s2 = timeit.timeit('np.random.seed(1); spherical_to_cylindrical(np.random.uniform(low=0, high=np.pi, size=3))',
+                           setup='import numpy as np\nfrom BDSpace.Coordinates.transforms_c import spherical_to_cylindrical',
+                           number=10000
+                           #number=10000
+                           )
+        print('Spherical to Cyl. 1 Cy:', s2)
+        print('Spherical to Cyl. 1 Cy speedup: %2.2f%%' % ((s1 - s2) / s1 * 100))
+        print()
+        s1 = timeit.timeit('np.random.seed(1); spherical_to_cylindrical(np.random.uniform(low=0, high=np.pi, size=(1000, 3)))',
+                           setup='import numpy as np\nfrom BDSpace.Coordinates.transforms import spherical_to_cylindrical',
+                           number=10000
+                           #number=10
+                           )
+        print('Spherical to Cyl. Py:', s1)
+        s2 = timeit.timeit('np.random.seed(1); spherical_to_cylindrical(np.random.uniform(low=0, high=np.pi, size=(1000, 3)))',
+                           setup='import numpy as np\nfrom BDSpace.Coordinates.transforms_c import spherical_to_cylindrical',
+                           number=10000
+                           #number=10
+                           )
+        print('Spherical to Cyl. Cy:', s2)
+        print('Spherical to Cyl. Cy speedup: %2.2f%%' % ((s1 - s2) / s1 * 100))
+        print()
+        s1 = timeit.timeit('np.random.seed(1); cartesian_to_cylindrical(np.random.uniform(low=0, high=np.pi, size=3))',
+                           setup='import numpy as np\nfrom BDSpace.Coordinates.transforms import cartesian_to_cylindrical',
+                           number=10000
+                           # number=10000
+                           )
+        print('Cart. to Cyl. 1 Py:', s1)
+        s2 = timeit.timeit('np.random.seed(1); cartesian_to_cylindrical(np.random.uniform(low=0, high=np.pi, size=3))',
+                           setup='import numpy as np\nfrom BDSpace.Coordinates.transforms_c import cartesian_to_cylindrical',
+                           number=10000
+                           # number=10000
+                           )
+        print('Cart. to Cyl. 1 Cy:', s2)
+        print('Cart. to Cyl. 1 Cy speedup: %2.2f%%' % ((s1 - s2) / s1 * 100))
+        print()
+        s1 = timeit.timeit(
+            'np.random.seed(1); cartesian_to_cylindrical(np.random.uniform(low=0, high=np.pi, size=(1000, 3)))',
+            setup='import numpy as np\nfrom BDSpace.Coordinates.transforms import cartesian_to_cylindrical',
+            number=10000
+            # number=10
+            )
+        print('Cart. to Cyl. Py:', s1)
+        s2 = timeit.timeit(
+            'np.random.seed(1); cartesian_to_cylindrical(np.random.uniform(low=0, high=np.pi, size=(1000, 3)))',
+            setup='import numpy as np\nfrom BDSpace.Coordinates.transforms_c import cartesian_to_cylindrical',
+            number=10000
+            # number=10
+            )
+        print('Cart. to Cyl. Cy:', s2)
+        print('Cart. to Cyl. Cy speedup: %2.2f%%' % ((s1 - s2) / s1 * 100))
 
     def test_to_cylindrical_single_point(self):
-        xyz = [1, 0, 0]
+        xyz = np.array([1, 0, 0], dtype=np.double)
         np.testing.assert_allclose(cartesian_to_cylindrical(xyz), [1, 0, 0], atol=np.finfo(float).eps)
-        xyz = [0, 1, 0]
+        xyz = np.array([0, 1, 0], dtype=np.double)
         np.testing.assert_allclose(cartesian_to_cylindrical(xyz), [1, np.pi / 2, 0], atol=np.finfo(float).eps)
-        xyz = [1, 0, 1]
+        xyz = np.array([1, 0, 1], dtype=np.double)
         np.testing.assert_allclose(cartesian_to_cylindrical(xyz), [1, 0, 1], atol=np.finfo(float).eps)
-        xyz = [0, 0, 0]
+        xyz = np.array([0, 0, 0], dtype=np.double)
         np.testing.assert_allclose(cartesian_to_cylindrical(xyz), [0, 0, 0], atol=np.finfo(float).eps)
-        xyz = [0, 0, 1]
+        xyz = np.array([0, 0, 1], dtype=np.double)
         np.testing.assert_allclose(cartesian_to_cylindrical(xyz), [0, 0, 1], atol=np.finfo(float).eps)
 
     def test_to_cylindrical_and_back_many_points(self):

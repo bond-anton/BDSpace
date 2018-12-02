@@ -230,28 +230,83 @@ def spherical_to_cartesian(r_theta_phi):
             raise ValueError('N-points array shape must be (N, 3)')
 
 
+@boundscheck(False)
+@wraparound(False)
+cdef double[:] __cartesian_to_cylindrical_point(double[:] xyz):
+    cdef:
+        Py_ssize_t s = xyz.size
+        array[double] rho_phi_z, template = array('d')
+    if s < 3:
+        xyz = __extend_vector_dimensions(xyz, 3)
+    rho_phi_z = clone(template, 3, False)
+    rho_phi_z[0] = sqrt(xyz[0] * xyz[0] + xyz[1] * xyz[1])
+    rho_phi_z[1] = atan2(xyz[1], xyz[0])
+    rho_phi_z[2] = xyz[2]
+    return rho_phi_z
+
+
+@boundscheck(False)
+@wraparound(False)
+cdef double[:] __cartesian_to_cylindrical_points(double[:] xyz):
+    cdef:
+        Py_ssize_t s = xyz.size
+        array[double] rho_phi_z, template = array('d')
+        int i
+    rho_phi_z = clone(template, s, False)
+    for i in range(0, s, 3):
+        rho_phi_z[i] = sqrt(xyz[i] * xyz[i] + xyz[i + 1] * xyz[i + 1])
+        rho_phi_z[i + 1] = atan2(xyz[i + 1], xyz[i])
+        rho_phi_z[i + 2] = xyz[i + 2]
+    return rho_phi_z
+
+
 def cartesian_to_cylindrical(xyz):
     """
     convert cartesian to cylindrical coordinates
     :param xyz: cartesian coordinates (at least 3)
     :return: cylindrical coordinates rho, phi, z
     """
-    xyz = np.array(xyz)
-    rho_phi_z = np.zeros(xyz.shape)
-    if xyz.size == 3:
-        rho_phi_z[0] = np.sqrt(xyz[0]**2 + xyz[1]**2)
-        rho_phi_z[1] = np.arctan2(xyz[1], xyz[0])
-        rho_phi_z[2] = xyz[2]
-    elif xyz.size > 3:
+    if xyz.size <= 3:
+        return np.asarray(__cartesian_to_cylindrical_point(xyz))
+    else:
         if len(xyz.shape) == 2 and xyz.shape[1] == 3:
-            rho_phi_z[:, 0] = np.sqrt(xyz[:, 0]**2 + xyz[:, 1]**2)
-            rho_phi_z[:, 1] = np.arctan2(xyz[:, 1], xyz[:, 0])
-            rho_phi_z[:, 2] = xyz[:, 2]
+            return np.asarray(__cartesian_to_cylindrical_points(xyz.ravel())).reshape(xyz.shape)
         else:
             raise ValueError('N-points array shape must be (N, 3)')
-    else:
-        raise ValueError('at least 3 coordinates are needed for conversion')
-    return rho_phi_z
+
+
+@boundscheck(False)
+@wraparound(False)
+cdef double[:] __cylindrical_to_cartesian_point(double[:] rho_phi_z):
+    cdef:
+        Py_ssize_t s = rho_phi_z.size
+        array[double] xyz, template = array('d')
+    if s < 3:
+        rho_phi_z = __extend_vector_dimensions(rho_phi_z, 3)
+    xyz = clone(template, 3, False)
+    rho_phi_z[1] = __reduce_angle(rho_phi_z[1], center=False, positive=True)
+    xyz[0] = rho_phi_z[0] * cos(rho_phi_z[1])
+    xyz[1] = rho_phi_z[0] * sin(rho_phi_z[1])
+    xyz[2] = rho_phi_z[2]
+    return xyz
+
+
+@boundscheck(False)
+@wraparound(False)
+cdef double[:] __cylindrical_to_cartesian_points(double[:] rho_phi_z):
+    cdef:
+        Py_ssize_t s = rho_phi_z.size
+        array[double] xyz, template = array('d')
+        int i
+    if s < 3:
+        rho_phi_z = __extend_vector_dimensions(rho_phi_z, 3)
+    xyz = clone(template, s, False)
+    for i in range(0, s, 3):
+        rho_phi_z[i + 1] = __reduce_angle(rho_phi_z[i + 1], center=False, positive=True)
+        xyz[i] = rho_phi_z[i] * cos(rho_phi_z[i + 1])
+        xyz[i + 1] = rho_phi_z[i] * sin(rho_phi_z[i + 1])
+        xyz[i + 2] = rho_phi_z[i + 2]
+    return xyz
 
 
 def cylindrical_to_cartesian(rho_phi_z):
@@ -260,28 +315,44 @@ def cylindrical_to_cartesian(rho_phi_z):
     :param rho_phi_z: cylindrical coordinates (at least 3)
     :return: cartesian coordinates x, y, z
     """
-    rho_phi_z = np.array(rho_phi_z)
-    xyz = np.zeros(rho_phi_z.shape)
-    if rho_phi_z.size == 3:
-        rho_phi_z[1] = reduce_angle(rho_phi_z[1], keep_sign=False)
-        if (rho_phi_z[:2] < 0).any() or rho_phi_z[1] > 2*np.pi:
-            raise ValueError('r must be >= 0, phi must be within [0; 2*pi]')
-        xyz[0] = rho_phi_z[0] * np.cos(rho_phi_z[1])
-        xyz[1] = rho_phi_z[0] * np.sin(rho_phi_z[1])
-        xyz[2] = rho_phi_z[2]
-    elif rho_phi_z.size > 3:
+    if rho_phi_z.size <= 3:
+        return np.asarray(__cylindrical_to_cartesian_point(rho_phi_z))
+    else:
         if len(rho_phi_z.shape) == 2 and rho_phi_z.shape[1] == 3:
-            rho_phi_z[:, 1] = reduce_angle(rho_phi_z[:, 1], keep_sign=False)
-            if (rho_phi_z[:, :2] < 0).any() or (rho_phi_z[:, 1] > 2*np.pi).any():
-                raise ValueError('r must be >= 0, phi must be within [0; 2*pi]')
-            xyz[:, 0] = rho_phi_z[:, 0] * np.cos(rho_phi_z[:, 1])
-            xyz[:, 1] = rho_phi_z[:, 0] * np.sin(rho_phi_z[:, 1])
-            xyz[:, 2] = rho_phi_z[:, 2]
+            return np.asarray(__cylindrical_to_cartesian_points(rho_phi_z.ravel())).reshape(rho_phi_z.shape)
         else:
             raise ValueError('N-points array shape must be (N, 3)')
-    else:
-        raise ValueError('at least 3 coordinates are needed for conversion')
-    return xyz
+
+
+@boundscheck(False)
+@wraparound(False)
+cdef double[:] __spherical_to_cylindrical_point(double[:] r_theta_phi):
+    cdef:
+        Py_ssize_t s = r_theta_phi.size
+        array[double] rho_phi_z, template = array('d')
+    if s < 3:
+        r_theta_phi = __extend_vector_dimensions(r_theta_phi, 3)
+    rho_phi_z = clone(template, 3, False)
+    rho_phi_z[0] = r_theta_phi[0] * sin(r_theta_phi[1])
+    rho_phi_z[1] = r_theta_phi[2]
+    rho_phi_z[2] = r_theta_phi[0] * cos(r_theta_phi[1])
+    return rho_phi_z
+
+
+@boundscheck(False)
+@wraparound(False)
+cdef double[:] __spherical_to_cylindrical_points(double[:] r_theta_phi):
+    cdef:
+        Py_ssize_t s = r_theta_phi.size
+        array[double] rho_phi_z, template = array('d')
+        int i
+    rho_phi_z = clone(template, s, False)
+    for i in range(0, s, 3):
+        rho_phi_z[i] = r_theta_phi[i] * sin(r_theta_phi[i + 1])
+        rho_phi_z[i + 1] = r_theta_phi[i + 2]
+        rho_phi_z[i + 2] = r_theta_phi[i] * cos(r_theta_phi[i + 1])
+    return rho_phi_z
+
 
 
 def spherical_to_cylindrical(r_theta_phi):
@@ -290,8 +361,43 @@ def spherical_to_cylindrical(r_theta_phi):
     :param r_theta_phi: spherical coordinates (at least 3)
     :return: cylindrical coordinates rho, phi, z
     """
-    xyz = spherical_to_cartesian(r_theta_phi)
-    return cartesian_to_cylindrical(xyz)
+    if r_theta_phi.size <= 3:
+        return np.asarray(__spherical_to_cylindrical_point(r_theta_phi))
+    else:
+        if len(r_theta_phi.shape) == 2 and r_theta_phi.shape[1] == 3:
+            return np.asarray(__spherical_to_cylindrical_points(r_theta_phi.ravel())).reshape(r_theta_phi.shape)
+        else:
+            raise ValueError('N-points array shape must be (N, 3)')
+
+
+@boundscheck(False)
+@wraparound(False)
+cdef double[:] __cylindrical_to_spherical_point(double[:] rho_phi_z):
+    cdef:
+        Py_ssize_t s = rho_phi_z.size
+        array[double] r_theta_phi, template = array('d')
+    if s < 3:
+        rho_phi_z = __extend_vector_dimensions(rho_phi_z, 3)
+    r_theta_phi = clone(template, 3, False)
+    r_theta_phi[0] = sqrt(rho_phi_z[0] * rho_phi_z[0] + rho_phi_z[2] * rho_phi_z[2])
+    r_theta_phi[1] = atan2(rho_phi_z[0], rho_phi_z[2])
+    r_theta_phi[2] = rho_phi_z[1]
+    return r_theta_phi
+
+
+@boundscheck(False)
+@wraparound(False)
+cdef double[:] __cylindrical_to_spherical_points(double[:] rho_phi_z):
+    cdef:
+        Py_ssize_t s = rho_phi_z.size
+        array[double] r_theta_phi, template = array('d')
+        int i
+    r_theta_phi = clone(template, s, False)
+    for i in range(0, s, 3):
+        r_theta_phi[i] = sqrt(rho_phi_z[i] * rho_phi_z[i] + rho_phi_z[i + 2] * rho_phi_z[i + 2])
+        r_theta_phi[i + 1] = atan2(rho_phi_z[i], rho_phi_z[i + 2])
+        r_theta_phi[i + 2] = rho_phi_z[i + 1]
+    return r_theta_phi
 
 
 def cylindrical_to_spherical(rho_phi_z):
@@ -300,5 +406,10 @@ def cylindrical_to_spherical(rho_phi_z):
     :param rho_phi_z: cylindrical coordinates (at least 3)
     :return: spherical coordinates r, theta, phi
     """
-    xyz = cylindrical_to_cartesian(rho_phi_z)
-    return cartesian_to_spherical(xyz)
+    if rho_phi_z.size <= 3:
+        return np.asarray(__cylindrical_to_spherical_point(rho_phi_z))
+    else:
+        if len(rho_phi_z.shape) == 2 and rho_phi_z.shape[1] == 3:
+            return np.asarray(__cylindrical_to_spherical_points(rho_phi_z.ravel())).reshape(rho_phi_z.shape)
+        else:
+            raise ValueError('N-points array shape must be (N, 3)')
