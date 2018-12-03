@@ -1,13 +1,15 @@
 from __future__ import division, print_function
 import numpy as np
 
-from BDQuaternions cimport Rotation, Conventions
+from cpython.array cimport array, clone
+from cpython.object cimport Py_EQ, Py_NE
+from BDQuaternions cimport Rotation
 
 from .transforms import unit_vector
 from ._utils import check_points_array
 
 
-class Cartesian(object):
+cdef class Cartesian(object):
     """
     3D cartesian coordinate system
     """
@@ -16,15 +18,12 @@ class Cartesian(object):
                  euler_angles_convention=None):
         # The basis rotation is kept as Rotation quaternion
         self.__rotation = Rotation()
-        self.__rotation.euler_angles_convention = euler_angles_convention
-        self.__name = None
-        self.name = str(name)
-        self.__labels = None
+        self.euler_angles_convention = euler_angles_convention
+        self.__name = str(name)
         self.labels = labels
         # Basis in parent CS
         self.basis = basis
         # Origin in parent CS
-        self.__origin = None
         self.origin = origin
 
     @property
@@ -83,10 +82,10 @@ class Cartesian(object):
         :param basis: 3x3 numpy array.
         """
         if basis is None:
-            basis = np.identity(3, dtype=np.float64)
+            basis = np.identity(3, dtype=np.double)
         if isinstance(basis, np.ndarray):
             try:
-                basis = basis.astype(np.float64)
+                basis = basis.astype(np.double)
             except:
                 raise ValueError('only numeric basis coordinates are supported')
             if basis.shape == (3, 3) or basis.size == 9:
@@ -108,17 +107,24 @@ class Cartesian(object):
     @origin.setter
     def origin(self, origin):
         if origin is None:
-            origin = [0, 0, 0]
-        origin = np.array(origin, dtype=np.float64).ravel()
-        if origin.size != 3:
-            raise ValueError('Origin must be 3 numeric coordinates')
-        self.__origin = origin
+            self.__origin = np.zeros(3, dtype=np.double)
+        else:
+            origin = np.array(origin, dtype=np.double).ravel()
+            if origin.size != 3:
+                raise ValueError('Origin must be 3 numeric coordinates')
+            self.__origin = origin
 
-    def __eq__(self, other):
-        result = isinstance(other, self.__class__)
-        result = result and np.allclose(self.basis, other.basis)
-        result = result and np.allclose(self.origin, other.origin)
-        return result
+    def __richcmp__(x, y, int op):
+        if op == Py_EQ:
+            if isinstance(x, Cartesian) and isinstance(y, Cartesian):
+                return x.__rotation == y.__rotation and np.allclose(x.__origin, y.__origin)
+            return False
+        elif op == Py_NE:
+            if isinstance(x, Cartesian) and isinstance(y, Cartesian):
+                return x.__rotation != y.__rotation or not np.allclose(x.__origin, y.__origin)
+            return True
+        else:
+            return NotImplemented
 
     def __str__(self):
         information = 'Cartesian coordinate system: %s\n' % self.name
@@ -131,19 +137,22 @@ class Cartesian(object):
         information += str(self.euler_angles) + '\n'
         return information
 
-    def rotate(self, rotation, rot_center=None):
+    cpdef rotate(self, Rotation rotation, double[:] rot_center=None):
         """
         Apply rotation specified by Rotation quaternion instance
         :param rotation: Rotation quaternion instance
         :param rot_center: center of rotation, if None the origin of the CS is used
         """
-        if isinstance(rotation, Rotation):
-            self.__rotation *= rotation
-            if rot_center is not None:
-                origin_shift = self.origin - rot_center
-                self.origin = rot_center + rotation.rotate(origin_shift)
-        else:
-            raise ValueError('instance of Rotation class was expected, got' + str(type(rotation)))
+        cdef:
+            int i
+            Py_ssize_t s = self.__origin.size
+            array[double] origin_shift, template = array('d')
+        origin_shift = clone(template, s, zero=False)
+        self.__rotation *= rotation
+        if rot_center is not None:
+            for i in range(s):
+                origin_shift[i] = self.__origin[i] - rot_center[i]
+            self.__origin = rot_center + rotation.rotate(origin_shift)
 
     def rotate_axis_angle(self, axis, theta, rot_center=None):
         """
