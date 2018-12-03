@@ -1,12 +1,14 @@
 from __future__ import division, print_function
 import numpy as np
 
+from cython import boundscheck, wraparound
+
 from cpython.array cimport array, clone
 from cpython.object cimport Py_EQ, Py_NE
-from BDQuaternions cimport Rotation
+#from BDQuaternions cimport Rotation
 
-from .transforms import unit_vector
-from ._utils import check_points_array
+from .transforms_c cimport unit_vector
+from ._utils_c cimport check_points_array
 
 
 cdef class Cartesian(object):
@@ -71,6 +73,8 @@ cdef class Cartesian(object):
         return self.__rotation.rotation_matrix.T
 
     @basis.setter
+    @boundscheck(False)
+    @wraparound(False)
     def basis(self, basis):
         """
         Sets basis for the cartesian coordinate system. Basis will be converted to 3x3 array.
@@ -117,11 +121,11 @@ cdef class Cartesian(object):
     def __richcmp__(x, y, int op):
         if op == Py_EQ:
             if isinstance(x, Cartesian) and isinstance(y, Cartesian):
-                return x.__rotation == y.__rotation and np.allclose(x.__origin, y.__origin)
+                return np.allclose(x.basis, y.basis) and np.allclose(x.origin, y.origin)
             return False
         elif op == Py_NE:
             if isinstance(x, Cartesian) and isinstance(y, Cartesian):
-                return x.__rotation != y.__rotation or not np.allclose(x.__origin, y.__origin)
+                return not np.allclose(x.basis, y.basis) or not np.allclose(x.origin, y.origin)
             return True
         else:
             return NotImplemented
@@ -137,6 +141,8 @@ cdef class Cartesian(object):
         information += str(self.euler_angles) + '\n'
         return information
 
+    @boundscheck(False)
+    @wraparound(False)
     cpdef rotate(self, Rotation rotation, double[:] rot_center=None):
         """
         Apply rotation specified by Rotation quaternion instance
@@ -154,7 +160,7 @@ cdef class Cartesian(object):
                 origin_shift[i] = self.__origin[i] - rot_center[i]
             self.__origin = rot_center + rotation.rotate(origin_shift)
 
-    def rotate_axis_angle(self, axis, theta, rot_center=None):
+    cpdef rotate_axis_angle(self, double[:] axis, double theta, double[:] rot_center=None):
         """
         rotate basis around axis in parent CS
         :param axis: axis of rotation
@@ -162,33 +168,53 @@ cdef class Cartesian(object):
         :param rot_center: center of rotation, if None the origin of the CS is used
         """
         rotation = Rotation()
-        rotation.euler_angles_convention = self.euler_angles_convention
+        rotation.euler_angles_convention = self.__rotation.euler_angles_convention
         rotation.axis_angle = (axis, theta)
         self.rotate(rotation, rot_center=rot_center)
         
-    def rotate_euler_angles(self, euler_angles, rot_center=None):
+    cpdef rotate_euler_angles(self, double[:] euler_angles, double[:] rot_center=None):
         """
         rotate basis in parent CS using three Euler's angles and selected center of rotation
         :param euler_angles: Euler's angles
         :param rot_center: rotation center, if None the origin of the CS is used
         """
         rotation = Rotation()
-        rotation.euler_angles_convention = self.euler_angles_convention
+        rotation.euler_angles_convention = self.__rotation.euler_angles_convention
         rotation.euler_angles = euler_angles
         self.rotate(rotation, rot_center=rot_center)
-    
-    def to_parent(self, xyz):
+
+    @boundscheck(False)
+    @wraparound(False)
+    cpdef double[:] to_parent(self, double[:] xyz):
         """
         calculates coordinates of given points in parent (global) CS
         :param xyz: local coordinates array
         """
-        xyz = check_points_array(xyz)
-        return self.__rotation.rotate(xyz) + self.origin
+        cdef:
+            int i
+            double[:] xyz_parent = self.__rotation.rotate(check_points_array(xyz))
+            Py_ssize_t s = xyz_parent.size
+        for i in range(0, s, 3):
+            xyz_parent[i] += self.__origin[0]
+            xyz_parent[i + 1] += self.__origin[1]
+            xyz_parent[i + 2] += self.__origin[2]
+        return xyz_parent
 
-    def to_local(self, xyz):
+    @boundscheck(False)
+    @wraparound(False)
+    cpdef double[:] to_local(self, double[:] xyz):
         """
         calculates local coordinates for points in parent CS/
         :param xyz: coordinates in parent (global) coordinate system.
         """
-        xyz_offset = check_points_array(xyz) - self.origin
-        return self.__rotation.reciprocal().rotate(xyz_offset)
+        cdef:
+            int i
+            # double[:] xyz_local = check_points_array(xyz)
+            double[:] xyz_local = xyz
+            Py_ssize_t s = xyz_local.size
+        for i in range(0, s, 3):
+            xyz_local[i] -= self.__origin[0]
+            xyz_local[i + 1] -= self.__origin[1]
+            xyz_local[i + 2] -= self.__origin[2]
+        xyz_local = self.__rotation.reciprocal().rotate(xyz_local)
+        return xyz_local
