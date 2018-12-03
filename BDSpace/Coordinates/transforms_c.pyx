@@ -88,12 +88,12 @@ cpdef double[:] unit_vector(double[:] v):
         array[double] result, template = array('d')
     result = clone(template, s, zero=False)
 
-    if length > 0:
-        for i in range(s):
-            result[i] = v[i] / length
-    else:
+    if length == 0:
         for i in range(s):
             result[i] = 0.0
+    else:
+        for i in range(s):
+            result[i] = v[i] / length
     return result
 
 
