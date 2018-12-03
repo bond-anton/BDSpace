@@ -33,12 +33,12 @@ class TestCoordinatesUtils(unittest.TestCase):
 
     def test_speed(self):
         print()
-        s = timeit.timeit('check_points(np.arange(36, dtype=np.double).reshape(12, 3).T)',
+        s1 = timeit.timeit('check_points(np.arange(36, dtype=np.double).reshape(12, 3).T)',
                           setup='import numpy as np\nfrom BDSpace.Coordinates._utils import check_points_array as check_points',
                           number=100000)
-        print('CP Py:', s)
-        s = timeit.timeit('check_points(np.arange(36, dtype=np.double).reshape(12, 3).T)',
+        print('Check Array of Points Py:', s1)
+        s2 = timeit.timeit('check_points(np.arange(36, dtype=np.double).reshape(12, 3).T)',
                           setup='import numpy as np\nfrom BDSpace.Coordinates.Cartesian_c import check_points_array as check_points',
                           number=100000)
-        print('CP Cy:', s)
-        print()
+        print('Check Array of Points Cy:', s2)
+        print('Check Array of Points Cy speedup: %2.2f%%' % ((s1 - s2) / s1 * 100))

@@ -5,7 +5,7 @@ import numpy as np
 from cython import boundscheck, wraparound
 
 from cpython.array cimport array, clone
-from libc.math cimport sin, cos, atan2, acos, sqrt, M_PI
+from libc.math cimport fabs, sin, cos, atan2, acos, sqrt, M_PI
 
 
 cdef double __reduce_angle(double angle, bint center=True, bint positive=False):
@@ -18,7 +18,7 @@ cdef double __reduce_angle(double angle, bint center=True, bint positive=False):
     """
     cdef:
         double reduced_angle
-    if abs(angle) > 2 * M_PI:
+    if fabs(angle) > 2 * M_PI:
         reduced_angle = angle - 2 * M_PI * (angle // (2 * M_PI))
     else:
         reduced_angle = angle
@@ -37,10 +37,12 @@ cdef double __reduce_angle(double angle, bint center=True, bint positive=False):
 @wraparound(False)
 cdef double[:] __reduce_angles(double[:] angles, bint center=True, bint positive=False):
     cdef:
-        double[:] reduced_angles = angles
         int i
-    for i in range(angles.size):
-        reduced_angles[i] = __reduce_angle(reduced_angles[i], center=center, positive=positive)
+        Py_ssize_t s = angles.size
+        array[double] reduced_angles, template = array('d')
+    reduced_angles = clone(template, s, zero=False)
+    for i in range(s):
+        reduced_angles[i] = __reduce_angle(angles[i], center=center, positive=positive)
     return reduced_angles
 
 
@@ -115,6 +117,7 @@ cdef double[:] __extend_vector_dimensions(double[:] v, Py_ssize_t s):
 @wraparound(False)
 cpdef double angles_between_vectors(double[:] v1, double[:] v2):
     cdef:
+        int i
         Py_ssize_t s1 = v1.size, s2 = v2.size
         Py_ssize_t s = s1
         double [:] v1_u = unit_vector(v1)
