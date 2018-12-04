@@ -190,7 +190,7 @@ cdef class Cartesian(object):
         """
         cdef:
             int i
-            double[:, :] xyz_parent = check_points_array(self.__rotation.rotate(check_points_array(xyz)))
+            double[:, :] xyz_parent = self.__rotation.rotate(xyz)
             Py_ssize_t[:] s = xyz_parent.shape
         for i in range(0, s[0]):
             xyz_parent[i, 0] += self.__origin[0]
@@ -208,11 +208,10 @@ cdef class Cartesian(object):
         cdef:
             int i
             double[:, :] xyz_local = check_points_array(xyz)
-            # double[:] xyz_local = xyz
             Py_ssize_t[:] s = xyz_local.shape
         for i in range(0, s[0]):
             xyz_local[i, 0] -= self.__origin[0]
             xyz_local[i, 1] -= self.__origin[1]
             xyz_local[i, 2] -= self.__origin[2]
-        xyz_local = check_points_array(self.__rotation.reciprocal().rotate(xyz_local))
+        xyz_local = self.__rotation.reciprocal().rotate(xyz_local)
         return xyz_local
