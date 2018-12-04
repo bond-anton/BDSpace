@@ -2,6 +2,7 @@ from __future__ import division
 import unittest
 import numpy as np
 from BDSpace.Coordinates.Cartesian_c import Cartesian
+from BDSpace.Coordinates._utils_c import check_points_array
 from BDQuaternions import Conventions
 
 
@@ -67,8 +68,8 @@ class TestCoordinates(unittest.TestCase):
         point_global = (np.random.random(3) - 0.5) * 100
         point_local = other_coordinate_system.to_local(point_global)
         point_global2 = other_coordinate_system.to_parent(point_local)
-        np.testing.assert_allclose(point_global2, point_global, atol=np.finfo(float).eps)
+        np.testing.assert_allclose(point_global2, check_points_array(point_global), atol=np.finfo(float).eps)
         point_local = (np.random.random(3) - 0.5) * 100
         point_global = other_coordinate_system.to_parent(point_local)
         point_local_2 = other_coordinate_system.to_local(point_global)
-        np.testing.assert_allclose(point_local_2, point_local, atol=np.finfo(float).eps)
+        np.testing.assert_allclose(point_local_2, check_points_array(point_local), atol=np.finfo(float).eps)

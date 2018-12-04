@@ -183,38 +183,36 @@ cdef class Cartesian(object):
         rotation.euler_angles = euler_angles
         self.rotate(rotation, rot_center=rot_center)
 
-    @boundscheck(False)
-    @wraparound(False)
-    cpdef double[:] to_parent(self, double[:] xyz):
+    cpdef double[:, :] to_parent(self, xyz):
         """
         calculates coordinates of given points in parent (global) CS
         :param xyz: local coordinates array
         """
         cdef:
             int i
-            double[:] xyz_parent = self.__rotation.rotate(check_points_array(xyz))
-            Py_ssize_t s = xyz_parent.size
-        for i in range(0, s, 3):
-            xyz_parent[i] += self.__origin[0]
-            xyz_parent[i + 1] += self.__origin[1]
-            xyz_parent[i + 2] += self.__origin[2]
+            double[:, :] xyz_parent = check_points_array(self.__rotation.rotate(check_points_array(xyz)))
+            Py_ssize_t[:] s = xyz_parent.shape
+        for i in range(0, s[0]):
+            xyz_parent[i, 0] += self.__origin[0]
+            xyz_parent[i, 1] += self.__origin[1]
+            xyz_parent[i, 2] += self.__origin[2]
         return xyz_parent
 
     @boundscheck(False)
     @wraparound(False)
-    cpdef double[:] to_local(self, double[:] xyz):
+    cpdef double[:, :] to_local(self, xyz):
         """
         calculates local coordinates for points in parent CS/
         :param xyz: coordinates in parent (global) coordinate system.
         """
         cdef:
             int i
-            # double[:] xyz_local = check_points_array(xyz)
-            double[:] xyz_local = xyz
-            Py_ssize_t s = xyz_local.size
-        for i in range(0, s, 3):
-            xyz_local[i] -= self.__origin[0]
-            xyz_local[i + 1] -= self.__origin[1]
-            xyz_local[i + 2] -= self.__origin[2]
-        xyz_local = self.__rotation.reciprocal().rotate(xyz_local)
+            double[:, :] xyz_local = check_points_array(xyz)
+            # double[:] xyz_local = xyz
+            Py_ssize_t[:] s = xyz_local.shape
+        for i in range(0, s[0]):
+            xyz_local[i, 0] -= self.__origin[0]
+            xyz_local[i, 1] -= self.__origin[1]
+            xyz_local[i, 2] -= self.__origin[2]
+        xyz_local = check_points_array(self.__rotation.reciprocal().rotate(xyz_local))
         return xyz_local

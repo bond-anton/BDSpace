@@ -27,9 +27,13 @@ with open(readme_file, encoding='utf-8') as f:
 extensions = [
     Extension(
         'BDSpace.Coordinates.Cartesian_c',
-        ['BDSpace/Coordinates/Cartesian_c.pyx',
-         'BDSpace/Coordinates/_utils_c.pyx'],
-        depends=['BDSpace/Coordinates/Cartesian_c.pxd', 'BDSpace/Coordinates/_utils_c.pxd'],
+        ['BDSpace/Coordinates/Cartesian_c.pyx'],
+        depends=['BDSpace/Coordinates/Cartesian_c.pxd'],
+    ),
+    Extension(
+        'BDSpace.Coordinates._utils_c',
+        ['BDSpace/Coordinates/_utils_c.pyx'],
+        depends=['BDSpace/Coordinates/_utils_c.pxd'],
     ),
     Extension(
         'BDSpace.Coordinates.transforms_c',
