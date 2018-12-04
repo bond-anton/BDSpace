@@ -26,19 +26,19 @@ with open(readme_file, encoding='utf-8') as f:
 
 extensions = [
     Extension(
-        'BDSpace.Coordinates.Cartesian_c',
-        ['BDSpace/Coordinates/Cartesian_c.pyx'],
-        depends=['BDSpace/Coordinates/Cartesian_c.pxd'],
+        'BDSpace.Coordinates.Cartesian',
+        ['BDSpace/Coordinates/Cartesian.pyx'],
+        depends=['BDSpace/Coordinates/Cartesian.pxd'],
     ),
     Extension(
-        'BDSpace.Coordinates._utils_c',
-        ['BDSpace/Coordinates/_utils_c.pyx'],
-        depends=['BDSpace/Coordinates/_utils_c.pxd'],
+        'BDSpace.Coordinates._utils',
+        ['BDSpace/Coordinates/_utils.pyx'],
+        depends=['BDSpace/Coordinates/_utils.pxd'],
     ),
     Extension(
-        'BDSpace.Coordinates.transforms_c',
-        ['BDSpace/Coordinates/transforms_c.pyx'],
-        depends=['BDSpace/Coordinates/transforms_c.pxd'],
+        'BDSpace.Coordinates.transforms',
+        ['BDSpace/Coordinates/transforms.pyx'],
+        depends=['BDSpace/Coordinates/transforms.pxd'],
     ),
 ]
 
@@ -77,8 +77,8 @@ setup(
     packages=find_packages(exclude=['demo', 'tests', 'docs', 'contrib', 'venv']),
     ext_modules=cythonize(extensions, compiler_directives={'language_level': sys.version_info[0]}),
     package_data={
-        'Coordinates.Cartesian_c': ['Cartesian_c.pxd', '_utils_c.pxd'],
-        'Coordinates.transforms_c': ['transforms_c.pxd'],
+        'Coordinates.Cartesian_c': ['Cartesian.pxd', '_utils.pxd'],
+        'Coordinates.transforms_c': ['transforms.pxd'],
         # 'Schottky.Metal': ['Schottky/Metal/__init__.pxd'],
     },
     install_requires=['numpy', 'Cython',

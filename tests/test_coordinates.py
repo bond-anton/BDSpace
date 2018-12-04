@@ -1,8 +1,8 @@
 from __future__ import division
 import unittest
 import numpy as np
-from BDSpace.Coordinates.Cartesian_c import Cartesian
-from BDSpace.Coordinates._utils_c import check_points_array
+from BDSpace.Coordinates import Cartesian
+from BDSpace.Coordinates._utils import check_points_array
 from BDQuaternions import Conventions
 
 

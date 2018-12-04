@@ -5,10 +5,11 @@ from cython import boundscheck, wraparound
 
 from cpython.array cimport array, clone
 from cpython.object cimport Py_EQ, Py_NE
-#from BDQuaternions cimport Rotation
 
-from .transforms_c cimport unit_vector
-from ._utils_c cimport check_points_array
+from BDQuaternions cimport Rotation
+
+from .transforms cimport unit_vector
+from ._utils cimport check_points_array
 
 
 cdef class Cartesian(object):
