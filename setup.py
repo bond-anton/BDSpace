@@ -45,6 +45,16 @@ extensions = [
         ['BDSpace/Coordinates/transforms.pyx'],
         depends=['BDSpace/Coordinates/transforms.pxd'],
     ),
+    Extension(
+        'BDSpace.Field.Field',
+        ['BDSpace/Field/Field.pyx'],
+        depends=['BDSpace/Field/Field.pxd'],
+    ),
+    Extension(
+        'BDSpace.Field.Superposed',
+        ['BDSpace/Field/Superposed.pyx'],
+        depends=['BDSpace/Field/Superposed.pxd'],
+    ),
 ]
 
 setup(
@@ -86,6 +96,8 @@ setup(
         'Coordinates._utils': ['_utils.pxd'],
         'Coordinates.transforms': ['transforms.pxd'],
         'Space': ['Space.pxd'],
+        'Field.Field': ['Field.pxd'],
+        'Field.Superposed': ['Superposed.pxd'],
     },
     install_requires=['numpy', 'Cython',
                       'BDQuaternions>=0.2.4'],
