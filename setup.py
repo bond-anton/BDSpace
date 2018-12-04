@@ -26,6 +26,11 @@ with open(readme_file, encoding='utf-8') as f:
 
 extensions = [
     Extension(
+        'BDSpace.Space',
+        ['BDSpace/Space.pyx'],
+        depends=['BDSpace/Space.pxd'],
+    ),
+    Extension(
         'BDSpace.Coordinates.Cartesian',
         ['BDSpace/Coordinates/Cartesian.pyx'],
         depends=['BDSpace/Coordinates/Cartesian.pxd'],
@@ -77,12 +82,13 @@ setup(
     packages=find_packages(exclude=['demo', 'tests', 'docs', 'contrib', 'venv']),
     ext_modules=cythonize(extensions, compiler_directives={'language_level': sys.version_info[0]}),
     package_data={
-        'Coordinates.Cartesian_c': ['Cartesian.pxd', '_utils.pxd'],
-        'Coordinates.transforms_c': ['transforms.pxd'],
-        # 'Schottky.Metal': ['Schottky/Metal/__init__.pxd'],
+        'Coordinates.Cartesian': ['Cartesian.pxd'],
+        'Coordinates._utils': ['_utils.pxd'],
+        'Coordinates.transforms': ['transforms.pxd'],
+        'Space': ['Space.pxd'],
     },
     install_requires=['numpy', 'Cython',
-                      'BDQuaternions>=0.1.2'],
+                      'BDQuaternions>=0.2.4'],
     test_suite='nose.collector',
     tests_require=['nose']
 )
