@@ -1,7 +1,7 @@
 from __future__ import division, print_function
 import numpy as np
 
-from BDSpace.Coordinates import Cartesian
+from BDSpace.Coordinates.Cartesian_c import Cartesian
 from ._version import __version__
 
 
