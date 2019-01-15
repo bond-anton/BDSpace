@@ -4,3 +4,13 @@ include NOTICE.txt
 
 # Include README
 include README.md
+
+# Include Cython sources
+recursive-include BDSpace *.pyx
+recursive-include BDSpace *.pxd
+
+recursive-exclude build *
+recursive-exclude dist *
+recursive-exclude tools *
+recursive-exclude venv *
+recursive-exclude venv_2.7 *
