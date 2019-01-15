@@ -6,7 +6,7 @@ from cython import boundscheck, wraparound
 from cpython.array cimport array, clone
 from cpython.object cimport Py_EQ, Py_NE
 
-from BDQuaternions cimport Rotation
+from BDQuaternions cimport Rotation, EulerAngles
 
 from .transforms cimport unit_vector
 from ._utils cimport check_points_array
@@ -159,7 +159,7 @@ cdef class Cartesian(object):
         if rot_center is not None:
             for i in range(s):
                 origin_shift[i] = self.__origin[i] - rot_center[i]
-            self.__origin = rot_center + rotation.rotate(origin_shift)
+            self.__origin = rot_center + rotation.rotate(origin_shift)[0]
 
     cpdef rotate_axis_angle(self, double[:] axis, double theta, double[:] rot_center=None):
         """
@@ -181,7 +181,7 @@ cdef class Cartesian(object):
         """
         rotation = Rotation()
         rotation.euler_angles_convention = self.__rotation.euler_angles_convention
-        rotation.euler_angles = euler_angles
+        rotation.euler_angles = EulerAngles(euler_angles, rotation.euler_angles_convention)
         self.rotate(rotation, rot_center=rot_center)
 
     cpdef double[:, :] to_parent(self, xyz):

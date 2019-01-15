@@ -47,17 +47,25 @@ class TestCoordinates(unittest.TestCase):
         np.testing.assert_allclose(self.coordinate_system.euler_angles.euler_angles,
                                    np.array([np.pi, 0, np.pi]), atol=np.finfo(float).eps * 2)
         self.coordinate_system.rotate_axis_angle(axis, np.pi / 2)
-        #np.testing.assert_allclose(self.coordinate_system.euler_angles.euler_angles,
-        #                           np.array([0, np.pi / 2, 0]), atol=np.finfo(float).eps * 2)
         self.coordinate_system.rotate_axis_angle(axis, np.pi / 2)
         np.testing.assert_allclose(self.coordinate_system.euler_angles.euler_angles,
                                    np.array([0, np.pi, 0]), atol=np.finfo(float).eps)
         self.coordinate_system.rotate_axis_angle(axis, np.pi / 2)
-        #np.testing.assert_allclose(self.coordinate_system.euler_angles.euler_angles,
-        #                           np.array([np.pi, np.pi / 2, np.pi]), atol=np.finfo(float).eps)
         self.coordinate_system.rotate_axis_angle(axis, np.pi / 2)
         np.testing.assert_allclose(self.coordinate_system.euler_angles.euler_angles,
                                    np.array([np.pi, 0, -np.pi]), atol=np.finfo(float).eps * 4)
+
+    def test_rotate_euler_angles(self):
+        conventions = Conventions()
+        self.coordinate_system.euler_angles_convention = conventions.get_convention('Bunge')
+        rot_center = np.array([0.0, 0.0, 0.0])
+        self.coordinate_system.rotate_euler_angles(np.array([0.0, 0.0, 0.0]), rot_center)
+        np.testing.assert_allclose(self.coordinate_system.euler_angles.euler_angles,
+                                   np.array([0, 0, 0]), atol=np.finfo(float).eps)
+        self.coordinate_system.rotate_euler_angles(np.array([0.0, np.pi/2, 0.0]), rot_center)
+        np.testing.assert_allclose(self.coordinate_system.euler_angles.euler_angles,
+                                   np.array([0, np.pi/2, 0]), atol=np.finfo(float).eps)
+
 
     def test_to_parent_to_local(self):
         origin = (np.random.random(3) - 0.5) * 100
