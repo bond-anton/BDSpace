@@ -66,7 +66,6 @@ class TestCoordinates(unittest.TestCase):
         np.testing.assert_allclose(self.coordinate_system.euler_angles.euler_angles,
                                    np.array([0, np.pi/2, 0]), atol=np.finfo(float).eps)
 
-
     def test_to_parent_to_local(self):
         origin = (np.random.random(3) - 0.5) * 100
         other_coordinate_system = Cartesian(origin=origin)
