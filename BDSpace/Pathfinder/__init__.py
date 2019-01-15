@@ -50,8 +50,8 @@ def arc_between_two_points(coordinate_system, point1, point2, radius=1, right=Tr
     if right:
         y_offset *= -1
     arc_coordinate_system.origin = arc_coordinate_system.to_parent([x_offset, y_offset, 0])
-    local_point1 = arc_coordinate_system.to_local(global_point1)
-    local_point2 = arc_coordinate_system.to_local(global_point2)
+    local_point1 = arc_coordinate_system.to_local(global_point1)[0]
+    local_point2 = arc_coordinate_system.to_local(global_point2)[0]
     start = transforms.cartesian_to_spherical(local_point1)[2]
     stop = transforms.cartesian_to_spherical(local_point2)[2]
     if not right:
