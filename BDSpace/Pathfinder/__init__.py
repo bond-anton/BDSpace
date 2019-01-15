@@ -25,8 +25,8 @@ def helix_between_two_points(coordinate_system, point1, point2, radius=1, loops=
     helix_coordinate_system = Cartesian(basis=np.copy(coordinate_system.basis), origin=np.copy(origin),
                                         name='Helix coordinate system')
     r_theta_phi = transforms.cartesian_to_spherical(direction)
-    helix_coordinate_system.rotate_axis_angle([0, 0, 1], r_theta_phi[2])
-    helix_coordinate_system.rotate_axis_angle([0, 1, 0], r_theta_phi[1])
+    helix_coordinate_system.rotate_axis_angle(np.array([0, 0, 1], dtype=np.double), r_theta_phi[2])
+    helix_coordinate_system.rotate_axis_angle(np.array([0, 1, 0], dtype=np.double), r_theta_phi[1])
     pitch = distance / int(loops)
     name = 'Right Helix' if right else 'Left Helix'
     path = Helix(name=name, coordinate_system=helix_coordinate_system,
@@ -43,8 +43,8 @@ def arc_between_two_points(coordinate_system, point1, point2, radius=1, right=Tr
                                       name='Arc coordinate_system')
 
     r_theta_phi = transforms.cartesian_to_spherical(direction)
-    arc_coordinate_system.rotate_axis_angle([0, 0, 1], r_theta_phi[2])
-    arc_coordinate_system.rotate_axis_angle([0, 1, 0], r_theta_phi[1] + np.pi/2)
+    arc_coordinate_system.rotate_axis_angle(np.array([0, 0, 1], dtype=np.double), r_theta_phi[2])
+    arc_coordinate_system.rotate_axis_angle(np.array([0, 1, 0], dtype=np.double), r_theta_phi[1] + np.pi/2)
     x_offset = -distance / 2
     y_offset = np.sqrt(radius**2 - x_offset**2)
     if right:
