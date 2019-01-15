@@ -23,10 +23,14 @@ and machining tools, robotic arms, manipulators, etc.
 
 ## Installation
 
-Space depends on numpy and [BDQuaternions](https://github.com/bond-anton/BDQuaternions) packages only.
+BDSpace depends on numpy and [BDQuaternions](https://github.com/bond-anton/BDQuaternions) packages only.
 It is compatible with Python 2 and Python 3.
 
-To install BDSpace run
+To install BDSpace type in a shell
+```shell
+pip install BDSpace
+```
+or in the root directory of BDQuaternions distribution run
 ```shell
 python setup.py install
 ```

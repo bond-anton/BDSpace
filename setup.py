@@ -1,7 +1,10 @@
 from setuptools import setup, find_packages
+from setuptools.extension import Extension
+from Cython.Build import cythonize
 
 from codecs import open
 from os import path
+import sys
 import re
 
 
@@ -21,12 +24,46 @@ readme_file = path.join(here, 'README.md')
 with open(readme_file, encoding='utf-8') as f:
     long_description = f.read()
 
+extensions = [
+    Extension(
+        'BDSpace.Space',
+        ['BDSpace/Space.pyx'],
+        depends=['BDSpace/Space.pxd'],
+    ),
+    Extension(
+        'BDSpace.Coordinates.Cartesian',
+        ['BDSpace/Coordinates/Cartesian.pyx'],
+        depends=['BDSpace/Coordinates/Cartesian.pxd'],
+    ),
+    Extension(
+        'BDSpace.Coordinates._utils',
+        ['BDSpace/Coordinates/_utils.pyx'],
+        depends=['BDSpace/Coordinates/_utils.pxd'],
+    ),
+    Extension(
+        'BDSpace.Coordinates.transforms',
+        ['BDSpace/Coordinates/transforms.pyx'],
+        depends=['BDSpace/Coordinates/transforms.pxd'],
+    ),
+    Extension(
+        'BDSpace.Field.Field',
+        ['BDSpace/Field/Field.pyx'],
+        depends=['BDSpace/Field/Field.pxd'],
+    ),
+    Extension(
+        'BDSpace.Field.Superposed',
+        ['BDSpace/Field/Superposed.pyx'],
+        depends=['BDSpace/Field/Superposed.pxd'],
+    ),
+]
+
 setup(
     name=package_name,
     version=version_string,
 
     description='3D space positioning and motion',
     long_description=long_description,
+    long_description_content_type='text/markdown',
 
     url='https://github.com/bond-anton/BDSpace',
 
@@ -52,10 +89,18 @@ setup(
 
     keywords='3D coordinate Space paths trajectory',
 
-    packages=find_packages(exclude=['demo', 'tests', 'docs', 'contrib']),
-    install_requires=['numpy',
-                      'BDQuaternions>=0.1.2'],
-    dependency_links=['https://github.com/bond-anton/BDQuaternions/tarball/master#egg=BDQuaternions-0.1.2'],
+    packages=find_packages(exclude=['demo', 'tests', 'docs', 'contrib', 'venv']),
+    ext_modules=cythonize(extensions, compiler_directives={'language_level': sys.version_info[0]}),
+    package_data={
+        'Coordinates.Cartesian': ['Cartesian.pxd'],
+        'Coordinates._utils': ['_utils.pxd'],
+        'Coordinates.transforms': ['transforms.pxd'],
+        'Space': ['Space.pxd'],
+        'Field.Field': ['Field.pxd'],
+        'Field.Superposed': ['Superposed.pxd'],
+    },
+    install_requires=['numpy', 'Cython',
+                      'BDQuaternions>=0.2.4'],
     test_suite='nose.collector',
     tests_require=['nose']
 )
