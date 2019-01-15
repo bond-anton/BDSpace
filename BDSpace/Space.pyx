@@ -75,12 +75,12 @@ cdef class Space(object):
         returns local coordinate system basis in global coordinate system as Cartesian class object
         :return: local Cartesian coordinate system in global coordinate system
         """
-        origin = np.copy(self.coordinate_system.origin)
-        basis = np.copy(self.coordinate_system.basis)
+        origin = np.asarray(np.copy(self.coordinate_system.origin))
+        basis = np.asarray(np.copy(self.coordinate_system.basis))
         if self.parent is not None:
             basis = self.parent.to_global_coordinate_system(basis + origin)
             origin = self.parent.to_global_coordinate_system(origin)
-            basis = basis - origin
+            basis = np.asarray(basis) - np.asarray(origin)
         name = self.coordinate_system.name
         labels = self.coordinate_system.labels
         coordinate_system = Cartesian(basis=basis, origin=origin, name=name, labels=labels)
