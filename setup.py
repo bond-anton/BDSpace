@@ -56,7 +56,6 @@ extensions = [
         depends=['BDSpace/Field/Superposed.pxd'],
     ),
 ]
-
 setup(
     name=package_name,
     version=version_string,
@@ -91,16 +90,18 @@ setup(
 
     packages=find_packages(exclude=['demo', 'tests', 'docs', 'contrib', 'venv']),
     ext_modules=cythonize(extensions, compiler_directives={'language_level': sys.version_info[0]}),
+    package_dir={
+        'Coordinates.Cartesian': 'BDSpace/Coordinates',
+    },
     package_data={
-        'Coordinates.Cartesian': ['BDSpace/Coordinates/Cartesian.pxd'],
-        'Coordinates._utils': ['BDSpace/Coordinates/_utils.pxd'],
-        'Coordinates.transforms': ['BDSpace/Coordinates/transforms.pxd'],
-        'Space': ['BDSpace/Space.pxd'],
-        'Field.Field': ['BDSpace/Field/Field.pxd'],
-        'Field.Superposed': ['BDSpace/Field/Superposed.pxd'],
+        'BDSpace': ['*.pxd'],
+        'BDSpace/Coordinates': ['*.pxd'],
+        'BDSpace/Field': ['*.pxd'],
+
     },
     install_requires=['numpy', 'Cython',
                       'BDQuaternions>=0.2.4'],
     test_suite='nose.collector',
     tests_require=['nose']
 )
+
