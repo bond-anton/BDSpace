@@ -1,6 +1,8 @@
 from __future__ import division, print_function
 import numpy as np
 
+from cpython.array cimport array, clone
+
 from .Field cimport Field
 
 
@@ -17,7 +19,7 @@ cdef class SuperposedField(Field):
         return self.__fields
 
     @fields.setter
-    def fields(self, fields):
+    def fields(self, list fields):
         for field in fields:
             if not isinstance(field, Field):
                 raise ValueError('Fields must be iterable of Field class instances')
@@ -28,43 +30,36 @@ cdef class SuperposedField(Field):
 
         self.__fields = fields
 
-    def scalar_field(self, xyz):
+    cpdef double[:] scalar_field(self, double[:, :] xyz):
         """
-        Calculates superposed scalar field value at points xyz
-        :param xyz: array of one or more points in global coordinate system
+        Calculates scalar field value at points xyz
+        :param xyz: array of N points with shape (N, 3)
         :return: scalar values array
         """
-        xyz = np.array(xyz, dtype=np.float)
-        if xyz.size == 3:
-            total_field = 0
-        elif xyz.size > 3:
-            if len(xyz.shape) == 2 and xyz.shape[1] == 3:
-                total_field = np.zeros((xyz.shape[0],))
-            else:
-                raise ValueError('N-points array shape must be (N, 3)')
-        else:
-            raise ValueError('at least 3 coordinates are needed for point')
+        cdef:
+            Py_ssize_t i, s = xyz.shape[0]
+            double[:] field_contribution, total_field = self.__points_scalar(xyz, 0.0)
         for field in self.fields:
-            total_field += field.scalar_field(field.to_local_coordinate_system(xyz))
+            field_contribution = field.scalar_field(field.to_local_coordinate_system(xyz))
+            for i in range(s):
+                total_field[i] += field_contribution[i]
         return total_field
 
-    def vector_field(self, xyz):
+    cpdef double[:, :] vector_field(self, double[:, :] xyz):
         """
-        Calculates superposed vector field value at points xyz
-        :param xyz: array of one or more points in global coordinate system
-        :return: vector values array
+        Calculates vector field value at points xyz
+        :param xyz: array of N points with shape (N, 3)
+        :return: vector field values array
         """
-        xyz = np.array(xyz, dtype=np.float)
-        if xyz.size == 3:
-            total_field = np.array([0, 0, 0])
-        elif xyz.size > 3:
-            if len(xyz.shape) == 2 and xyz.shape[1] == 3:
-                total_field = np.zeros_like(xyz)
-            else:
-                raise ValueError('N-points array shape must be (N, 3)')
-        else:
-            raise ValueError('at least 3 coordinates are needed for point')
+        cdef:
+            Py_ssize_t i, j, s = xyz.shape[0], c = xyz.shape[1]
+            array[double] template = array('d')
+            double[:, :] field_contribution
+            double[:, :] total_field = self.__points_vector(xyz, clone(template, xyz.shape[1], zero=True))
         for field in self.fields:
-            vector_field_local = field.vector_field(field.to_local_coordinate_system(xyz))
-            total_field += field.to_global_coordinate_system(vector_field_local)
+            field_contribution = field.vector_field(field.to_local_coordinate_system(xyz))
+            field_contribution = field.to_global_coordinate_system(field_contribution)
+            for i in range(s):
+                for j in range(c):
+                    total_field[i][j] += field_contribution[i][j]
         return total_field

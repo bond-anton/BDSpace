@@ -39,11 +39,10 @@ cdef class Field(Space):
 
     @boundscheck(False)
     @wraparound(False)
-    cpdef double[:] points_scalar(self, double[:, :] xyz, double value):
+    cdef double[:] __points_scalar(self, double[:, :] xyz, double value):
         cdef:
             Py_ssize_t i
             Py_ssize_t s = xyz.shape[0]
-            Py_ssize_t c = xyz.shape[1]
             array[double] values, template = array('d')
         values = clone(template, s, zero=False)
         for i in range(s):
@@ -52,7 +51,7 @@ cdef class Field(Space):
 
     @boundscheck(False)
     @wraparound(False)
-    cpdef double[:, :] points_vector(self, double[:, :] xyz, double[:] value):
+    cdef double[:, :] __points_vector(self, double[:, :] xyz, double[:] value):
         cdef:
             Py_ssize_t i, j
             Py_ssize_t s = xyz.shape[0]
@@ -63,38 +62,20 @@ cdef class Field(Space):
                 values[i, j] = value[j]
         return values
 
-    def scalar_field(self, xyz):
+    cpdef double[:] scalar_field(self, double[:, :] xyz):
         """
         Calculates scalar field value at points xyz
-        :param xyz: array of one or more points
+        :param xyz: array of N points with shape (N, 3)
         :return: scalar values array
         """
-        xyz = np.array(xyz, dtype=np.float)
-        if xyz.size == 3:
-            field = 0
-        elif xyz.size > 3:
-            if len(xyz.shape) == 2 and xyz.shape[1] == 3:
-                field = np.zeros_like(xyz.shape[0])
-            else:
-                raise ValueError('N-points array shape must be (N, 3)')
-        else:
-            raise ValueError('at least 3 coordinates are needed for point')
-        return field
+        return self.__points_scalar(xyz, 0.0)
 
-    def vector_field(self, xyz):
+    cpdef double[:, :] vector_field(self, double[:, :] xyz):
         """
         Calculates vector field value at points xyz
-        :param xyz: array of one or more points
+        :param xyz: array of N points with shape (N, 3)
         :return: vector field values array
         """
-        xyz = np.array(xyz, dtype=np.float)
-        if xyz.size == 3:
-            field = np.array([0, 0, 0])
-        elif xyz.size > 3:
-            if len(xyz.shape) == 2 and xyz.shape[1] == 3:
-                field = np.zeros_like(xyz)
-            else:
-                raise ValueError('N-points array shape must be (N, 3)')
-        else:
-            raise ValueError('at least 3 coordinates are needed for point')
-        return field
+        cdef:
+            array[double] template = array('d')
+        return self.__points_vector(xyz, clone(template, xyz.shape[1], zero=True))
