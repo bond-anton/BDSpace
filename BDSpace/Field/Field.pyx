@@ -1,14 +1,17 @@
 from __future__ import division, print_function
 import numpy as np
 
+from cython import boundscheck, wraparound
+
+from cpython.array cimport array, clone
+
 from BDSpace.Space cimport Space
 
 
 cdef class Field(Space):
 
     def __init__(self, str name, str field_type):
-        self.__type = None
-        self.type = field_type
+        self.__type = field_type
         super(Field, self).__init__(name, coordinate_system=None)
 
     @property
@@ -16,8 +19,8 @@ cdef class Field(Space):
         return self.__type
 
     @type.setter
-    def type(self, field_type):
-        self.__type = str(field_type)
+    def type(self, str field_type):
+        self.__type = field_type
 
     def __str__(self):
         description = 'Field: %s (%s)\n' % (self.name, self.type)
@@ -29,12 +32,36 @@ cdef class Field(Space):
         return description
 
     def add_element(self, element):
-        print('No element could be added to Field')
-        pass
+        raise NotImplementedError('No element could be added to or removed from Field')
 
     def remove_element(self, element):
-        print('No element could be added to or removed from Field')
-        pass
+        raise NotImplementedError('No element could be added to or removed from Field')
+
+    @boundscheck(False)
+    @wraparound(False)
+    cpdef double[:] points_scalar(self, double[:, :] xyz, double value):
+        cdef:
+            Py_ssize_t i
+            Py_ssize_t s = xyz.shape[0]
+            Py_ssize_t c = xyz.shape[1]
+            array[double] values, template = array('d')
+        values = clone(template, s, zero=False)
+        for i in range(s):
+            values[i] = value
+        return values
+
+    @boundscheck(False)
+    @wraparound(False)
+    cpdef double[:, :] points_vector(self, double[:, :] xyz, double[:] value):
+        cdef:
+            Py_ssize_t i, j
+            Py_ssize_t s = xyz.shape[0]
+            Py_ssize_t c = xyz.shape[1]
+            double[:, :] values = np.empty((s, c), dtype=np.double)
+        for i in range(s):
+            for j in range(c):
+                values[i, j] = value[j]
+        return values
 
     def scalar_field(self, xyz):
         """
