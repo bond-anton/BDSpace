@@ -8,3 +8,13 @@ cdef class Field(Space):
     cdef double[:, :] __points_vector(self, double[:, :] xyz, double[:] value)
     cpdef double[:] scalar_field(self, double[:, :] xyz)
     cpdef double[:, :] vector_field(self, double[:, :] xyz)
+
+
+cdef class ConstantScalarConservativeField(Field):
+    cdef:
+        double __potential
+
+
+cdef class ConstantVectorConservativeField(Field):
+    cdef:
+        double[:] __potential

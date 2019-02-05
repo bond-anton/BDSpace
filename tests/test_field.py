@@ -2,9 +2,7 @@ from __future__ import division
 import unittest
 import numpy as np
 from BDSpace.Coordinates import Cartesian
-from BDSpace.Field import Field
-from BDSpace.Coordinates._utils import check_points_array
-from BDQuaternions import Conventions
+from BDSpace.Field import Field, ConstantScalarConservativeField, ConstantVectorConservativeField
 
 
 class TestField(unittest.TestCase):
@@ -39,3 +37,21 @@ class TestField(unittest.TestCase):
         xyz = np.ones((100, 3), dtype=np.double)
         result = self.Field.vector_field(xyz)
         np.testing.assert_allclose(result, np.zeros((100, 3), dtype=np.double))
+
+    def test_constant_scalar_field(self):
+        CField = ConstantScalarConservativeField('My field', 'My type', np.pi)
+        xyz = np.random.random((100, 3))
+        result = CField.scalar_field(xyz)
+        np.testing.assert_allclose(result, np.ones(100, dtype=np.double) * np.pi)
+        result = CField.vector_field(xyz)
+        np.testing.assert_allclose(result, np.zeros((100, 3), dtype=np.double))
+
+    def test_constant_vector_field(self):
+        VField = ConstantVectorConservativeField('My field', 'My type', np.array([1.0, 0.0, 0.0], dtype=np.double))
+        xyz = np.random.random((100, 3))
+        result = VField.scalar_field(xyz)
+        np.testing.assert_allclose(result, xyz[:, 0])
+        result = VField.vector_field(xyz)
+        check = np.zeros((100, 3), dtype=np.double)
+        check[:, 0] += np.ones(100, dtype=np.double)
+        np.testing.assert_allclose(result, check)

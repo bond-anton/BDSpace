@@ -20,6 +20,7 @@ cdef class SuperposedField(Field):
 
     @fields.setter
     def fields(self, list fields):
+        self.__fields = []
         for field in fields:
             if not isinstance(field, Field):
                 raise ValueError('Fields must be iterable of Field class instances')
@@ -27,8 +28,7 @@ cdef class SuperposedField(Field):
                 self.type = field.type
             if self.type != field.type:
                 raise ValueError('All fields must be iterable of Field class instances')
-
-        self.__fields = fields
+            self.__fields.append(field)
 
     cpdef double[:] scalar_field(self, double[:, :] xyz):
         """
@@ -39,7 +39,7 @@ cdef class SuperposedField(Field):
         cdef:
             Py_ssize_t i, s = xyz.shape[0]
             double[:] field_contribution, total_field = self.__points_scalar(xyz, 0.0)
-        for field in self.fields:
+        for field in self.__fields:
             field_contribution = field.scalar_field(field.to_local_coordinate_system(xyz))
             for i in range(s):
                 total_field[i] += field_contribution[i]
@@ -56,7 +56,7 @@ cdef class SuperposedField(Field):
             array[double] template = array('d')
             double[:, :] field_contribution
             double[:, :] total_field = self.__points_vector(xyz, clone(template, xyz.shape[1], zero=True))
-        for field in self.fields:
+        for field in self.__fields:
             field_contribution = field.vector_field(field.to_local_coordinate_system(xyz))
             field_contribution = field.to_global_coordinate_system(field_contribution)
             for i in range(s):

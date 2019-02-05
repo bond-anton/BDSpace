@@ -79,3 +79,67 @@ cdef class Field(Space):
         cdef:
             array[double] template = array('d')
         return self.__points_vector(xyz, clone(template, xyz.shape[1], zero=True))
+
+
+cdef class ConstantScalarConservativeField(Field):
+
+    def __init__(self, str name, str field_type, double potential):
+        self.__potential = potential
+        super(ConstantScalarConservativeField, self).__init__(name, field_type)
+
+    @property
+    def potential(self):
+        return self.__potential
+
+    @potential.setter
+    def potential(self, double potential):
+        self.__potential = potential
+
+    cpdef double[:] scalar_field(self, double[:, :] xyz):
+        """
+        Calculates scalar field value at points xyz
+        :param xyz: array of N points with shape (N, 3)
+        :return: scalar values array
+        """
+        return self.__points_scalar(xyz, self.__potential)
+
+
+cdef class ConstantVectorConservativeField(Field):
+
+    def __init__(self, str name, str field_type, double[:] potential):
+        self.__potential = potential
+        super(ConstantVectorConservativeField, self).__init__(name, field_type)
+
+    @property
+    def potential(self):
+        return self.__potential
+
+    @potential.setter
+    def potential(self, double[:] potential):
+        self.__potential = potential
+
+    cpdef double[:] scalar_field(self, double[:, :] xyz):
+        """
+        Calculates scalar field value at points xyz
+        :param xyz: array of N points with shape (N, 3)
+        :return: scalar values array
+        """
+        cdef:
+            Py_ssize_t i, j
+            Py_ssize_t s = xyz.shape[0]
+            Py_ssize_t c = xyz.shape[1]
+            array[double] values, template = array('d')
+        values = clone(template, s, zero=False)
+        for i in range(s):
+            values[i] = 0
+            for j in range(c):
+                values[i] += xyz[i, j] * self.__potential[j]
+        return values
+
+    cpdef double[:, :] vector_field(self, double[:, :] xyz):
+        """
+        Calculates vector field value at points xyz
+        :param xyz: array of N points with shape (N, 3)
+        :return: vector field values array
+        """
+        return self.__points_vector(xyz, self.__potential)
