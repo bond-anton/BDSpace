@@ -3,6 +3,7 @@ import numpy as np
 
 from cython import boundscheck, wraparound
 
+from libc.math cimport sqrt
 from cpython.array cimport array, clone
 
 from BDSpace.Space cimport Space
@@ -118,6 +119,8 @@ cdef class ConstantVectorConservativeField(Field):
     def potential(self, double[:] potential):
         self.__potential = potential
 
+    @boundscheck(False)
+    @wraparound(False)
     cpdef double[:] scalar_field(self, double[:, :] xyz):
         """
         Calculates scalar field value at points xyz
@@ -143,3 +146,57 @@ cdef class ConstantVectorConservativeField(Field):
         :return: vector field values array
         """
         return self.__points_vector(xyz, self.__potential)
+
+
+cdef class HyperbolicPotentialSphericalConservativeField(Field):
+
+    def __init__(self, str name, str field_type, double a, double r):
+        self.__r = r
+        self.__a = a
+        super(HyperbolicPotentialSphericalConservativeField, self).__init__(name, field_type)
+
+    @property
+    def r(self):
+        return self.__r
+
+    @r.setter
+    def r(self, double r):
+        self.__r = r
+
+    @property
+    def a(self):
+        return self.__a
+
+    @a.setter
+    def a(self, double a):
+        self.__a = a
+
+    cpdef double[:] scalar_field(self, double[:, :] xyz):
+        cdef:
+            Py_ssize_t i
+            Py_ssize_t s = xyz.shape[0]
+            Py_ssize_t c = xyz.shape[1]
+            double r
+            array[double] values, template = array('d')
+        values = clone(template, s, zero=False)
+        for i in range(s):
+            r = sqrt(xyz[i, 0]*xyz[i, 0] + xyz[i, 1]*xyz[i, 1] + xyz[i, 2]*xyz[i, 2])
+            if r < self.__r:
+                r = self.__r
+            values[i] = self.__a / r
+        return values
+
+    cpdef double[:, :] vector_field(self, double[:, :] xyz):
+        cdef:
+            Py_ssize_t i, j
+            Py_ssize_t s = xyz.shape[0]
+            Py_ssize_t c = xyz.shape[1]
+            double r2, r2_min = self.__r * self.__r
+            double[:, :] values = np.empty((s, c), dtype=np.double)
+        for i in range(s):
+            r2 = xyz[i, 0]*xyz[i, 0] + xyz[i, 1]*xyz[i, 1] + xyz[i, 2]*xyz[i, 2]
+            if r2 < r2_min:
+                r2 = r2_min
+            for j in range(c):
+                values[i, j] = self.__a * xyz[i, j] / r2
+        return values

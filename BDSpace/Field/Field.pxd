@@ -18,3 +18,8 @@ cdef class ConstantScalarConservativeField(Field):
 cdef class ConstantVectorConservativeField(Field):
     cdef:
         double[:] __potential
+
+cdef class HyperbolicPotentialSphericalConservativeField(Field):
+    cdef:
+        double __r
+        double __a
