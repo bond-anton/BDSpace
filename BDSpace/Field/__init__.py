@@ -1,2 +1,3 @@
 from .Field import Field, ConstantScalarConservativeField, ConstantVectorConservativeField
+from .Field import HyperbolicPotentialSphericalConservativeField
 from .SuperposedField import SuperposedField

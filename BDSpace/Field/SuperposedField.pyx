@@ -56,9 +56,9 @@ cdef class SuperposedField(Field):
             array[double] template = array('d')
             double[:, :] field_contribution
             double[:, :] total_field = self.__points_vector(xyz, clone(template, xyz.shape[1], zero=True))
+            double[:, :] global_xyz = self.to_global_coordinate_system(xyz)
         for field in self.__fields:
-            field_contribution = field.vector_field(field.to_local_coordinate_system(xyz))
-            field_contribution = field.to_global_coordinate_system(field_contribution)
+            field_contribution = field.vector_field(field.to_local_coordinate_system(global_xyz))
             for i in range(s):
                 for j in range(c):
                     total_field[i][j] += field_contribution[i][j]

@@ -133,11 +133,11 @@ cdef class Cartesian(object):
 
     def __str__(self):
         information = 'Cartesian coordinate system: %s\n' % self.name
-        information += 'Origin: ' + str(self.origin) + '\n'
+        information += 'Origin: ' + str(np.asarray(self.origin)) + '\n'
         information += 'Basis:\n'
-        information += self.labels[0] + ': ' + str(self.basis[0]) + '\n'
-        information += self.labels[1] + ': ' + str(self.basis[1]) + '\n'
-        information += self.labels[2] + ': ' + str(self.basis[2]) + '\n'
+        information += self.labels[0] + ': ' + str(np.asarray(self.basis[0])) + '\n'
+        information += self.labels[1] + ': ' + str(np.asarray(self.basis[1])) + '\n'
+        information += self.labels[2] + ': ' + str(np.asarray(self.basis[2])) + '\n'
         information += 'Orientation: %s:\n' % self.euler_angles_convention.description
         information += str(self.euler_angles) + '\n'
         return information
@@ -184,6 +184,8 @@ cdef class Cartesian(object):
         rotation.euler_angles = EulerAngles(euler_angles, rotation.euler_angles_convention)
         self.rotate(rotation, rot_center=rot_center)
 
+    @boundscheck(False)
+    @wraparound(False)
     cpdef double[:, :] to_parent(self, xyz):
         """
         calculates coordinates of given points in parent (global) CS
