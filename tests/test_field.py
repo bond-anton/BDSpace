@@ -1,7 +1,6 @@
 from __future__ import division
 import unittest
 import numpy as np
-from BDSpace.Coordinates import Cartesian
 from BDSpace.Field import Field, ConstantScalarConservativeField, ConstantVectorConservativeField
 
 

@@ -213,8 +213,8 @@ cdef class Cartesian(object):
             unsigned int i, s = xyz.shape[0]
             double[:, :] xyz_local = np.empty((s, 3), dtype=np.double)
         for i in range(0, s):
-            xyz_local[i, 0] -= self.__origin[0]
-            xyz_local[i, 1] -= self.__origin[1]
-            xyz_local[i, 2] -= self.__origin[2]
+            xyz_local[i, 0] = xyz[i, 0] - self.__origin[0]
+            xyz_local[i, 1] = xyz[i, 1] - self.__origin[1]
+            xyz_local[i, 2] = xyz[i, 2] - self.__origin[2]
         xyz_local = self.__rotation.reciprocal().rotate(xyz_local)
         return xyz_local
