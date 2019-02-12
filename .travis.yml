@@ -17,6 +17,6 @@ script:
   nosetests -v --with-coverage --cover-package=BDSpace
 # codecov support
 before_install:
-- pip install Cython codecov
+- pip install scipy Cython codecov
 after_success:
 - codecov
