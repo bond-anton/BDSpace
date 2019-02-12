@@ -4,7 +4,6 @@ from Cython.Build import cythonize
 
 from codecs import open
 from os import path
-import sys
 import re
 
 
@@ -35,11 +34,11 @@ extensions = [
         ['BDSpace/Coordinates/Cartesian.pyx'],
         depends=['BDSpace/Coordinates/Cartesian.pxd'],
     ),
-    Extension(
-        'BDSpace.Coordinates._utils',
-        ['BDSpace/Coordinates/_utils.pyx'],
-        depends=['BDSpace/Coordinates/_utils.pxd'],
-    ),
+    # Extension(
+    #     'BDSpace.Coordinates._utils',
+    #     ['BDSpace/Coordinates/_utils.pyx'],
+    #     depends=['BDSpace/Coordinates/_utils.pxd'],
+    # ),
     Extension(
         'BDSpace.Coordinates.transforms',
         ['BDSpace/Coordinates/transforms.pyx'],
@@ -78,26 +77,25 @@ setup(
         'License :: OSI Approved :: Apache Software License',
         'Topic :: Scientific/Engineering :: Mathematics',
         'Programming Language :: Python',
-        'Programming Language :: Python :: 2',
-        'Programming Language :: Python :: 2.7',
         'Programming Language :: Python :: 3',
         'Programming Language :: Python :: 3.4',
         'Programming Language :: Python :: 3.5',
         'Programming Language :: Python :: 3.6',
+        'Programming Language :: Python :: 3.7',
     ],
 
     keywords='3D coordinate Space paths trajectory',
 
     packages=find_packages(exclude=['demo', 'tests', 'docs', 'contrib', 'venv']),
-    ext_modules=cythonize(extensions, compiler_directives={'language_level': sys.version_info[0]}),
+    ext_modules=cythonize(extensions, compiler_directives={'language_level': 3}),
     package_data={
         'BDSpace': ['*.pxd'],
         'BDSpace.Coordinates': ['*.pxd'],
         'BDSpace.Field': ['*.pxd'],
 
     },
-    install_requires=['numpy', 'Cython',
-                      'BDQuaternions>=0.2.4'],
+    install_requires=['numpy', 'scipy', 'Cython',
+                      'BDQuaternions>=0.2.7'],
     test_suite='nose.collector',
     tests_require=['nose'],
     zip_safe=False,

@@ -9,7 +9,6 @@ from cpython.object cimport Py_EQ, Py_NE
 from BDQuaternions cimport Rotation, EulerAngles
 
 from .transforms cimport unit_vector
-from ._utils cimport check_points_array
 
 
 cdef class Cartesian(object):
@@ -152,14 +151,16 @@ cdef class Cartesian(object):
         """
         cdef:
             int i
-            Py_ssize_t s = self.__origin.size
-            array[double] origin_shift, template = array('d')
-        origin_shift = clone(template, s, zero=False)
+            double[:] origin_shift
+            array[double] template = array('d')
+        origin_shift = clone(template, 3, zero=False)
         self.__rotation *= rotation
         if rot_center is not None:
-            for i in range(s):
+            for i in range(3):
                 origin_shift[i] = self.__origin[i] - rot_center[i]
-            self.__origin = rot_center + rotation.rotate(origin_shift)[0]
+            origin_shift = rotation.rotate_vector(origin_shift)
+            for i in range(3):
+                self.__origin[i] = rot_center[i] + origin_shift[i]
 
     cpdef rotate_axis_angle(self, double[:] axis, double theta, double[:] rot_center=None):
         """
@@ -186,7 +187,7 @@ cdef class Cartesian(object):
 
     @boundscheck(False)
     @wraparound(False)
-    cpdef double[:, :] to_parent(self, xyz):
+    cpdef double[:, :] to_parent(self, double[:, :] xyz):
         """
         calculates coordinates of given points in parent (global) CS
         :param xyz: local coordinates array
@@ -203,16 +204,15 @@ cdef class Cartesian(object):
 
     @boundscheck(False)
     @wraparound(False)
-    cpdef double[:, :] to_local(self, xyz):
+    cpdef double[:, :] to_local(self, double[:, :] xyz):
         """
         calculates local coordinates for points in parent CS/
         :param xyz: coordinates in parent (global) coordinate system.
         """
         cdef:
-            int i
-            double[:, :] xyz_local = check_points_array(xyz)
-            Py_ssize_t[:] s = xyz_local.shape
-        for i in range(0, s[0]):
+            unsigned int i, s = xyz.shape[0]
+            double[:, :] xyz_local = np.empty((s, 3), dtype=np.double)
+        for i in range(0, s):
             xyz_local[i, 0] -= self.__origin[0]
             xyz_local[i, 1] -= self.__origin[1]
             xyz_local[i, 2] -= self.__origin[2]

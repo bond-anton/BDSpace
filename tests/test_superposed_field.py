@@ -4,7 +4,6 @@ import numpy as np
 from BDSpace.Coordinates import Cartesian
 from BDSpace.Field import Field, SuperposedField
 from BDSpace.Field import ConstantScalarConservativeField, ConstantVectorConservativeField
-from BDSpace.Coordinates._utils import check_points_array
 from BDQuaternions import Conventions
 
 
