@@ -1,99 +1,85 @@
-from __future__ import division, print_function
 import numpy as np
 
-from BDSpace.Curve import Curve
 from ._helpers import check_equation
+from cython import boundscheck, wraparound
+
+from cpython.array cimport array, clone
+
+from BDSpace.Space cimport Space
+from BDSpace.Coordinates cimport Cartesian
 
 
-class ParametricCurve(Curve):
+cdef class ParametricCurve(Space):
 
-    def __init__(self, name='Parametric curve', coordinate_system=None,
-                 x=None, y=None, z=None, start=0.0, stop=0.0):
+    def __init__(self, str name='Parametric curve', Cartesian coordinate_system=None,
+                 double start=0.0, double stop=0.0):
         super(ParametricCurve, self).__init__(name, coordinate_system=coordinate_system)
-        self.__x = None
-        self.__y = None
-        self.__z = None
-        self.x = x
-        self.y = y
-        self.z = z
         self.__start = None
         self.start = start
         self.__stop = None
         self.stop = stop
 
-    @property
-    def x(self):
-        return self.__x
+    cpdef double[:] x(self, double[:] t):
+        cdef:
+            array[double] result, template = array('d')
+        result = clone(template, t.shape[0], zero=False)
+        return result
 
-    @x.setter
-    def x(self, x):
-        if x is None:
-            self.__x = lambda t: None
-        elif check_equation(x):
-            self.__x = x
-        else:
-            raise ValueError('Parametric equation must be single argument callable compatible with 1D numpy arrays')
+    cpdef double[:] y(self, double[:] t):
+        cdef:
+            array[double] result, template = array('d')
+        result = clone(template, t.shape[0], zero=False)
+        return result
 
-    @property
-    def y(self):
-        return self.__y
-
-    @y.setter
-    def y(self, y):
-        if y is None:
-            self.__y = lambda t: None
-        elif check_equation(y):
-            self.__y = y
-        else:
-            raise ValueError('Parametric equation must be single argument callable compatible with 1D numpy arrays')
-
-    @property
-    def z(self):
-        return self.__z
-
-    @z.setter
-    def z(self, z):
-        if z is None:
-            self.__z = lambda t: None
-        elif check_equation(z):
-            self.__z = z
-        else:
-            raise ValueError('Parametric equation must be single argument callable compatible with 1D numpy arrays')
+    cpdef double[:] z(self, double[:] t):
+        cdef:
+            array[double] result, template = array('d')
+        result = clone(template, t.shape[0], zero=False)
+        return result
 
     @property
     def start(self):
         return self.__start
 
     @start.setter
-    def start(self, start):
-        self.__start = np.float64(start)
+    def start(self, double start):
+        self.__start = start
 
     @property
     def stop(self):
         return self.__stop
 
     @stop.setter
-    def stop(self, stop):
-        self.__stop = np.float64(stop)
+    def stop(self, double stop):
+        self.__stop = stop
 
-    def generate_points(self, t):
-        xyz = np.zeros((len(t), 3), dtype=np.float64)
+    cpdef double[:, :] generate_points(self, double[:] t):
+        cdef:
+            double[:, :] xyz = np.empty((t.shape[0], 3), dtype=np.double)
         xyz[:, 0] = self.x(t)
         xyz[:, 1] = self.y(t)
         xyz[:, 2] = self.z(t)
         return xyz
 
-    def tangent(self, t):
-        xyz = self.generate_points(t)
-        return np.diff(xyz, axis=0) / np.diff(t).reshape(len(t) - 1, 1)
+    @boundscheck(False)
+    @wraparound(False)
+    cpdef double[:, :] tangent(self, double[:] t):
+        cdef:
+            double[:, :] xyz = self.generate_points(t)
+            unsigned int i, s = t.shape[0]
+            double[:, :] result = np.empty((s - 1, 3), dtype=np.double)
+        for i in range(s - 1):
+            result[i, 0] = (xyz[i + 1, 0] - xyz[i, 0]) / (t[i + 1] - t[i])
+        return result
 
-    def length(self, a=None, b=None, precision=1e-6, return_details=False):
+    cpdef double length(self, double a=None, double b=None, double precision=1e-6, bint print_details=False):
+        cdef:
+            unsigned int num_points, iteration = 0
         if a is None:
-            a = self.start
+            a = self.__start
         if b is None:
-            b = self.stop
+            b = self.__stop
         num_points = int(100 * abs(b-a) / (2 * np.pi)) + 1
-        iteration = 0
         while True:
             iteration += 1
             t = np.linspace(a, b, num=num_points, endpoint=True, dtype=np.float)
