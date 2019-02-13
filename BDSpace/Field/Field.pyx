@@ -32,11 +32,11 @@ cdef class Field(Space):
             description += str(self.coordinate_system)
         return description
 
-    def add_element(self, element):
-        raise NotImplementedError('No element could be added to or removed from Field')
+    cpdef bint add_element(self, Space element):
+        return False
 
-    def remove_element(self, element):
-        raise NotImplementedError('No element could be added to or removed from Field')
+    cpdef bint remove_element(self, Space element):
+        return False
 
     @boundscheck(False)
     @wraparound(False)

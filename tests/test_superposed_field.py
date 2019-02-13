@@ -26,10 +26,8 @@ class TestField(unittest.TestCase):
             self.SField.type = 3.14
 
     def test_elements(self):
-        with self.assertRaises(NotImplementedError):
-            self.SField.add_element(Field('My another Field', 'The Type of My Field'))
-        with self.assertRaises(NotImplementedError):
-            self.SField.remove_element(Field('My another Field', 'The Type of My Field'))
+        self.assertFalse(self.SField.add_element(Field('My another Field', 'The Type of My Field')))
+        self.assertFalse(self.SField.remove_element(Field('My another Field', 'The Type of My Field')))
 
     def test_scalar_field(self):
         xyz = np.ones((100, 3), dtype=np.double)

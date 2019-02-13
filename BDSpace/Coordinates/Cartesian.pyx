@@ -185,6 +185,18 @@ cdef class Cartesian(object):
         rotation.euler_angles = EulerAngles(euler_angles, rotation.euler_angles_convention)
         self.rotate(rotation, rot_center=rot_center)
 
+    cpdef double[:] to_parent_vector(self, double[:] xyz):
+        """
+        calculates coordinates of given points in parent (global) CS
+        :param xyz: local coordinates of a 3D vector
+        """
+        cdef:
+            double[:] xyz_parent = self.__rotation.rotate_vector(xyz)
+        xyz_parent[0] += self.__origin[0]
+        xyz_parent[1] += self.__origin[1]
+        xyz_parent[2] += self.__origin[2]
+        return xyz_parent
+
     @boundscheck(False)
     @wraparound(False)
     cpdef double[:, :] to_parent(self, double[:, :] xyz):
@@ -193,14 +205,28 @@ cdef class Cartesian(object):
         :param xyz: local coordinates array
         """
         cdef:
-            int i
             double[:, :] xyz_parent = self.__rotation.rotate(xyz)
-            Py_ssize_t[:] s = xyz_parent.shape
-        for i in range(0, s[0]):
+            unsigned int i, s = xyz_parent.shape[0]
+        for i in range(0, s):
             xyz_parent[i, 0] += self.__origin[0]
             xyz_parent[i, 1] += self.__origin[1]
             xyz_parent[i, 2] += self.__origin[2]
         return xyz_parent
+
+    cpdef double[:] to_local_vector(self, double[:] xyz):
+        """
+        calculates local coordinates for points in parent CS/
+        :param xyz: vector coordinates in parent (global) coordinate system.
+        """
+        cdef:
+            double[:] xyz_local
+            array[double] template = array('d')
+        xyz_local = clone(template, 3, zero=False)
+        xyz_local[0] = xyz[0] - self.__origin[0]
+        xyz_local[1] = xyz[1] - self.__origin[1]
+        xyz_local[2] = xyz[2] - self.__origin[2]
+        xyz_local = self.__rotation.reciprocal().rotate_vector(xyz_local)
+        return xyz_local
 
     @boundscheck(False)
     @wraparound(False)

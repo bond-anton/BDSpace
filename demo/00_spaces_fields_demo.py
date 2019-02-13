@@ -14,7 +14,7 @@ from mayavi import mlab
 
 space = Space('Two charged balls')
 pos_ball_position = np.array([5.0, 5.0, 0.0], dtype=np.double)
-neg_ball_position = np.array([-5.0, -5.0, 0.0], dtype=np.double)
+neg_ball_position = np.array([1.0, 1.0, 0.0], dtype=np.double)
 
 pos_ball_charge = 5.0
 pos_ball_radius = 1.0

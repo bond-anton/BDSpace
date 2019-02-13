@@ -19,8 +19,8 @@ class TestSpace(unittest.TestCase):
         self.assertRaises(ValueError, Space, 'xxx', '0')
 
     def test_add_remove_subspaces(self):
-        self.assertRaises(ValueError, self.solar_system.add_element, self.solar_system)
-        self.assertRaises(ValueError, self.solar_system.add_element, 'Any object except BDSpace')
+        self.assertFalse(self.solar_system.add_element(self.solar_system))
+        self.assertRaises(TypeError, self.solar_system.add_element, 'Any object except BDSpace')
         earth = self.solar_system.elements['Earth']
         moon = Space('Moon')
         earth.add_element(moon)
@@ -31,8 +31,8 @@ class TestSpace(unittest.TestCase):
         deimos = Space('Deimos')
         mars.add_element(phobos)
         mars.add_element(deimos)
-        self.assertRaises(ValueError, self.solar_system.add_element, lunohod)
-        self.assertRaises(ValueError, self.solar_system.remove_element, 'Any object, not BDSpace')
+        self.assertFalse(self.solar_system.add_element(lunohod))
+        self.assertRaises(TypeError, self.solar_system.remove_element, 'Any object, not BDSpace')
 
     def test_add_same_name_subspaces(self):
         mars = self.solar_system.elements['Mars']
@@ -41,3 +41,6 @@ class TestSpace(unittest.TestCase):
             phobos = Space('Phobos')
             mars.add_element(phobos)
         self.assertEqual(phobos.name, 'Phobos %d' % (count-1))
+
+    def test_basis_in_global_coordinates(self):
+        print('Basis in GCS:', self.solar_system.basis_in_global_coordinate_system())
