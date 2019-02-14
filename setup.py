@@ -34,11 +34,6 @@ extensions = [
         ['BDSpace/Coordinates/Cartesian.pyx'],
         depends=['BDSpace/Coordinates/Cartesian.pxd'],
     ),
-    # Extension(
-    #     'BDSpace.Coordinates._utils',
-    #     ['BDSpace/Coordinates/_utils.pyx'],
-    #     depends=['BDSpace/Coordinates/_utils.pxd'],
-    # ),
     Extension(
         'BDSpace.Coordinates.transforms',
         ['BDSpace/Coordinates/transforms.pyx'],
@@ -53,6 +48,11 @@ extensions = [
         'BDSpace.Field.SuperposedField',
         ['BDSpace/Field/SuperposedField.pyx'],
         depends=['BDSpace/Field/SuperposedField.pxd'],
+    ),
+    Extension(
+        'BDSpace.Curve.Parametric',
+        ['BDSpace/Curve/Parametric.pyx', 'BDSpace/Curve/_helpers.pyx'],
+        depends=['BDSpace/Field/Field.pxd', 'BDSpace/Curve/_helpers.pxd'],
     ),
 ]
 setup(
@@ -92,7 +92,7 @@ setup(
         'BDSpace': ['*.pxd'],
         'BDSpace.Coordinates': ['*.pxd'],
         'BDSpace.Field': ['*.pxd'],
-
+        'BDSpace.Curve': ['*.pxd'],
     },
     install_requires=['numpy', 'scipy', 'Cython',
                       'BDQuaternions>=0.2.7'],
