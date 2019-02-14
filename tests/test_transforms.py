@@ -1,11 +1,13 @@
-from __future__ import division
 import unittest
 import numpy as np
 import timeit
 
 from BDSpace.Coordinates.transforms import reduce_angle, unit_vector, angles_between_vectors
+from BDSpace.Coordinates.transforms import cartesian_to_spherical_point, spherical_to_cartesian_point
 from BDSpace.Coordinates.transforms import cartesian_to_spherical, spherical_to_cartesian
+from BDSpace.Coordinates.transforms import cartesian_to_cylindrical_point, cylindrical_to_cartesian_point
 from BDSpace.Coordinates.transforms import cartesian_to_cylindrical, cylindrical_to_cartesian
+from BDSpace.Coordinates.transforms import cylindrical_to_spherical_point, spherical_to_cylindrical_point
 from BDSpace.Coordinates.transforms import cylindrical_to_spherical, spherical_to_cylindrical
 
 
@@ -127,21 +129,17 @@ class TestTransforms(unittest.TestCase):
 
     def test_to_spherical_single_point(self):
         xyz = np.array([1, 0, 0], dtype=np.double)
-        np.testing.assert_allclose(cartesian_to_spherical(xyz), [1, np.pi / 2, 0], atol=np.finfo(float).eps)
+        np.testing.assert_allclose(cartesian_to_spherical_point(xyz), [1, np.pi / 2, 0], atol=np.finfo(float).eps)
         xyz = np.array([0, 1, 0], dtype=np.double)
-        np.testing.assert_allclose(cartesian_to_spherical(xyz), [1, np.pi / 2, np.pi / 2], atol=np.finfo(float).eps)
+        np.testing.assert_allclose(cartesian_to_spherical_point(xyz), [1, np.pi / 2, np.pi / 2], atol=np.finfo(float).eps)
         xyz = np.array([0, 0, 0], dtype=np.double)
-        np.testing.assert_allclose(cartesian_to_spherical(xyz), [0, 0, 0], atol=np.finfo(float).eps)
+        np.testing.assert_allclose(cartesian_to_spherical_point(xyz), [0, 0, 0], atol=np.finfo(float).eps)
 
     def test_to_spherical_wrong_arguments(self):
         xyz = 0
-        self.assertRaises(AttributeError, cartesian_to_spherical, xyz)
+        self.assertRaises(TypeError, cartesian_to_spherical, xyz)
         xyz = [0, 0]
-        self.assertRaises(AttributeError, cartesian_to_spherical, xyz)
-        xyz = np.array([0, 0, 0, 0], dtype=np.double)
-        self.assertRaises(ValueError, cartesian_to_spherical, xyz)
-        xyz = [0, 0, 0, 0, 0, 0]
-        self.assertRaises(AttributeError, cartesian_to_spherical, xyz)
+        self.assertRaises(TypeError, cartesian_to_spherical, xyz)
 
     def test_to_spherical_and_back_many_points(self):
         points_num = 100
@@ -151,37 +149,33 @@ class TestTransforms(unittest.TestCase):
 
     def test_to_cartesian_single_point(self):
         rtp = np.zeros(3, dtype=np.double)
-        np.testing.assert_allclose(spherical_to_cartesian(rtp), [0, 0, 0], atol=np.finfo(float).eps)
+        np.testing.assert_allclose(spherical_to_cartesian_point(rtp), [0, 0, 0], atol=np.finfo(float).eps)
         rtp = np.array([0, 1, 0], dtype=np.double)
-        np.testing.assert_allclose(spherical_to_cartesian(rtp), [0, 0, 0], atol=np.finfo(float).eps)
+        np.testing.assert_allclose(spherical_to_cartesian_point(rtp), [0, 0, 0], atol=np.finfo(float).eps)
         rtp = np.array([1, 0, 0], dtype=np.double)
-        np.testing.assert_allclose(spherical_to_cartesian(rtp), [0, 0, 1], atol=np.finfo(float).eps)
+        np.testing.assert_allclose(spherical_to_cartesian_point(rtp), [0, 0, 1], atol=np.finfo(float).eps)
         rtp = np.array([1, np.pi/2, 0], dtype=np.double)
-        np.testing.assert_allclose(spherical_to_cartesian(rtp), [1, 0, 0], atol=np.finfo(float).eps)
+        np.testing.assert_allclose(spherical_to_cartesian_point(rtp), [1, 0, 0], atol=np.finfo(float).eps)
         rtp = np.array([1, np.pi, 0], dtype=np.double)
-        np.testing.assert_allclose(spherical_to_cartesian(rtp), [0, 0, -1], atol=np.finfo(float).eps)
+        np.testing.assert_allclose(spherical_to_cartesian_point(rtp), [0, 0, -1], atol=np.finfo(float).eps)
 
     def test_to_cartesian_wrong_arguments(self):
         rtp = 0
-        self.assertRaises(AttributeError, spherical_to_cartesian, rtp)
+        self.assertRaises(TypeError, spherical_to_cartesian, rtp)
         rtp = [0, 0]
-        self.assertRaises(AttributeError, spherical_to_cartesian, rtp)
-        rtp = np.array([0, 0, 0, 0], dtype=np.double)
-        self.assertRaises(ValueError, spherical_to_cartesian, rtp)
-        rtp = [0, 0, 0, 0, 0, 0]
-        self.assertRaises(AttributeError, spherical_to_cartesian, rtp)
+        self.assertRaises(TypeError, spherical_to_cartesian, rtp)
 
     def test_to_cylindrical_single_point(self):
         xyz = np.array([1, 0, 0], dtype=np.double)
-        np.testing.assert_allclose(cartesian_to_cylindrical(xyz), [1, 0, 0], atol=np.finfo(float).eps)
+        np.testing.assert_allclose(cartesian_to_cylindrical_point(xyz), [1, 0, 0], atol=np.finfo(float).eps)
         xyz = np.array([0, 1, 0], dtype=np.double)
-        np.testing.assert_allclose(cartesian_to_cylindrical(xyz), [1, np.pi / 2, 0], atol=np.finfo(float).eps)
+        np.testing.assert_allclose(cartesian_to_cylindrical_point(xyz), [1, np.pi / 2, 0], atol=np.finfo(float).eps)
         xyz = np.array([1, 0, 1], dtype=np.double)
-        np.testing.assert_allclose(cartesian_to_cylindrical(xyz), [1, 0, 1], atol=np.finfo(float).eps)
+        np.testing.assert_allclose(cartesian_to_cylindrical_point(xyz), [1, 0, 1], atol=np.finfo(float).eps)
         xyz = np.array([0, 0, 0], dtype=np.double)
-        np.testing.assert_allclose(cartesian_to_cylindrical(xyz), [0, 0, 0], atol=np.finfo(float).eps)
+        np.testing.assert_allclose(cartesian_to_cylindrical_point(xyz), [0, 0, 0], atol=np.finfo(float).eps)
         xyz = np.array([0, 0, 1], dtype=np.double)
-        np.testing.assert_allclose(cartesian_to_cylindrical(xyz), [0, 0, 1], atol=np.finfo(float).eps)
+        np.testing.assert_allclose(cartesian_to_cylindrical_point(xyz), [0, 0, 1], atol=np.finfo(float).eps)
 
     def test_to_cylindrical_and_back_many_points(self):
         points_num = 100

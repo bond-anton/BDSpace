@@ -24,6 +24,8 @@ cdef class Cartesian(object):
         self.__name = str(name)
         self.labels = labels
         # Basis in parent CS
+        if basis is None:
+            basis = np.eye(3, dtype=np.double)
         self.basis = basis
         # Origin in parent CS
         self.origin = origin
@@ -75,7 +77,7 @@ cdef class Cartesian(object):
     @basis.setter
     @boundscheck(False)
     @wraparound(False)
-    def basis(self, basis):
+    def basis(self, double[:, :] basis):
         """
         Sets basis for the cartesian coordinate system. Basis will be converted to 3x3 array.
         Each basis vector will be normed and placed in separate row like this:
@@ -83,26 +85,18 @@ cdef class Cartesian(object):
         1 x1 y1 z1
         2 x2 y2 z2
         3 x3 y3 z3
-        :param basis: 3x3 numpy array.
+        :param basis: 3x3 array.
         """
-        if basis is None:
-            basis = np.identity(3, dtype=np.double)
-        if isinstance(basis, np.ndarray):
-            try:
-                basis = basis.astype(np.double)
-            except:
-                raise ValueError('only numeric basis coordinates are supported')
-            if basis.shape == (3, 3) or basis.size == 9:
-                basis = basis.reshape((3, 3))
-                for i in range(3):
-                    basis[i] = unit_vector(basis[i])
-                if not np.allclose(np.dot(basis[0], basis[1]), [0]):
-                    raise ValueError('only orthogonal vectors accepted')
-                if not np.allclose(np.cross(basis[0], basis[1]), basis[2]):
-                    raise ValueError('only right-hand basis accepted')
-                self.__rotation.rotation_matrix = basis.T
-            else:
-                raise ValueError('complete 3D basis is needed')
+        if basis.shape[0] == 3 and basis.shape[1] == 3:
+            for i in range(3):
+                basis[i] = unit_vector(basis[i])
+            if not np.allclose(np.dot(basis[0], basis[1]), [0]):
+                raise ValueError('only orthogonal vectors accepted')
+            if not np.allclose(np.cross(basis[0], basis[1]), basis[2]):
+                raise ValueError('only right-hand basis accepted')
+            self.__rotation.rotation_matrix = basis.T
+        else:
+            raise ValueError('complete 3D basis is needed')
 
     @property
     def origin(self):

@@ -6,6 +6,9 @@ cdef class ParametricCurve(Space):
     cdef:
         double __start
         double __stop
+    cpdef double x_point(self, double t)
+    cpdef double y_point(self, double t)
+    cpdef double z_point(self, double t)
     cpdef double[:] x(self, double[:] t)
     cpdef double[:] y(self, double[:] t)
     cpdef double[:] z(self, double[:] t)

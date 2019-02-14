@@ -83,26 +83,26 @@ cdef class ParametricCurve(Space):
 
     @boundscheck(False)
     @wraparound(False)
-    cpdef double[:, :] tangent(self, double[:] t, double step=10*DBL_MIN):
+    cpdef double[:, :] tangent(self, double[:] t, double step=1.0e-15):
         cdef:
             unsigned int i, s = t.shape[0] - 1
             double[:, :] result = np.empty((s + 1, 3), dtype=np.double)
             double step2 = step / 2
-        result[0, 0] = (self.x(t[0] + step)) - self.x(t[0]) / step
-        result[0, 1] = (self.y(t[0] + step)) - self.y(t[0]) / step
-        result[0, 2] = (self.z(t[0] + step)) - self.z(t[0]) / step
-        result[s, 0] = (self.x(t[s]) - self.x(t[s] - step)) / step
-        result[s, 1] = (self.y(t[s]) - self.y(t[s] - step)) / step
-        result[s, 2] = (self.z(t[s]) - self.z(t[s] - step)) / step
+        result[0, 0] = (self.x_point(t[0] + step)) - self.x_point(t[0]) / step
+        result[0, 1] = (self.y_point(t[0] + step)) - self.y_point(t[0]) / step
+        result[0, 2] = (self.z_point(t[0] + step)) - self.z_point(t[0]) / step
+        result[s, 0] = (self.x_point(t[s]) - self.x_point(t[s] - step)) / step
+        result[s, 1] = (self.y_point(t[s]) - self.y_point(t[s] - step)) / step
+        result[s, 2] = (self.z_point(t[s]) - self.z_point(t[s] - step)) / step
         for i in range(1, s):
-            result[i, 0] = (self.x(t[i] + step2) - self.x(t[i] - step2)) / step
-            result[i, 1] = (self.y(t[i] + step2) - self.y(t[i] - step2)) / step
-            result[i, 2] = (self.z(t[i] + step2) - self.z(t[i] - step2)) / step
+            result[i, 0] = (self.x_point(t[i] + step2) - self.x_point(t[i] - step2)) / step
+            result[i, 1] = (self.y_point(t[i] + step2) - self.y_point(t[i] - step2)) / step
+            result[i, 2] = (self.z_point(t[i] + step2) - self.z_point(t[i] - step2)) / step
         return result
 
     @boundscheck(False)
     @wraparound(False)
-    cdef double __length_tangent_array(self, double[:] t, double tangent_step=10*DBL_MIN):
+    cdef double __length_tangent_array(self, double[:] t, double tangent_step=1.0e-15):
         cdef:
             unsigned int i, num_points = t.shape[0] - 1
             double[:, :] xyz = self.tangent(t, tangent_step)
@@ -126,7 +126,7 @@ cdef class ParametricCurve(Space):
             result += sqrt(dx * dx + dy * dy + dz * dz)
         return result
 
-    cdef double __length_tangent_mesh(self, Mesh1DUniform mesh, double tangent_step=10*DBL_MIN):
+    cdef double __length_tangent_mesh(self, Mesh1DUniform mesh, double tangent_step=1.0e-15):
         cdef:
             unsigned int i, num_points = mesh.num  -1
             double[:, :] xyz = self.generate_points(mesh.physical_nodes)
@@ -154,10 +154,11 @@ cdef class ParametricCurve(Space):
         mesh.residual = error
         return result_t_acc
 
-    cpdef double length(self, double precision=1e-6, bint print_details=False):
+    cpdef double length(self, double precision=1e-6, bint print_details=True):
         cdef:
-            unsigned int i, num_points, iteration = 0
-            double[:] dl ,t
+            unsigned int num_points, iteration = 0
+            double[:] t
+            double length_tangent, length_polygonal, error
         num_points = int(100 * abs(self.__stop - self.__start) / (2 * M_PI)) + 1
         while True:
             iteration += 1
@@ -171,8 +172,8 @@ cdef class ParametricCurve(Space):
             if error <= abs(precision):
                 break
             num_points *= 2
-        if print_details:
-            print(max(length_tangent, length_polygonal), error, iteration)
+            if print_details:
+                print(iteration, length_tangent, length_polygonal, error, num_points)
         return max(length_tangent, length_polygonal)
 
 
@@ -213,38 +214,14 @@ cdef class Line(ParametricCurve):
     def c(self, double c):
         self.__c = c
 
-    @boundscheck(False)
-    @wraparound(False)
-    cpdef double[:] x(self, double[:] t):
-        cdef:
-            array[double] result, template = array('d')
-            unsigned int i, s = t.shape[0]
-        result = clone(template, s, zero=False)
-        for i in range(s):
-            result[i] = self.__origin[0] + self.__a * t[i]
-        return result
+    cpdef double x_point(self, double t):
+        return self.__origin[0] + self.__a * t
 
-    @boundscheck(False)
-    @wraparound(False)
-    cpdef double[:] y(self, double[:] t):
-        cdef:
-            array[double] result, template = array('d')
-            unsigned int i, s = t.shape[0]
-        result = clone(template, s, zero=False)
-        for i in range(s):
-            result[i] = self.__origin[0] + self.__b * t[i]
-        return result
+    cpdef double y_point(self, double t):
+        return self.__origin[1] + self.__b * t
 
-    @boundscheck(False)
-    @wraparound(False)
-    cpdef double[:] z(self, double[:] t):
-        cdef:
-            array[double] result, template = array('d')
-            unsigned int i, s = t.shape[0]
-        result = clone(template, s, zero=False)
-        for i in range(s):
-            result[i] = self.__origin[0] + self.__c * t[i]
-        return result
+    cpdef double z_point(self, double t):
+        return self.__origin[2] + self.__c * t
 
 
 cdef class Arc(ParametricCurve):
@@ -311,36 +288,14 @@ cdef class Arc(ParametricCurve):
         else:
             self.__direction = 1
 
-    @boundscheck(False)
-    @wraparound(False)
-    cpdef double[:] x(self, double[:] t):
-        cdef:
-            array[double] result, template = array('d')
-            unsigned int i, s = t.shape[0]
-        result = clone(template, s, zero=False)
-        for i in range(s):
-            result[i] = self.__a * cos(t[i])
-        return result
+    cpdef double x_point(self, double t):
+        return self.__a * cos(t)
 
-    @boundscheck(False)
-    @wraparound(False)
-    cpdef double[:] y(self, double[:] t):
-        cdef:
-            array[double] result, template = array('d')
-            unsigned int i, s = t.shape[0]
-        result = clone(template, s, zero=False)
-        for i in range(s):
-            result[i] = self.__direction * self.__b * sin(t[i])
-        return result
+    cpdef double y_point(self, double t):
+        return self.__direction * self.__b * sin(t)
 
-    @boundscheck(False)
-    @wraparound(False)
-    cpdef double[:] z(self, double[:] t):
-        cdef:
-            array[double] result, template = array('d')
-            unsigned int s = t.shape[0]
-        result = clone(template, s, zero=True)
-        return result
+    cpdef double z_point(self, double t):
+        return 0.0
 
     cpdef double eccentricity(self):
         return sqrt((self.__a * self.__a - self.__b * self.__b) / (self.__a * self.__a))
@@ -413,35 +368,11 @@ cdef class Helix(ParametricCurve):
         else:
             self.__direction = 1
 
-    @boundscheck(False)
-    @wraparound(False)
-    cpdef double[:] x(self, double[:] t):
-        cdef:
-            array[double] result, template = array('d')
-            unsigned int i, s = t.shape[0]
-        result = clone(template, s, zero=False)
-        for i in range(s):
-            result[i] = self.__radius - self.__radius * cos(t[i])
-        return result
+    cpdef double x_point(self, double t):
+        return self.__radius - self.__radius * cos(t)
 
-    @boundscheck(False)
-    @wraparound(False)
-    cpdef double[:] y(self, double[:] t):
-        cdef:
-            array[double] result, template = array('d')
-            unsigned int i, s = t.shape[0]
-        result = clone(template, s, zero=False)
-        for i in range(s):
-            result[i] = self.__direction * self.__radius * sin(t[i])
-        return result
+    cpdef double y_point(self, double t):
+        return self.__direction * self.__radius * sin(t)
 
-    @boundscheck(False)
-    @wraparound(False)
-    cpdef double[:] z(self, double[:] t):
-        cdef:
-            array[double] result, template = array('d')
-            unsigned int i, s = t.shape[0]
-        result = clone(template, s, zero=False)
-        for i in range(s):
-            result[i] = self.__pitch / (2 * M_PI) * t[i]
-        return result
+    cpdef double z_point(self, double t):
+        return self.__pitch / (2 * M_PI) * t

@@ -50,9 +50,14 @@ extensions = [
         depends=['BDSpace/Field/SuperposedField.pxd'],
     ),
     Extension(
+        'BDSpace.Curve._helpers',
+        ['BDSpace/Curve/_helpers.pyx'],
+        depends=['BDSpace/Curve/_helpers.pxd'],
+    ),
+    Extension(
         'BDSpace.Curve.Parametric',
-        ['BDSpace/Curve/Parametric.pyx', 'BDSpace/Curve/_helpers.pyx'],
-        depends=['BDSpace/Field/Field.pxd', 'BDSpace/Curve/_helpers.pxd'],
+        ['BDSpace/Curve/Parametric.pyx'],
+        depends=['BDSpace/Field/Field.pxd'],
     ),
 ]
 setup(
