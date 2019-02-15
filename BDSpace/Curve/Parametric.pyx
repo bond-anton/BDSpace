@@ -4,7 +4,7 @@ from cython import boundscheck, wraparound
 
 from cpython.array cimport array, clone
 from libc.math cimport sin, cos, sqrt, M_PI
-from libc.float cimport DBL_MIN
+from BDMesh.Mesh1D cimport Mesh1D
 from BDMesh.Mesh1DUniform cimport Mesh1DUniform
 from BDMesh.TreeMesh1DUniform cimport TreeMesh1DUniform
 
@@ -81,36 +81,99 @@ cdef class ParametricCurve(Space):
         xyz[:, 2] = self.z(t)
         return xyz
 
-    @boundscheck(False)
-    @wraparound(False)
-    cpdef double[:, :] tangent(self, double[:] t, double step=1.0e-15):
+    cpdef double tangent_x_point(self, double t, double step=1.0e-10, bint left=True, bint right=True):
+        cdef:
+            double step2 = step / 2
+        if left and right:
+            return (self.x_point(t + step2) - self.x_point(t - step2)) / step
+        elif left:
+            return (self.x_point(t) - self.x_point(t - step)) / step
+        else:
+            return (self.x_point(t + step) - self.x_point(t)) / step
+
+    cpdef double tangent_y_point(self, double t, double step=1.0e-10, bint left=True, bint right=True):
+        cdef:
+            double step2 = step / 2
+        if left and right:
+            return (self.y_point(t + step2) - self.y_point(t - step2)) / step
+        elif left:
+            return (self.y_point(t) - self.y_point(t - step)) / step
+        else:
+            return (self.y_point(t + step) - self.y_point(t)) / step
+
+    cpdef double tangent_z_point(self, double t, double step=1.0e-10, bint left=True, bint right=True):
+        cdef:
+            double step2 = step / 2
+        if left and right:
+            return (self.z_point(t + step2) - self.z_point(t - step2)) / step
+        elif left:
+            return (self.z_point(t) - self.z_point(t - step)) / step
+        else:
+            return (self.z_point(t + step) - self.z_point(t)) / step
+
+    cpdef double[:] tangent_x(self, double[:] t, double step=1.0e-10):
         cdef:
             unsigned int i, s = t.shape[0] - 1
-            double[:, :] result = np.empty((s + 1, 3), dtype=np.double)
-            double step2 = step / 2
-        result[0, 0] = (self.x_point(t[0] + step)) - self.x_point(t[0]) / step
-        result[0, 1] = (self.y_point(t[0] + step)) - self.y_point(t[0]) / step
-        result[0, 2] = (self.z_point(t[0] + step)) - self.z_point(t[0]) / step
-        result[s, 0] = (self.x_point(t[s]) - self.x_point(t[s] - step)) / step
-        result[s, 1] = (self.y_point(t[s]) - self.y_point(t[s] - step)) / step
-        result[s, 2] = (self.z_point(t[s]) - self.z_point(t[s] - step)) / step
+            array[double] result, template = array('d')
+        result = clone(template, s + 1, zero=False)
+        result[0] = self.tangent_x_point(t[0], step, left=False)
+        result[s] = self.tangent_x_point(t[s], step, right=False)
         for i in range(1, s):
-            result[i, 0] = (self.x_point(t[i] + step2) - self.x_point(t[i] - step2)) / step
-            result[i, 1] = (self.y_point(t[i] + step2) - self.y_point(t[i] - step2)) / step
-            result[i, 2] = (self.z_point(t[i] + step2) - self.z_point(t[i] - step2)) / step
+            result[i] = self.tangent_x_point(t[i], step)
+        return result
+
+    cpdef double[:] tangent_y(self, double[:] t, double step=1.0e-10):
+        cdef:
+            unsigned int i, s = t.shape[0] - 1
+            array[double] result, template = array('d')
+        result = clone(template, s + 1, zero=False)
+        result[0] = self.tangent_y_point(t[0], step, left=False)
+        result[s] = self.tangent_y_point(t[s], step, right=False)
+        for i in range(1, s):
+            result[i] = self.tangent_y_point(t[i], step)
+        return result
+
+    cpdef double[:] tangent_z(self, double[:] t, double step=1.0e-10):
+        cdef:
+            unsigned int i, s = t.shape[0] - 1
+            array[double] result, template = array('d')
+        result = clone(template, s + 1, zero=False)
+        result[0] = self.tangent_z_point(t[0], step, left=False)
+        result[s] = self.tangent_z_point(t[s], step, right=False)
+        for i in range(1, s):
+            result[i] = self.tangent_z_point(t[i], step)
         return result
 
     @boundscheck(False)
     @wraparound(False)
-    cdef double __length_tangent_array(self, double[:] t, double tangent_step=1.0e-15):
+    cpdef double[:, :] tangent(self, double[:] t, double step=1.0e-10):
         cdef:
-            unsigned int i, num_points = t.shape[0] - 1
+            unsigned int i, s = t.shape[0] - 1
+            double[:, :] result = np.empty((s + 1, 3), dtype=np.double)
+            double step2 = step / 2
+        result[0, 0] = self.tangent_x_point(t[0], step, left=False)
+        result[0, 1] = self.tangent_y_point(t[0], step, left=False)
+        result[0, 2] = self.tangent_z_point(t[0], step, left=False)
+        result[s, 0] = self.tangent_x_point(t[s], step, right=False)
+        result[s, 1] = self.tangent_y_point(t[s], step, right=False)
+        result[s, 2] = self.tangent_z_point(t[s], step, right=False)
+        for i in range(1, s):
+            result[i, 0] = self.tangent_x_point(t[s], step)
+            result[i, 1] = self.tangent_y_point(t[s], step)
+            result[i, 2] = self.tangent_z_point(t[s], step)
+        return result
+
+    @boundscheck(False)
+    @wraparound(False)
+    cdef double __length_tangent_array(self, double[:] t, double tangent_step=1.0e-10):
+        cdef:
+            unsigned int i, num_points = t.shape[0]
             double[:, :] xyz = self.tangent(t, tangent_step)
             array[double] dl, template = array('d')
         dl = clone(template, num_points, zero=False)
         for i in range(num_points):
             dl[i] = sqrt(xyz[i, 0] * xyz[i, 0] + xyz[i, 1] * xyz[i, 1] + xyz[i, 2] * xyz[i, 2])
-        return trapz_1d(t[:num_points], dl)
+        return trapz_1d(dl, t)
 
     @boundscheck(False)
     @wraparound(False)
@@ -126,18 +189,18 @@ cdef class ParametricCurve(Space):
             result += sqrt(dx * dx + dy * dy + dz * dz)
         return result
 
-    cdef double __length_tangent_mesh(self, Mesh1DUniform mesh, double tangent_step=1.0e-15):
+    cdef double __length_tangent_mesh(self, Mesh1DUniform mesh, double tangent_step=1.0e-10):
         cdef:
-            unsigned int i, num_points = mesh.num  -1
+            unsigned int i, num_points = mesh.num
             double[:, :] xyz = self.generate_points(mesh.physical_nodes)
             double[:, :] xyz_t = self.tangent(mesh.physical_nodes, tangent_step)
             double result_t, result_p, result_t_acc = 0.0, result_p_acc = 0.0, dx, dy, dz, dl1, dl2
             array[double] solution, error, template = array('d')
-        solution = clone(template, num_points + 1, zero=False)
-        error = clone(template, num_points + 1, zero=False)
+        solution = clone(template, num_points, zero=False)
+        error = clone(template, num_points, zero=False)
         solution[0] = 0.0
         error[0] = 0.0
-        for i in range(num_points):
+        for i in range(num_points - 1):
             dx = xyz[i + 1, 0] - xyz[i, 0]
             dy = xyz[i + 1, 1] - xyz[i, 1]
             dz = xyz[i + 1, 2] - xyz[i, 2]
@@ -154,27 +217,54 @@ cdef class ParametricCurve(Space):
         mesh.residual = error
         return result_t_acc
 
-    cpdef double length(self, double precision=1e-6, bint print_details=True):
+    @boundscheck(False)
+    @wraparound(False)
+    cpdef double length(self, double precision=1e-6, unsigned int max_iterations=100, double tangent_step=1.0e-10):
         cdef:
-            unsigned int num_points, iteration = 0
+            TreeMesh1DUniform meshes_tree = self.mesh_tree(precision, max_iterations, tangent_step)
+            Mesh1D flat_mesh = meshes_tree.flatten()
+            unsigned int i
+            double length_tangent = 0
+        for i in range(flat_mesh.num):
+            length_tangent += flat_mesh.solution[i]
+        return length_tangent
+
+    @boundscheck(False)
+    @wraparound(False)
+    cpdef TreeMesh1DUniform mesh_tree(self, double precision=1e-6, unsigned int max_iterations=100,
+                                      double tangent_step=1.0e-10):
+        cdef:
+            Mesh1DUniform root_mesh, mesh, refinement_mesh
+            TreeMesh1DUniform meshes_tree
+            unsigned int num_points = 3, iteration = 0, level, i, to_refine
             double[:] t
-            double length_tangent, length_polygonal, error
-        num_points = int(100 * abs(self.__stop - self.__start) / (2 * M_PI)) + 1
-        while True:
+            double length_tangent = 0.0
+            long[:, :] refinements
+        root_mesh = Mesh1DUniform(self.__start, self.__stop,
+                                  boundary_condition_1=0.0,
+                                  boundary_condition_2=0.0,
+                                  physical_step=(self.__stop - self.__start) / 2.0)
+        meshes_tree = TreeMesh1DUniform(root_mesh, refinement_coefficient=2, aligned=True)
+        while iteration < max_iterations:
             iteration += 1
-            t = np.linspace(self.__start, self.__stop, num=num_points, endpoint=True, dtype=np.double)
-            length_tangent = self.__length_tangent_array(t)
-            length_polygonal = self.__length_poly_array(t)
-            if length_tangent == length_polygonal == 0.0:
-                error = 0.0
-            else:
-                error = abs(length_tangent - length_polygonal) / max(length_tangent, length_polygonal)
-            if error <= abs(precision):
+            level = max(meshes_tree.levels)
+            to_refine = 0
+            for mesh in meshes_tree.__tree[level]:
+                length_tangent = self.__length_tangent_mesh(mesh, tangent_step=tangent_step)
+                refinements = refinement_points(mesh, precision)
+                for i in range(refinements.shape[0]):
+                    to_refine += 1
+                    refinement_mesh = Mesh1DUniform(
+                        mesh.to_physical(np.array([mesh.__local_nodes[refinements[i][0]]]))[0],
+                        mesh.to_physical(np.array([mesh.__local_nodes[refinements[i][1]]]))[0],
+                        boundary_condition_1=0.0,
+                        boundary_condition_2=0.0,
+                        physical_step=mesh.physical_step/meshes_tree.refinement_coefficient)
+                    meshes_tree.add_mesh(refinement_mesh)
+                meshes_tree.remove_coarse_duplicates()
+            if to_refine == 0:
                 break
-            num_points *= 2
-            if print_details:
-                print(iteration, length_tangent, length_polygonal, error, num_points)
-        return max(length_tangent, length_polygonal)
+        return meshes_tree
 
 
 cdef class Line(ParametricCurve):
@@ -222,6 +312,15 @@ cdef class Line(ParametricCurve):
 
     cpdef double z_point(self, double t):
         return self.__origin[2] + self.__c * t
+
+    cpdef double tangent_x_point(self, double t, double step=1.0e-10, bint left=True, bint right=True):
+        return self.__a
+
+    cpdef double tangent_y_point(self, double t, double step=1.0e-10, bint left=True, bint right=True):
+        return self.__b
+
+    cpdef double tangent_z_point(self, double t, double step=1.0e-10, bint left=True, bint right=True):
+        return self.__c
 
 
 cdef class Arc(ParametricCurve):
@@ -295,6 +394,15 @@ cdef class Arc(ParametricCurve):
         return self.__direction * self.__b * sin(t)
 
     cpdef double z_point(self, double t):
+        return 0.0
+
+    cpdef double tangent_x_point(self, double t, double step=1.0e-10, bint left=True, bint right=True):
+        return -self.__a * sin(t)
+
+    cpdef double tangent_y_point(self, double t, double step=1.0e-10, bint left=True, bint right=True):
+        return self.__direction * self.__b * cos(t)
+
+    cpdef double tangent_z_point(self, double t, double step=1.0e-10, bint left=True, bint right=True):
         return 0.0
 
     cpdef double eccentricity(self):
@@ -376,3 +484,12 @@ cdef class Helix(ParametricCurve):
 
     cpdef double z_point(self, double t):
         return self.__pitch / (2 * M_PI) * t
+
+    cpdef double tangent_x_point(self, double t, double step=1.0e-10, bint left=True, bint right=True):
+        return self.__radius * sin(t)
+
+    cpdef double tangent_y_point(self, double t, double step=1.0e-10, bint left=True, bint right=True):
+        return self.__direction * self.__radius * cos(t)
+
+    cpdef double tangent_z_point(self, double t, double step=1.0e-10, bint left=True, bint right=True):
+        return self.__pitch / (2 * M_PI)
