@@ -7,6 +7,8 @@ cdef class ParametricCurve(Space):
     cdef:
         double __start
         double __stop
+        double __dt
+        double __precision
     cpdef double x_point(self, double t)
     cpdef double y_point(self, double t)
     cpdef double z_point(self, double t)
@@ -14,18 +16,19 @@ cdef class ParametricCurve(Space):
     cpdef double[:] y(self, double[:] t)
     cpdef double[:] z(self, double[:] t)
     cpdef double[:, :] generate_points(self, double[:] t)
-    cpdef double tangent_x_point(self, double t, double step=*, bint left=*, bint right=*)
-    cpdef double tangent_y_point(self, double t, double step=*, bint left=*, bint right=*)
-    cpdef double tangent_z_point(self, double t, double step=*, bint left=*, bint right=*)
-    cpdef double[:] tangent_x(self, double[:] t, double step=*)
-    cpdef double[:] tangent_y(self, double[:] t, double step=*)
-    cpdef double[:] tangent_z(self, double[:] t, double step=*)
-    cpdef double[:, :] tangent(self, double[:] t, double step=*)
-    cdef double __length_tangent_array(self, double[:] t, double tangent_step=*)
+    cpdef double tangent_x_point(self, double t, bint left=*, bint right=*)
+    cpdef double tangent_y_point(self, double t, bint left=*, bint right=*)
+    cpdef double tangent_z_point(self, double t, bint left=*, bint right=*)
+    cpdef double[:] tangent_x(self, double[:] t)
+    cpdef double[:] tangent_y(self, double[:] t)
+    cpdef double[:] tangent_z(self, double[:] t)
+    cpdef double[:, :] tangent(self, double[:] t)
+    cdef double __length_tangent_array(self, double[:] t)
     cdef double __length_poly_array(self, double[:] t)
-    cdef double __length_tangent_mesh(self, Mesh1DUniform mesh, double tangent_step=*)
-    cpdef double length(self, double precision=*, unsigned int max_iterations=*, double tangent_step=*)
-    cpdef TreeMesh1DUniform mesh_tree(self, double precision=*, unsigned int max_iterations=*, double tangent_step=*)
+    cdef double __length_tangent_mesh(self, Mesh1DUniform mesh)
+    cpdef double length(self, unsigned int max_iterations=*)
+    cpdef TreeMesh1DUniform mesh_tree(self, unsigned int max_iterations=*)
+    cpdef double distance_to_point_square(self, double t, double[:] xyz)
     cpdef double distance_to_point(self, double t, double[:] xyz)
 
 

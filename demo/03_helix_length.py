@@ -41,6 +41,10 @@ plt.show()
 flat = tree.flatten()
 print(np.sum(flat.solution))
 
+for j in range(flat.num):
+    t = flat.physical_boundary_1 + flat.jacobian * flat.local_nodes[j]
+    print(t)
+
 # step = 1e-10
 # t = np.linspace(0.0, 2 * np.pi, num=100)
 #

@@ -191,6 +191,7 @@ cdef class HyperbolicPotentialSphericalConservativeField(Field):
             r2 = xyz[i, 0]*xyz[i, 0] + xyz[i, 1]*xyz[i, 1] + xyz[i, 2]*xyz[i, 2]
             if r2 < r2_min:
                 r2 = r2_min
-            for j in range(3):
-                values[i, j] = self.__a * xyz[i, j] / r2
+            values[i, 0] = self.__a * xyz[i, 0] / r2
+            values[i, 1] = self.__a * xyz[i, 1] / r2
+            values[i, 2] = self.__a * xyz[i, 2] / r2
         return values

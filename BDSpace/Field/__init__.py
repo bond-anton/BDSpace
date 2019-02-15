@@ -1,3 +1,4 @@
 from .Field import Field, ConstantScalarConservativeField, ConstantVectorConservativeField
 from .Field import HyperbolicPotentialSphericalConservativeField
 from .SuperposedField import SuperposedField
+from .CurveField import CurveField, HyperbolicPotentialCurveConservativeField

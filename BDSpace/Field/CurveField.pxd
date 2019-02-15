@@ -6,8 +6,10 @@ cdef class CurveField(Field):
     cdef:
         ParametricCurve __curve
         TreeMesh1DUniform __tree_mesh
+        double __a
 
-    cpdef double linear_density(self, double t)
+    cpdef double linear_density_point(self, double t)
+    cpdef double[:] linear_density(self, double[:] t)
 
 
 cdef class HyperbolicPotentialCurveConservativeField(CurveField):

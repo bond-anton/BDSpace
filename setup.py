@@ -59,6 +59,11 @@ extensions = [
         ['BDSpace/Curve/Parametric.pyx'],
         depends=['BDSpace/Field/Field.pxd'],
     ),
+    Extension(
+        'BDSpace.Field.CurveField',
+        ['BDSpace/Field/CurveField.pyx'],
+        depends=['BDSpace/Field/CurveField.pxd'],
+    ),
 ]
 setup(
     name=package_name,
