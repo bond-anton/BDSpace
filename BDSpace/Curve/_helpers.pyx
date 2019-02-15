@@ -1,16 +1,17 @@
 import numpy as np
 from cython import boundscheck, wraparound
+from cython.parallel import prange
 
 from BDMesh.Mesh1DUniform cimport Mesh1DUniform
 
 
 @boundscheck(False)
 @wraparound(False)
-cdef double trapz_1d(double[:] y, double[:] x):
+cdef double trapz_1d(double[:] y, double[:] x) nogil:
     cdef:
         int nx = x.shape[0], i
         double result = 0.0
-    for i in range(nx - 1):
+    for i in prange(nx - 1):
         result += (x[i + 1] - x[i]) * (y[i + 1] + y[i]) / 2
     return result
 

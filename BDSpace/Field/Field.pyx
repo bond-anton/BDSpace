@@ -1,6 +1,7 @@
 import numpy as np
 
 from cython import boundscheck, wraparound
+from cython.parallel import prange
 
 from libc.math cimport sqrt
 from cpython.array cimport array, clone
@@ -41,23 +42,25 @@ cdef class Field(Space):
     @wraparound(False)
     cdef double[:] __points_scalar(self, double[:, :] xyz, double value):
         cdef:
-            unsigned int i, s = xyz.shape[0]
+            int i, s = xyz.shape[0]
             array[double] values, template = array('d')
         values = clone(template, s, zero=False)
-        for i in range(s):
-            values[i] = value
+        with nogil:
+            for i in prange(s):
+                values[i] = value
         return values
 
     @boundscheck(False)
     @wraparound(False)
     cdef double[:, :] __points_vector(self, double[:, :] xyz, double[:] value):
         cdef:
-            unsigned int i, s = xyz.shape[0]
+            int i, s = xyz.shape[0]
             double[:, :] values = np.empty((s, 3), dtype=np.double)
-        for i in range(s):
-            values[i, 0] = value[0]
-            values[i, 1] = value[1]
-            values[i, 2] = value[2]
+        with nogil:
+            for i in prange(s):
+                values[i, 0] = value[0]
+                values[i, 1] = value[1]
+                values[i, 2] = value[2]
         return values
 
     cpdef double[:] scalar_field(self, double[:, :] xyz):
@@ -76,7 +79,7 @@ cdef class Field(Space):
         """
         cdef:
             array[double] template = array('d')
-        return self.__points_vector(xyz, clone(template, xyz.shape[1], zero=True))
+        return self.__points_vector(xyz, clone(template, 3, zero=True))
 
 
 cdef class ConstantScalarConservativeField(Field):
@@ -125,12 +128,13 @@ cdef class ConstantVectorConservativeField(Field):
         :return: scalar values array
         """
         cdef:
-            unsigned int i, s = xyz.shape[0]
+            int i, s = xyz.shape[0]
             array[double] values, template = array('d')
         values = clone(template, s, zero=False)
-        for i in range(s):
-            values[i] = xyz[i, 0] * self.__potential[0] + xyz[i, 1] * self.__potential[1]\
-                        + xyz[i, 2] * self.__potential[2]
+        with nogil:
+            for i in prange(s):
+                values[i] = xyz[i, 0] * self.__potential[0] + xyz[i, 1] * self.__potential[1]\
+                            + xyz[i, 2] * self.__potential[2]
         return values
 
     cpdef double[:, :] vector_field(self, double[:, :] xyz):
@@ -169,29 +173,31 @@ cdef class HyperbolicPotentialSphericalConservativeField(Field):
     @wraparound(False)
     cpdef double[:] scalar_field(self, double[:, :] xyz):
         cdef:
-            unsigned int i, s = xyz.shape[0]
+            int i, s = xyz.shape[0]
             double r
             array[double] values, template = array('d')
         values = clone(template, s, zero=False)
-        for i in range(s):
-            r = sqrt(xyz[i, 0]*xyz[i, 0] + xyz[i, 1]*xyz[i, 1] + xyz[i, 2]*xyz[i, 2])
-            if r < self.__r:
-                r = self.__r
-            values[i] = self.__a / r
+        with nogil:
+            for i in prange(s):
+                r = sqrt(xyz[i, 0] * xyz[i, 0] + xyz[i, 1] * xyz[i, 1] + xyz[i, 2] * xyz[i, 2])
+                if r < self.__r:
+                    r = self.__r
+                values[i] = self.__a / r
         return values
 
     @boundscheck(False)
     @wraparound(False)
     cpdef double[:, :] vector_field(self, double[:, :] xyz):
         cdef:
-            unsigned int i, j, s = xyz.shape[0]
+            int i, j, s = xyz.shape[0]
             double r2, r2_min = self.__r * self.__r
             double[:, :] values = np.empty((s, 3), dtype=np.double)
-        for i in range(s):
-            r2 = xyz[i, 0]*xyz[i, 0] + xyz[i, 1]*xyz[i, 1] + xyz[i, 2]*xyz[i, 2]
-            if r2 < r2_min:
-                r2 = r2_min
-            values[i, 0] = self.__a * xyz[i, 0] / r2
-            values[i, 1] = self.__a * xyz[i, 1] / r2
-            values[i, 2] = self.__a * xyz[i, 2] / r2
+        with nogil:
+            for i in prange(s):
+                r2 = xyz[i, 0] * xyz[i, 0] + xyz[i, 1] * xyz[i, 1] + xyz[i, 2] * xyz[i, 2]
+                if r2 < r2_min:
+                    r2 = r2_min
+                values[i, 0] = self.__a * xyz[i, 0] / r2
+                values[i, 1] = self.__a * xyz[i, 1] / r2
+                values[i, 2] = self.__a * xyz[i, 2] / r2
         return values

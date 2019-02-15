@@ -9,6 +9,9 @@ cdef class ParametricCurve(Space):
         double __stop
         double __dt
         double __precision
+    cdef double __x_point(self, double t) nogil
+    cdef double __y_point(self, double t) nogil
+    cdef double __z_point(self, double t) nogil
     cpdef double x_point(self, double t)
     cpdef double y_point(self, double t)
     cpdef double z_point(self, double t)
@@ -16,6 +19,9 @@ cdef class ParametricCurve(Space):
     cpdef double[:] y(self, double[:] t)
     cpdef double[:] z(self, double[:] t)
     cpdef double[:, :] generate_points(self, double[:] t)
+    cdef double __tangent_x_point(self, double t, bint left=*, bint right=*) nogil
+    cdef double __tangent_y_point(self, double t, bint left=*, bint right=*) nogil
+    cdef double __tangent_z_point(self, double t, bint left=*, bint right=*) nogil
     cpdef double tangent_x_point(self, double t, bint left=*, bint right=*)
     cpdef double tangent_y_point(self, double t, bint left=*, bint right=*)
     cpdef double tangent_z_point(self, double t, bint left=*, bint right=*)

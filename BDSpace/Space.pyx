@@ -81,6 +81,7 @@ cdef class Space(object):
         else:
             return self.parent.to_global_coordinate_system(parent_xyz)
 
+    @boundscheck(False)
     cpdef Cartesian basis_in_global_coordinate_system(self):
         """
         returns local coordinate system basis in global coordinate system as Cartesian class object
