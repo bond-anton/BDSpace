@@ -2,3 +2,4 @@ numpy
 scipy
 Cython
 BDQuaternions
+BDMesh
