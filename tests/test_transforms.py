@@ -1,6 +1,5 @@
 import unittest
 import numpy as np
-import timeit
 
 from BDSpace.Coordinates.transforms import reduce_angle, unit_vector, angles_between_vectors
 from BDSpace.Coordinates.transforms import cartesian_to_spherical_point, spherical_to_cartesian_point

@@ -1,11 +1,7 @@
-from __future__ import division, print_function
 import numpy as np
 
-from BDSpace.Coordinates import Cartesian
 from BDSpace import Space
-from BDSpace.Figure import Figure
 from BDSpace.Figure.Sphere import Sphere
-from BDSpace.Curve import ParametricCurve
 from BDSpace.Field import HyperbolicPotentialSphericalConservativeField, SuperposedField
 
 import BDSpaceVis as Visual

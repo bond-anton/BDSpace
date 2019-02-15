@@ -1,5 +1,3 @@
-from __future__ import division, print_function
-import numpy as np
 from mayavi import mlab
 
 from BDSpace.Coordinates import Cartesian

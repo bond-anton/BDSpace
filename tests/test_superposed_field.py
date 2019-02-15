@@ -1,10 +1,7 @@
-from __future__ import division
 import unittest
 import numpy as np
-from BDSpace.Coordinates import Cartesian
 from BDSpace.Field import Field, SuperposedField
 from BDSpace.Field import ConstantScalarConservativeField, ConstantVectorConservativeField
-from BDQuaternions import Conventions
 
 
 class TestField(unittest.TestCase):

@@ -1,6 +1,3 @@
-from __future__ import division, print_function
-import numpy as np
-
 from cpython.array cimport array, clone
 
 from .Field cimport Field
