@@ -76,4 +76,5 @@ cdef class HyperbolicPotentialCurveConservativeField(CurveField):
                 # values[i, 0] += self.linear_density(t) * flat_mesh.solution[j] / d2
                 # values[i, 1] += self.linear_density(t) * flat_mesh.solution[j] / d2
                 # values[i, 2] += self.linear_density(t) * flat_mesh.solution[j] / d2
+                # HINT: v = xyz -L(t)
         return values
