@@ -41,8 +41,7 @@ cdef class Field(Space):
     @wraparound(False)
     cdef double[:] __points_scalar(self, double[:, :] xyz, double value):
         cdef:
-            Py_ssize_t i
-            Py_ssize_t s = xyz.shape[0]
+            unsigned int i, s = xyz.shape[0]
             array[double] values, template = array('d')
         values = clone(template, s, zero=False)
         for i in range(s):
@@ -53,13 +52,12 @@ cdef class Field(Space):
     @wraparound(False)
     cdef double[:, :] __points_vector(self, double[:, :] xyz, double[:] value):
         cdef:
-            Py_ssize_t i, j
-            Py_ssize_t s = xyz.shape[0]
-            Py_ssize_t c = xyz.shape[1]
-            double[:, :] values = np.empty((s, c), dtype=np.double)
+            unsigned int i, s = xyz.shape[0]
+            double[:, :] values = np.empty((s, 3), dtype=np.double)
         for i in range(s):
-            for j in range(c):
-                values[i, j] = value[j]
+            values[i, 0] = value[0]
+            values[i, 1] = value[1]
+            values[i, 2] = value[2]
         return values
 
     cpdef double[:] scalar_field(self, double[:, :] xyz):
@@ -127,15 +125,12 @@ cdef class ConstantVectorConservativeField(Field):
         :return: scalar values array
         """
         cdef:
-            Py_ssize_t i, j
-            Py_ssize_t s = xyz.shape[0]
-            Py_ssize_t c = xyz.shape[1]
+            unsigned int i, s = xyz.shape[0]
             array[double] values, template = array('d')
         values = clone(template, s, zero=False)
         for i in range(s):
-            values[i] = 0
-            for j in range(c):
-                values[i] += xyz[i, j] * self.__potential[j]
+            values[i] = xyz[i, 0] * self.__potential[0] + xyz[i, 1] * self.__potential[1]\
+                        + xyz[i, 2] * self.__potential[2]
         return values
 
     cpdef double[:, :] vector_field(self, double[:, :] xyz):
@@ -170,11 +165,11 @@ cdef class HyperbolicPotentialSphericalConservativeField(Field):
     def a(self, double a):
         self.__a = a
 
+    @boundscheck(False)
+    @wraparound(False)
     cpdef double[:] scalar_field(self, double[:, :] xyz):
         cdef:
-            Py_ssize_t i
-            Py_ssize_t s = xyz.shape[0]
-            Py_ssize_t c = xyz.shape[1]
+            unsigned int i, s = xyz.shape[0]
             double r
             array[double] values, template = array('d')
         values = clone(template, s, zero=False)
@@ -185,17 +180,17 @@ cdef class HyperbolicPotentialSphericalConservativeField(Field):
             values[i] = self.__a / r
         return values
 
+    @boundscheck(False)
+    @wraparound(False)
     cpdef double[:, :] vector_field(self, double[:, :] xyz):
         cdef:
-            Py_ssize_t i, j
-            Py_ssize_t s = xyz.shape[0]
-            Py_ssize_t c = xyz.shape[1]
+            unsigned int i, j, s = xyz.shape[0]
             double r2, r2_min = self.__r * self.__r
-            double[:, :] values = np.empty((s, c), dtype=np.double)
+            double[:, :] values = np.empty((s, 3), dtype=np.double)
         for i in range(s):
             r2 = xyz[i, 0]*xyz[i, 0] + xyz[i, 1]*xyz[i, 1] + xyz[i, 2]*xyz[i, 2]
             if r2 < r2_min:
                 r2 = r2_min
-            for j in range(c):
+            for j in range(3):
                 values[i, j] = self.__a * xyz[i, j] / r2
         return values

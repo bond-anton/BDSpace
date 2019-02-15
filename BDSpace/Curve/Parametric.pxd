@@ -26,6 +26,7 @@ cdef class ParametricCurve(Space):
     cdef double __length_tangent_mesh(self, Mesh1DUniform mesh, double tangent_step=*)
     cpdef double length(self, double precision=*, unsigned int max_iterations=*, double tangent_step=*)
     cpdef TreeMesh1DUniform mesh_tree(self, double precision=*, unsigned int max_iterations=*, double tangent_step=*)
+    cpdef double distance_to_point(self, double t, double[:] xyz)
 
 
 cdef class Line(ParametricCurve):

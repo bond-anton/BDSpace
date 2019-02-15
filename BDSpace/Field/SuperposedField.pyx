@@ -5,8 +5,8 @@ from .Field cimport Field
 
 cdef class SuperposedField(Field):
 
-    def __init__(self, name, fields):
-        self.__fields = None
+    def __init__(self, str name, list fields):
+        self.__fields = []
         self.type = None
         self.fields = fields
         super(SuperposedField, self).__init__(name, self.type)

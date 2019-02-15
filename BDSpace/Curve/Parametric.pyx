@@ -266,6 +266,14 @@ cdef class ParametricCurve(Space):
                 break
         return meshes_tree
 
+    cpdef double distance_to_point(self, double t, double[:] xyz):
+        cdef:
+            double x, y, z
+        x = self.x_point(t) - xyz[0]
+        y = self.x_point(t) - xyz[1]
+        z = self.x_point(t) - xyz[2]
+        return sqrt(x*x + y*y + z*z)
+
 
 cdef class Line(ParametricCurve):
 
