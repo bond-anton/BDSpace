@@ -8,19 +8,16 @@ from BDSpace.Coordinates import Cartesian
 
 
 def error(cs_1, cs_2):
-    delta = cs_1.basis - cs_2.basis
+    delta = np.asarray(cs_1.basis) - np.asarray(cs_2.basis)
     return np.sqrt(np.sum(delta ** 2))
 
-# Create cartesian coordinate system
-
-# if you don't pass arguments the basis coincide with 'Absolute' (mayavi) coordinate system
-cs_1 = Cartesian(origin=np.array([0, 0, 0]), euler_angles_convention='Bunge')
-cs_2 = Cartesian(origin=np.array([0, 0, 0]), euler_angles_convention='Bunge')
+cs_1 = Cartesian(origin=np.array([0, 0, 0], dtype=np.double), euler_angles_convention='Bunge')
+cs_2 = Cartesian(origin=np.array([0, 0, 0], dtype=np.double), euler_angles_convention='Bunge')
 
 print(cs_1)
 
 turns = 10
-axis = np.array([1, 1, 1])
+axis = np.array([1, 1, 1], dtype=np.double)
 steps = 1  # per turn
 max_steps_order = 4
 errors = []

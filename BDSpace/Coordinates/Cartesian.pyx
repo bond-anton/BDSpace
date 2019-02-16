@@ -1,6 +1,7 @@
 import numpy as np
 
 from cython import boundscheck, wraparound
+from cython.parallel import prange
 
 from cpython.array cimport array, clone
 from cpython.object cimport Py_EQ, Py_NE
@@ -199,13 +200,15 @@ cdef class Cartesian(object):
         """
         cdef:
             double[:, :] xyz_parent = self.__rotation.rotate(xyz)
-            unsigned int i, s = xyz_parent.shape[0]
-        for i in range(0, s):
-            xyz_parent[i, 0] += self.__origin[0]
-            xyz_parent[i, 1] += self.__origin[1]
-            xyz_parent[i, 2] += self.__origin[2]
+            int i, s = xyz_parent.shape[0]
+        with nogil:
+            for i in prange(0, s):
+                xyz_parent[i, 0] += self.__origin[0]
+                xyz_parent[i, 1] += self.__origin[1]
+                xyz_parent[i, 2] += self.__origin[2]
         return xyz_parent
 
+    @boundscheck(False)
     cpdef double[:] to_local_vector(self, double[:] xyz):
         """
         calculates local coordinates for points in parent CS/
@@ -229,11 +232,12 @@ cdef class Cartesian(object):
         :param xyz: coordinates in parent (global) coordinate system.
         """
         cdef:
-            unsigned int i, s = xyz.shape[0]
+            int i, s = xyz.shape[0]
             double[:, :] xyz_local = np.empty((s, 3), dtype=np.double)
-        for i in range(0, s):
-            xyz_local[i, 0] = xyz[i, 0] - self.__origin[0]
-            xyz_local[i, 1] = xyz[i, 1] - self.__origin[1]
-            xyz_local[i, 2] = xyz[i, 2] - self.__origin[2]
+        with nogil:
+            for i in prange(0, s):
+                xyz_local[i, 0] = xyz[i, 0] - self.__origin[0]
+                xyz_local[i, 1] = xyz[i, 1] - self.__origin[1]
+                xyz_local[i, 2] = xyz[i, 2] - self.__origin[2]
         xyz_local = self.__rotation.reciprocal().rotate(xyz_local)
         return xyz_local

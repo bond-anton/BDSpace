@@ -41,34 +41,17 @@ plt.show()
 flat = tree.flatten()
 print(np.sum(flat.solution))
 
-for j in range(flat.num):
-    t = flat.physical_boundary_1 + flat.jacobian * flat.local_nodes[j]
-    print(t)
+step = 1e-10
+t = np.linspace(0.0, 2 * np.pi, num=100)
 
-# step = 1e-10
-# t = np.linspace(0.0, 2 * np.pi, num=100)
-#
-# print('X')
-# print(left_helix.x_point(t[0]))
-# print(left_helix.x_point(t[0] + step))
-# print((left_helix.x_point(t[0] + step) - left_helix.x_point(t[0])) / step)
-# print('Y')
-# print(left_helix.y_point(t[0]))
-# print(left_helix.y_point(t[0] + step))
-# print((left_helix.y_point(t[0] + step)) - left_helix.y_point(t[0]) / step)
-# print('Z')
-# print(left_helix.z_point(t[0]))
-# print(left_helix.z_point(t[0] + step))
-# print((left_helix.z_point(t[0] + step)) - left_helix.z_point(t[0]) / step)
-#
-# xyz = np.asarray(left_helix.tangent(t, step=step))
-# print(xyz)
-# plt.plot(t, xyz[:, 0], 'r-o')
-# plt.plot(t, xyz[:, 1], 'b-o')
-# plt.plot(t, xyz[:, 2], 'g-o')
-# plt.show()
-#
-# dl = np.sqrt(xyz[:, 0]**2 + xyz[:, 1]**2 + xyz[:, 2]**2)
-# plt.plot(t, dl, 'b-o')
-# print(np.trapz(dl, t))
-# plt.show()
+
+xyz = np.asarray(left_helix.tangent(t))
+plt.plot(t, xyz[:, 0], 'r-o')
+plt.plot(t, xyz[:, 1], 'b-o')
+plt.plot(t, xyz[:, 2], 'g-o')
+plt.show()
+
+dl = np.sqrt(xyz[:, 0]**2 + xyz[:, 1]**2 + xyz[:, 2]**2)
+plt.plot(t, dl, 'b-o')
+print(np.trapz(dl, t))
+plt.show()

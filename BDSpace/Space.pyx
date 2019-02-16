@@ -173,10 +173,13 @@ cdef class Space(object):
     @boundscheck(False)
     @wraparound(False)
     cpdef bint remove_element(self, Space element):
+        cdef list to_remove = []
         if element.parent == self:
             for key in self.elements.keys():
                 if self.elements[key] == element:
-                    del self.elements[key]
+                    to_remove.append(key)
+            for key in to_remove:
+                del self.elements[key]
             element.parent = None
             return True
         return False
