@@ -1,3 +1,8 @@
+import numpy as np
+
+from cython import boundscheck, wraparound
+from cython.parallel import prange
+
 from cpython.array cimport array, clone
 
 from .Field cimport Field
@@ -27,6 +32,8 @@ cdef class SuperposedField(Field):
                 raise ValueError('All fields must be iterable of Field class instances')
             self.__fields.append(field)
 
+    @boundscheck(False)
+    @wraparound(False)
     cpdef double[:] scalar_field(self, double[:, :] xyz):
         """
         Calculates scalar field value at points xyz
@@ -34,14 +41,19 @@ cdef class SuperposedField(Field):
         :return: scalar values array
         """
         cdef:
-            Py_ssize_t i, s = xyz.shape[0]
-            double[:] field_contribution, total_field = self.__points_scalar(xyz, 0.0)
-        for field in self.__fields:
-            field_contribution = field.scalar_field(field.to_local_coordinate_system(xyz))
-            for i in range(s):
-                total_field[i] += field_contribution[i]
+            int i, j, s = xyz.shape[0], n_fields = len(self.__fields)
+            double[:, :] global_xyz = self.to_global_coordinate_system(xyz)
+            double[:] total_field = self.__points_scalar(global_xyz, 0.0)
+            double[:] field_contribution
+        for j in range(n_fields):
+            field_contribution = self.__fields[j].scalar_field(self.__fields[j].to_local_coordinate_system(global_xyz))
+            with nogil:
+                for i in prange(s):
+                    total_field[i] += field_contribution[i]
         return total_field
 
+    @boundscheck(False)
+    @wraparound(False)
     cpdef double[:, :] vector_field(self, double[:, :] xyz):
         """
         Calculates vector field value at points xyz
@@ -49,14 +61,15 @@ cdef class SuperposedField(Field):
         :return: vector field values array
         """
         cdef:
-            Py_ssize_t i, j, s = xyz.shape[0], c = xyz.shape[1]
+            int i, j, k, s = xyz.shape[0], n_fields = len(self.__fields)
             array[double] template = array('d')
             double[:, :] field_contribution
             double[:, :] total_field = self.__points_vector(xyz, clone(template, xyz.shape[1], zero=True))
             double[:, :] global_xyz = self.to_global_coordinate_system(xyz)
-        for field in self.__fields:
-            field_contribution = field.vector_field(field.to_local_coordinate_system(global_xyz))
-            for i in range(s):
-                for j in range(c):
-                    total_field[i][j] += field_contribution[i][j]
+        for k in range(n_fields):
+            field_contribution = self.__fields[k].vector_field(self.__fields[k].to_local_coordinate_system(global_xyz))
+            with nogil:
+                for i in prange(s):
+                    for j in prange(3):
+                        total_field[i][j] += field_contribution[i][j]
         return total_field

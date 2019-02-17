@@ -8,18 +8,17 @@ from libc.math cimport sqrt
 
 from .Field cimport Field
 from BDSpace.Curve.Parametric cimport ParametricCurve
-from BDMesh.Mesh1D cimport Mesh1D
 
 
 cdef class CurveField(Field):
 
     def __init__(self, str name, str field_type, ParametricCurve curve):
+        super(CurveField, self).__init__(name, field_type)
         self.__curve = curve
         self.__tree_mesh = self.__curve.mesh_tree()
         self.__flat_mesh = self.__tree_mesh.flatten()
         self.__curve.add_element(self)
         self.__a = 0.0
-        super(CurveField, self).__init__(name, field_type)
 
     @property
     def curve(self):
@@ -78,6 +77,8 @@ cdef class HyperbolicPotentialCurveConservativeField(CurveField):
     @wraparound(False)
     cpdef double[:] scalar_field(self, double[:, :] xyz):
         cdef:
+            double[:, :] global_xyz = self.to_global_coordinate_system(xyz)
+            double[:, :] curve_xyz = self.__curve.to_local_coordinate_system(global_xyz)
             double[:] t = self.__flat_mesh.physical_nodes
             double[:, :] curve_points = self.__curve.generate_points(t)
             double[:] nl = self.linear_density(t)
@@ -90,9 +91,9 @@ cdef class HyperbolicPotentialCurveConservativeField(CurveField):
             for i in prange(s):
                 values[i] = 0.0
                 for j in prange(ms):
-                    x = xyz[i, 0] - curve_points[j, 0]
-                    y = xyz[i, 1] - curve_points[j, 1]
-                    z = xyz[i, 2] - curve_points[j, 2]
+                    x = curve_xyz[i, 0] - curve_points[j, 0]
+                    y = curve_xyz[i, 1] - curve_points[j, 1]
+                    z = curve_xyz[i, 2] - curve_points[j, 2]
                     d = sqrt(x * x + y * y + z * z)
                     if d < self.__r:
                         d = self.__r
@@ -103,6 +104,7 @@ cdef class HyperbolicPotentialCurveConservativeField(CurveField):
     @wraparound(False)
     cpdef double[:, :] vector_field(self, double[:, :] xyz):
         cdef:
+            double[:, :] curve_xyz = self.__coordinate_system.to_parent(xyz)
             double[:] t = self.__flat_mesh.physical_nodes
             double[:, :] curve_points = self.__curve.generate_points(t)
             double[:] nl = self.linear_density(t)
@@ -117,9 +119,9 @@ cdef class HyperbolicPotentialCurveConservativeField(CurveField):
                 values[i, 1] = 0.0
                 values[i, 2] = 0.0
                 for j in prange(ms):
-                    x = xyz[i, 0] - curve_points[j, 0]
-                    y = xyz[i, 1] - curve_points[j, 1]
-                    z = xyz[i, 2] - curve_points[j, 2]
+                    x = curve_xyz[i, 0] - curve_points[j, 0]
+                    y = curve_xyz[i, 1] - curve_points[j, 1]
+                    z = curve_xyz[i, 2] - curve_points[j, 2]
                     d2 = x * x + y * y + z * z
                     if d2 < d2_min:
                         d2 = d2_min
