@@ -74,16 +74,37 @@ lopt = {'mingw32': ['-fopenmp'],
         'unix': ['-fopenmp']}
 
 
+# check whether compiler supports a flag
+def has_flag(compiler, flagname):
+    import tempfile
+    from distutils.errors import CompileError
+    with tempfile.NamedTemporaryFile('w', suffix='.cpp') as f:
+        f.write('int main (int argc, char **argv) { return 0; }')
+        try:
+            compiler.compile([f.name], extra_postargs=[flagname])
+        except CompileError:
+            return False
+    return True
+
+
+# filter flags, returns list of accepted flags
+def flag_filter(compiler, flags):
+    result = []
+    for flag in flags:
+        if has_flag(compiler, flag):
+            result.append(flag)
+    return result
+
+
 class CustomBuildExt(build_ext):
     def build_extensions(self):
         c = self.compiler.compiler_type
         print('Compiler:', c)
-        if c in copt:
-            for e in self.extensions:
-                e.extra_compile_args = copt[c]
-        if c in lopt:
-            for e in self.extensions:
-                e.extra_link_args = lopt[c]
+        opts = flag_filter(self.compiler, copt.get(c, []))
+        lopts = flag_filter(self.compiler, lopt.get(c, []))
+        for e in self.extensions:
+            e.extra_compile_args = opts
+            e.extra_link_args = lopts
         build_ext.build_extensions(self)
 
 
