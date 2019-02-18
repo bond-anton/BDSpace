@@ -1,5 +1,6 @@
 from setuptools import setup, find_packages
 from setuptools.extension import Extension
+from setuptools.command.build_ext import build_ext
 from Cython.Build import cythonize
 
 from codecs import open
@@ -65,6 +66,27 @@ extensions = [
         depends=['BDSpace/Field/CurveField.pxd'],
     ),
 ]
+
+copt = {'msvc': ['/openmp', '/Ox', '/fp:fast', '/favor:INTEL64', '/Og'],
+        'mingw32': ['-fopenmp', '-O3', '-ffast-math', '-march=native'],
+        'unix': ['-fopenmp', '-O3', '-ffast-math', '-march=native']}
+lopt = {'mingw32': ['-fopenmp'],
+        'unix': ['-fopenmp']}
+
+
+class CustomBuildExt(build_ext):
+    def build_extensions(self):
+        c = self.compiler.compiler_type
+        print('Compiler:', c)
+        if c in copt:
+            for e in self.extensions:
+                e.extra_compile_args = copt[c]
+        if c in lopt:
+            for e in self.extensions:
+                e.extra_link_args = lopt[c]
+        build_ext.build_extensions(self)
+
+
 setup(
     name=package_name,
     version=version_string,
@@ -109,5 +131,6 @@ setup(
                       'BDMesh>=0.2.7'],
     test_suite='nose.collector',
     tests_require=['nose'],
+    cmdclass={'build_ext': CustomBuildExt},
     zip_safe=False,
 )
