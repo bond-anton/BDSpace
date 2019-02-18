@@ -292,9 +292,8 @@ cdef class ParametricCurve(Space):
             int i, s = flat_mesh.num
             double[:] dl = flat_mesh.solution
             double length_tangent = 0
-        with nogil:
-            for i in range(s):
-                length_tangent += dl[i]
+        for i in range(s):
+            length_tangent += dl[i]
         return length_tangent
 
     @boundscheck(False)
@@ -322,8 +321,8 @@ cdef class ParametricCurve(Space):
                 for i in range(refinements.shape[0]):
                     to_refine += 1
                     refinement_mesh = Mesh1DUniform(
-                        mesh.to_physical(np.array([mesh.__local_nodes[refinements[i][0]]]))[0],
-                        mesh.to_physical(np.array([mesh.__local_nodes[refinements[i][1]]]))[0],
+                        mesh.__physical_boundary_1 + mesh.j() * mesh.__local_nodes[refinements[i][0]],
+                        mesh.__physical_boundary_1 + mesh.j() * mesh.__local_nodes[refinements[i][1]],
                         boundary_condition_1=0.0,
                         boundary_condition_2=0.0,
                         physical_step=mesh.physical_step/meshes_tree.refinement_coefficient)

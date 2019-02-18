@@ -21,10 +21,8 @@ pos_electrostatic_field = HyperbolicPotentialCurveConservativeField(name='Pos Ch
                                                                     field_type='electrostatic',
                                                                     curve=left_helix, r=helix_r)
 pos_electrostatic_field.a = 1.0
-# pos_electrostatic_field.curve.precision = 1.0e-2
 
 space.add_element(left_helix)
-# space.add_element(pos_electrostatic_field)
 
 fig = mlab.figure('CS demo', bgcolor=(0.0, 0.0, 0.0))  # Create the mayavi figure
 
