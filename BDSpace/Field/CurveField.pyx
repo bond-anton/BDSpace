@@ -110,7 +110,7 @@ cdef class HyperbolicPotentialCurveConservativeField(CurveField):
             double[:] nl = self.linear_density(t)
             double[:] dl = self.__flat_mesh.solution
             int i, j, s = xyz.shape[0], ms = self.__flat_mesh.num
-            double d2, d2_min = self.__r * self.__r
+            double d, d2, d2_min = self.__r * self.__r
             double x, y, z
             double[:, :] values = np.empty((s, 3), dtype=np.double)
         with nogil:
@@ -123,9 +123,9 @@ cdef class HyperbolicPotentialCurveConservativeField(CurveField):
                     y = curve_xyz[i, 1] - curve_points[j, 1]
                     z = curve_xyz[i, 2] - curve_points[j, 2]
                     d2 = x * x + y * y + z * z
-                    if d2 < d2_min:
-                        d2 = d2_min
-                    values[i, 0] += nl[j] * dl[j] * x / d2
-                    values[i, 1] += nl[j] * dl[j] * y / d2
-                    values[i, 2] += nl[j] * dl[j] * z / d2
+                    if d2 >= d2_min:
+                        d = sqrt(d2)
+                        values[i, 0] += nl[j] * dl[j] * x / d2 / d
+                        values[i, 1] += nl[j] * dl[j] * y / d2 / d
+                        values[i, 2] += nl[j] * dl[j] * z / d2 / d
         return values

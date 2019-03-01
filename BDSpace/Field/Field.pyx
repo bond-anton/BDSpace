@@ -190,14 +190,18 @@ cdef class HyperbolicPotentialSphericalConservativeField(Field):
     cpdef double[:, :] vector_field(self, double[:, :] xyz):
         cdef:
             int i, j, s = xyz.shape[0]
-            double r2, r2_min = self.__r * self.__r
+            double r, r2, r2_min = self.__r * self.__r
             double[:, :] values = np.empty((s, 3), dtype=np.double)
         with nogil:
             for i in prange(s):
                 r2 = xyz[i, 0] * xyz[i, 0] + xyz[i, 1] * xyz[i, 1] + xyz[i, 2] * xyz[i, 2]
-                if r2 < r2_min:
-                    r2 = r2_min
-                values[i, 0] = self.__a * xyz[i, 0] / r2
-                values[i, 1] = self.__a * xyz[i, 1] / r2
-                values[i, 2] = self.__a * xyz[i, 2] / r2
+                if r2 >= r2_min:
+                    r = sqrt(r2)
+                    values[i, 0] = self.__a * xyz[i, 0] / r2 / r
+                    values[i, 1] = self.__a * xyz[i, 1] / r2 / r
+                    values[i, 2] = self.__a * xyz[i, 2] / r2 / r
+                else:
+                    values[i, 0] = 0.0
+                    values[i, 0] = 0.0
+                    values[i, 0] = 0.0
         return values
