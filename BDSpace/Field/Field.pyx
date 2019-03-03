@@ -63,6 +63,14 @@ cdef class Field(Space):
                 values[i, 2] = value[2]
         return values
 
+    cpdef double scalar_field_point(self, double[:] xyz):
+        """
+        Calculates scalar field value at point xyz
+        :param xyz: array of cartesian coordinates of the point
+        :return: scalar field value
+        """
+        return 0.0
+
     cpdef double[:] scalar_field(self, double[:, :] xyz):
         """
         Calculates scalar field value at points xyz
@@ -70,6 +78,16 @@ cdef class Field(Space):
         :return: scalar values array
         """
         return self.__points_scalar(xyz, 0.0)
+
+    cpdef double[:] vector_field_point(self, double[:] xyz):
+        """
+        Calculates vector field value at point xyz
+        :param xyz: array of cartesian coordinates of the point
+        :return: vector field value
+        """
+        cdef:
+            array[double] template = array('d')
+        return clone(template, 3, zero=True)
 
     cpdef double[:, :] vector_field(self, double[:, :] xyz):
         """
@@ -96,12 +114,10 @@ cdef class ConstantScalarConservativeField(Field):
     def potential(self, double potential):
         self.__potential = potential
 
+    cpdef double scalar_field_point(self, double[:] xyz):
+        return self.__potential
+
     cpdef double[:] scalar_field(self, double[:, :] xyz):
-        """
-        Calculates scalar field value at points xyz
-        :param xyz: array of N points with shape (N, 3)
-        :return: scalar values array
-        """
         return self.__points_scalar(xyz, self.__potential)
 
 
@@ -119,14 +135,12 @@ cdef class ConstantVectorConservativeField(Field):
     def potential(self, double[:] potential):
         self.__potential = potential
 
+    cpdef double scalar_field_point(self, double[:] xyz):
+        return xyz[0] * self.__potential[0] + xyz[1] * self.__potential[1] + xyz[2] * self.__potential[2]
+
     @boundscheck(False)
     @wraparound(False)
     cpdef double[:] scalar_field(self, double[:, :] xyz):
-        """
-        Calculates scalar field value at points xyz
-        :param xyz: array of N points with shape (N, 3)
-        :return: scalar values array
-        """
         cdef:
             int i, s = xyz.shape[0]
             array[double] values, template = array('d')
@@ -137,12 +151,10 @@ cdef class ConstantVectorConservativeField(Field):
                             + xyz[i, 2] * self.__potential[2]
         return values
 
+    cpdef double[:] vector_field_point(self, double[:] xyz):
+        return self.__potential
+
     cpdef double[:, :] vector_field(self, double[:, :] xyz):
-        """
-        Calculates vector field value at points xyz
-        :param xyz: array of N points with shape (N, 3)
-        :return: vector field values array
-        """
         return self.__points_vector(xyz, self.__potential)
 
 
