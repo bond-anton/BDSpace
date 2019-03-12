@@ -1,11 +1,10 @@
-import numbers
 import numpy as np
 
 from cython import boundscheck, wraparound
 from cython.parallel import prange
 
 from cpython.array cimport array, clone
-from libc.math cimport fabs, sin, cos, atan2, acos, sqrt, M_PI
+from libc.math cimport fabs, fmod, sin, cos, atan2, acos, sqrt, M_PI
 
 
 cdef double __reduce_angle(double angle, bint center=True, bint positive=False) nogil:
@@ -144,13 +143,8 @@ cpdef double[:, :] cartesian_to_spherical(double[:, :] xyz):
     cdef:
         unsigned int i, s = xyz.shape[0]
         double[:, :] r_theta_phi = np.empty((s, 3), dtype=np.double)
-        # double xy
     for i in range(s):
         r_theta_phi[i] = cartesian_to_spherical_point(xyz[i])
-        # xy = xyz[i]*xyz[i] + xyz[i + 1]*xyz[i + 1]
-        # r_theta_phi[i] = sqrt(xy + xyz[i + 2]*xyz[i + 2])
-        # r_theta_phi[i + 1] = atan2(sqrt(xy), xyz[i + 2])
-        # r_theta_phi[i + 2] = __reduce_angle(atan2(xyz[i + 1], xyz[i]), center=False, positive=True)
     return r_theta_phi
 
 
@@ -181,6 +175,28 @@ cpdef double[:, :] spherical_to_cartesian(double[:, :] r_theta_phi):
     for i in range(s):
         xyz[i] = spherical_to_cartesian_point(r_theta_phi[i])
     return xyz
+
+
+@boundscheck(False)
+@wraparound(False)
+cpdef double[:] invert_spherical_point(double[:] r_theta_phi):
+    cdef:
+        array[double] rtp = clone(array('d'), 3, False)
+    rtp[0] = r_theta_phi[0]
+    rtp[1] = M_PI - r_theta_phi[1]
+    rtp[2] = fmod((r_theta_phi[2] + M_PI), (2 * M_PI))
+    return rtp
+
+
+@boundscheck(False)
+@wraparound(False)
+cpdef double[:, :] invert_spherical(double[:, :] r_theta_phi):
+    cdef:
+        int i, s = r_theta_phi.shape[0]
+        double[:, :] rtp = np.empty((s, 3), dtype=np.double)
+    for i in range(s):
+        rtp[i] = invert_spherical_point(r_theta_phi[i])
+    return rtp
 
 
 @boundscheck(False)

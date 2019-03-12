@@ -8,8 +8,12 @@ cdef class Field(Space):
     cdef double[:, :] __points_vector(self, double[:, :] xyz, double[:] value)  # nogil
     cpdef double scalar_field_point(self, double[:] xyz)
     cpdef double[:] scalar_field(self, double[:, :] xyz)
+    cpdef double scalar_field_polar_point(self, double[:] rtp)
+    cpdef double[:] scalar_field_polar(self, double[:, :] rtp)
     cpdef double[:] vector_field_point(self, double[:] xyz)
     cpdef double[:, :] vector_field(self, double[:, :] xyz)
+    cpdef double[:] vector_field_polar_point(self, double[:] rtp)
+    cpdef double[:, :] vector_field_polar(self, double[:, :] rtp)
 
 
 cdef class ConstantScalarConservativeField(Field):
@@ -20,8 +24,3 @@ cdef class ConstantScalarConservativeField(Field):
 cdef class ConstantVectorConservativeField(Field):
     cdef:
         double[:] __potential
-
-cdef class HyperbolicPotentialSphericalConservativeField(Field):
-    cdef:
-        double __r
-        double __a

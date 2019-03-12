@@ -46,6 +46,11 @@ extensions = [
         depends=['BDSpace/Field/Field.pxd'],
     ),
     Extension(
+        'BDSpace.Field.SphericallySymmetric',
+        ['BDSpace/Field/SphericallySymmetric.pyx'],
+        depends=['BDSpace/Field/SphericallySymmetric.pxd'],
+    ),
+    Extension(
         'BDSpace.Field.SuperposedField',
         ['BDSpace/Field/SuperposedField.pyx'],
         depends=['BDSpace/Field/SuperposedField.pxd'],

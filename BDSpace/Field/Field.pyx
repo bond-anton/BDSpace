@@ -7,6 +7,7 @@ from libc.math cimport sqrt
 from cpython.array cimport array, clone
 
 from BDSpace.Space cimport Space
+from BDSpace.Coordinates.transforms cimport spherical_to_cartesian_point, spherical_to_cartesian
 
 
 cdef class Field(Space):
@@ -79,6 +80,26 @@ cdef class Field(Space):
         """
         return self.__points_scalar(xyz, 0.0)
 
+    cpdef double scalar_field_polar_point(self, double[:] rtp):
+        """
+        Calculates scalar field value at point rtp in polar coordinates
+        :param rtp: array of polar coordinates of the point
+        :return: scalar field value
+        """
+        cdef:
+            double[:] xyz = spherical_to_cartesian_point(rtp)
+        return self.scalar_field_point(xyz)
+
+    cpdef double[:] scalar_field_polar(self, double[:, :] rtp):
+        """
+        Calculates scalar field value at points rtp in polar coordinates
+        :param rtp: array of N points with shape (N, 3)
+        :return: scalar values array
+        """
+        cdef:
+            double[:, :] xyz = spherical_to_cartesian(rtp)
+        return self.scalar_field(xyz)
+
     cpdef double[:] vector_field_point(self, double[:] xyz):
         """
         Calculates vector field value at point xyz
@@ -98,6 +119,26 @@ cdef class Field(Space):
         cdef:
             array[double] template = array('d')
         return self.__points_vector(xyz, clone(template, 3, zero=True))
+
+    cpdef double[:] vector_field_polar_point(self, double[:] rtp):
+        """
+        Calculates vector field value at point rtp in polar coordinates
+        :param rtp: array of polar coordinates of the point
+        :return: vector field value
+        """
+        cdef:
+            double[:] xyz = spherical_to_cartesian_point(rtp)
+        return self.vector_field_point(xyz)
+
+    cpdef double[:, :] vector_field_polar(self, double[:, :] rtp):
+        """
+        Calculates vector field value at points rtp in polar coordinates
+        :param rtp: array of N points with shape (N, 3)
+        :return: vector field values array
+        """
+        cdef:
+            double[:, :] xyz = spherical_to_cartesian(rtp)
+        return self.vector_field(xyz)
 
 
 cdef class ConstantScalarConservativeField(Field):
@@ -156,64 +197,3 @@ cdef class ConstantVectorConservativeField(Field):
 
     cpdef double[:, :] vector_field(self, double[:, :] xyz):
         return self.__points_vector(xyz, self.__potential)
-
-
-cdef class HyperbolicPotentialSphericalConservativeField(Field):
-
-    def __init__(self, str name, str field_type, double a, double r):
-        self.__r = r
-        self.__a = a
-        super(HyperbolicPotentialSphericalConservativeField, self).__init__(name, field_type)
-
-    @property
-    def r(self):
-        return self.__r
-
-    @r.setter
-    def r(self, double r):
-        self.__r = r
-
-    @property
-    def a(self):
-        return self.__a
-
-    @a.setter
-    def a(self, double a):
-        self.__a = a
-
-    @boundscheck(False)
-    @wraparound(False)
-    cpdef double[:] scalar_field(self, double[:, :] xyz):
-        cdef:
-            int i, s = xyz.shape[0]
-            double r
-            array[double] values, template = array('d')
-        values = clone(template, s, zero=False)
-        with nogil:
-            for i in prange(s):
-                r = sqrt(xyz[i, 0] * xyz[i, 0] + xyz[i, 1] * xyz[i, 1] + xyz[i, 2] * xyz[i, 2])
-                if r < self.__r:
-                    r = self.__r
-                values[i] = self.__a / r
-        return values
-
-    @boundscheck(False)
-    @wraparound(False)
-    cpdef double[:, :] vector_field(self, double[:, :] xyz):
-        cdef:
-            int i, j, s = xyz.shape[0]
-            double r, r2, r2_min = self.__r * self.__r
-            double[:, :] values = np.empty((s, 3), dtype=np.double)
-        with nogil:
-            for i in prange(s):
-                r2 = xyz[i, 0] * xyz[i, 0] + xyz[i, 1] * xyz[i, 1] + xyz[i, 2] * xyz[i, 2]
-                if r2 >= r2_min:
-                    r = sqrt(r2)
-                    values[i, 0] = self.__a * xyz[i, 0] / r2 / r
-                    values[i, 1] = self.__a * xyz[i, 1] / r2 / r
-                    values[i, 2] = self.__a * xyz[i, 2] / r2 / r
-                else:
-                    values[i, 0] = 0.0
-                    values[i, 0] = 0.0
-                    values[i, 0] = 0.0
-        return values
