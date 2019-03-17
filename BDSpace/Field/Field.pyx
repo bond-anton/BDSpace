@@ -3,7 +3,6 @@ import numpy as np
 from cython import boundscheck, wraparound
 from cython.parallel import prange
 
-from libc.math cimport sqrt
 from cpython.array cimport array, clone
 
 from BDSpace.Space cimport Space
