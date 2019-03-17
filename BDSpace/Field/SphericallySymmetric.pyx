@@ -68,6 +68,16 @@ cdef class SphericallySymmetric(Field):
 
     @boundscheck(False)
     @wraparound(False)
+    cpdef double scalar_field_point(self, double[:] xyz):
+        """
+        Calculates scalar field value at point xyz
+        :param xyz: array of cartesian coordinates of the point
+        :return: scalar field value
+        """
+        return self.scalar_field_r_law(self.__get_r(xyz))
+
+    @boundscheck(False)
+    @wraparound(False)
     cpdef double[:] scalar_field(self, double[:, :] xyz):
         """
         Calculates scalar field value at points xyz
