@@ -51,7 +51,7 @@ class TestCoordinates(unittest.TestCase):
         self.coordinate_system.rotate_axis_angle(axis, np.pi / 2)
         self.coordinate_system.rotate_axis_angle(axis, np.pi / 2)
         np.testing.assert_allclose(self.coordinate_system.euler_angles.euler_angles,
-                                   np.array([np.pi, 0, -np.pi]), atol=np.finfo(float).eps * 4)
+                                   np.array([np.pi, 0, -np.pi]), atol=np.finfo(float).eps * 10)
 
     def test_rotate_euler_angles(self):
         conventions = Conventions()
