@@ -1,3 +1,4 @@
+import sys
 from setuptools import setup, find_packages
 from setuptools.extension import Extension
 from setuptools.command.build_ext import build_ext
@@ -148,14 +149,17 @@ setup(
     keywords='3D coordinate Space paths trajectory',
 
     packages=find_packages(exclude=['demo', 'tests', 'docs', 'contrib', 'venv']),
-    ext_modules=cythonize(extensions, compiler_directives={'language_level': 3}),
+    ext_modules=cythonize(extensions, compiler_directives={'language_level': sys.version_info[0]}),
     package_data={
         'BDSpace': ['*.pxd'],
         'BDSpace.Coordinates': ['*.pxd'],
         'BDSpace.Field': ['*.pxd'],
         'BDSpace.Curve': ['*.pxd'],
     },
-    install_requires=['numpy', 'scipy', 'Cython',
+    setup_requires=['numpy', 'scipy', 'Cython',
+                    'BDQuaternions>=0.2.8',
+                    'BDMesh>=0.2.8'],
+    install_requires=['numpy', 'scipy',
                       'BDQuaternions>=0.2.8',
                       'BDMesh>=0.2.8'],
     test_suite='nose.collector',
