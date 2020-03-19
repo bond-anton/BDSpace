@@ -1,5 +1,5 @@
 numpy
 scipy
 Cython
-BDQuaternions
-BDMesh
+BDQuaternions>=0.2.11
+BDMesh>=0.2.11
