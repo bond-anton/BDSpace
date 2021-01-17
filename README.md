@@ -1,5 +1,6 @@
 # BDSpace
 
+![Build](https://github.com/bond-anton/BDSpace/workflows/Build/badge.svg)
 [![codecov](https://codecov.io/gh/bond-anton/BDSpace/branch/master/graph/badge.svg)](https://codecov.io/gh/bond-anton/BDSpace)
 
 **BDSpace** is a python package to simplify positioning, movement, and trajectory calculation for many

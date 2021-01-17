@@ -56,7 +56,7 @@ class TestTransforms(unittest.TestCase):
     def test_reduce_angle_random_array_positive(self):
         size = 1000
         angle = np.random.random(size) * 2 * np.pi
-        full_turns = np.random.random_integers(0, 100, size=size) * 2 * np.pi * 1
+        full_turns = np.random.randint(0, 101, size=size) * 2 * np.pi * 1
         np.testing.assert_allclose(reduce_angles(angle + full_turns, keep_sign=False),
                                    reduce_angles(angle, keep_sign=False))
         np.testing.assert_allclose(reduce_angles(angle + full_turns, keep_sign=True),
@@ -67,7 +67,7 @@ class TestTransforms(unittest.TestCase):
     def test_reduce_angle_random_array_loops(self):
         size = 1000
         angle = (np.random.random(size) - 0.5) * 4 * np.pi
-        full_turns = np.random.random_integers(-100, 100, size=size) * 2 * np.pi * 1
+        full_turns = np.random.randint(-100, 101, size=size) * 2 * np.pi * 1
         np.testing.assert_allclose(reduce_angles(angle + full_turns, keep_sign=False),
                                    reduce_angles(angle, keep_sign=False))
 
