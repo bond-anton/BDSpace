@@ -7,9 +7,10 @@ except ImportError:
 from BDSpace.Coordinates import Cartesian
 
 
-def error(cs_1, cs_2):
-    delta = np.asarray(cs_1.basis) - np.asarray(cs_2.basis)
+def error(cs1, cs2):
+    delta = np.asarray(cs1.basis) - np.asarray(cs2.basis)
     return np.sqrt(np.sum(delta ** 2))
+
 
 cs_1 = Cartesian(origin=np.array([0, 0, 0], dtype=np.double), euler_angles_convention='Bunge')
 cs_2 = Cartesian(origin=np.array([0, 0, 0], dtype=np.double), euler_angles_convention='Bunge')
@@ -23,7 +24,7 @@ max_steps_order = 4
 errors = []
 
 for order in range(max_steps_order + 1):
-    steps = 10**order # per turn
+    steps = 10**order  # per turn
     print("Processing %g steps per turn" % steps)
     step = 2 * np.pi / steps
     print("  Angle increment is %g rad (%g deg)" % (step, np.rad2deg(step)))

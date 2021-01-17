@@ -4,9 +4,8 @@ import numpy as np
 from BDSpace.Coordinates.transforms import reduce_angle, reduce_angles, unit_vector, angles_between_vectors
 from BDSpace.Coordinates.transforms import cartesian_to_spherical_point, spherical_to_cartesian_point
 from BDSpace.Coordinates.transforms import cartesian_to_spherical, spherical_to_cartesian
-from BDSpace.Coordinates.transforms import cartesian_to_cylindrical_point, cylindrical_to_cartesian_point
+from BDSpace.Coordinates.transforms import cartesian_to_cylindrical_point
 from BDSpace.Coordinates.transforms import cartesian_to_cylindrical, cylindrical_to_cartesian
-from BDSpace.Coordinates.transforms import cylindrical_to_spherical_point, spherical_to_cylindrical_point
 from BDSpace.Coordinates.transforms import cylindrical_to_spherical, spherical_to_cylindrical
 
 

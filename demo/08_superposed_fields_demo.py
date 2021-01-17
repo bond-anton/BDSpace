@@ -3,7 +3,7 @@ import numpy as np
 from BDSpace import Space
 from BDSpace.Figure.Sphere import Sphere
 from BDSpace.Curve.Parametric import Arc
-from BDSpace.Field import ConstantVectorConservativeField, SuperposedField
+from BDSpace.Field import SuperposedField
 from BDSpace.Field import HyperbolicPotentialSphericalConservativeField
 from BDSpace.Field import HyperbolicPotentialCurveConservativeField
 
@@ -35,7 +35,6 @@ loop.coordinate_system.origin = loop_position
 space.add_element(pos_charged_ball)
 space.add_element(neg_charged_ball)
 space.add_element(loop)
-
 
 
 pos_electrostatic_field = HyperbolicPotentialSphericalConservativeField(name='Pos Charged ball field',

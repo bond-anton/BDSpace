@@ -68,7 +68,7 @@ class TestField(unittest.TestCase):
         check[:, 2] += np.ones(100, dtype=np.double)
         np.testing.assert_allclose(result, check)
 
-    def test_constant_vector_fields(self):
+    def test_constant_vector_and_scalar_fields(self):
         VField1 = ConstantVectorConservativeField('My field', 'My type', np.array([1.0, 0.0, 0.0], dtype=np.double))
         CField1 = ConstantScalarConservativeField('My field 1', 'My type', np.pi)
         SField = SuperposedField('My super Field', [VField1, CField1])
