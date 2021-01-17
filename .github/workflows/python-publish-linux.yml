@@ -4,8 +4,10 @@
 name: Publish Linux wheels to PyPI
 
 on:
-  release:
-    types: [created]
+  push:
+    branches: [ master ]
+#  release:
+#    types: [created]
 
 jobs:
   deploy:
