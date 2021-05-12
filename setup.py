@@ -73,11 +73,11 @@ extensions = [
     ),
 ]
 
-copt = {'msvc': ['/openmp', '/Ox', '/fp:fast', '/favor:INTEL64', '/Og'],
-        'mingw32': ['-fopenmp', '-O3', '-ffast-math', '-march=native'],
-        'unix': ['-fopenmp', '-O3', '-ffast-math', '-march=native']}
-lopt = {'mingw32': ['-fopenmp'],
-        'unix': ['-fopenmp']}
+copt = {'msvc': [],
+        'mingw32': [],
+        'unix': []}
+lopt = {'mingw32': [],
+        'unix': []}
 
 
 # check whether compiler supports a flag
@@ -139,11 +139,10 @@ setup(
         'Topic :: Scientific/Engineering :: Mathematics',
         'Programming Language :: Python',
         'Programming Language :: Python :: 3',
-        'Programming Language :: Python :: 3.4',
-        'Programming Language :: Python :: 3.5',
         'Programming Language :: Python :: 3.6',
         'Programming Language :: Python :: 3.7',
         'Programming Language :: Python :: 3.8',
+        'Programming Language :: Python :: 3.9',
     ],
 
     keywords='3D coordinate Space paths trajectory',
